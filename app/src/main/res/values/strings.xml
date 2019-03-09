@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Thakur House PG</string>
+    <string name="rent">Rent</string>
+    <string name="deposit">Deposit</string>
+    <string name="debit">Debit</string>
+    <string name="credit">Credit</string>
+    <string name="room_number">Room Number</string>
+    <string name="rent_amount">NEFT/UPI</string>
+    <string name="KEY_ROOM_NUMBER">KEY_ROOM_NUMBER</string>
+    <string name="KEY_OUTSTANDING">KEY_OUTSTANDING</string>
+</resources>

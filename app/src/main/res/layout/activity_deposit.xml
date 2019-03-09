@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:paddingTop="30dp"
+    android:paddingLeft="30dp"
+    android:paddingRight="30dp"
+
+    android:orientation="vertical"
+    android:padding="30dp"
+    tools:context=".DepositActivity">
+
+
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:rowCount="4"
+        android:columnCount="2">
+
+        <TextView
+            android:id="@+id/roomNumberLable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"
+            android:text="@string/room_number"/>
+        <EditText
+            android:id="@+id/roomNumberText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="10dp"
+            android:cursorVisible="false"
+            android:inputType="numberDecimal"
+            android:textStyle="bold"
+            android:textColor="@color/colorForText"
+            android:maxLines="1"
+
+            android:hint="Enter Room Number"/>
+
+        <TextView
+            android:id="@+id/outstandingDepositLable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_marginBottom="20dp"
+            android:textStyle="bold"
+            android:text="Outstanding Deposit"/>
+        <TextView
+            android:id="@+id/outstandingDepositAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"/>
+
+        <CheckBox
+            android:id="@+id/depositOnlineCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_marginBottom="20dp"
+            android:textStyle="bold"
+            android:text="NEFT/UPI"/>
+        <EditText
+            android:id="@+id/depositOnlineValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="10dp"
+            android:inputType="numberDecimal"
+            android:focusedByDefault="true"
+            android:maxLines="1"
+            android:hint="Deposit Amount"/>
+
+        <CheckBox
+            android:id="@+id/depositInCashCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_marginBottom="20dp"
+            android:textStyle="bold"
+            android:text="In Cash"/>
+        <EditText
+            android:id="@+id/depositInCashValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="10dp"
+            android:maxLines="1"
+            android:inputType="numberDecimal"
+            android:focusedByDefault="true"
+            android:hint="Deposit Amount"/>
+
+    </GridLayout>
+
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/debitAmountRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:checked="true"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Received"/>
+        <RadioButton
+            android:id="@+id/creditAmountRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Refund"/>
+    </RadioGroup>
+
+
+    <!--<Button-->
+    <!--android:id="@+id/fetchRentData"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginLeft="50dp"-->
+
+    <!--android:text="FETCH"/>-->
+
+    <Button
+        android:id="@+id/saveDepositData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="SAVE"/>
+
+</LinearLayout>
