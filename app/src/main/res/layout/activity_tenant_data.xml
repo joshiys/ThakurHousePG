@@ -14,13 +14,13 @@
 
 
     <GridLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+
+
         android:layout_height="wrap_content"
-
-
         android:layout_marginBottom="20dp"
-        android:rowCount="3"
-        android:columnCount="4">
+        android:columnCount="3"
+        android:rowCount="3">
         <!--android:layout_marginLeft="10dp"-->
         <!--android:layout_marginRight="10dp"-->
 
@@ -31,7 +31,7 @@
 
             android:layout_weight="1"
 
-            android:text="Ground"/>
+            android:text="Ground" />
 
         <Button
             android:id="@+id/btn1"
@@ -40,6 +40,7 @@
             android:layout_weight="1"
 
             android:text="1st" />
+
         <Button
             android:id="@+id/btn2"
             android:layout_width="wrap_content"
@@ -47,6 +48,7 @@
             android:layout_weight="1"
 
             android:text="2nd" />
+
         <Button
             android:id="@+id/btn3"
             android:layout_width="wrap_content"
@@ -54,6 +56,7 @@
             android:layout_weight="1"
 
             android:text="3rd" />
+
         <Button
             android:id="@+id/btn4"
             android:layout_width="wrap_content"
@@ -61,6 +64,7 @@
             android:layout_weight="1"
 
             android:text="4th" />
+
         <Button
             android:id="@+id/btn5"
             android:layout_width="wrap_content"
@@ -68,6 +72,7 @@
             android:layout_weight="1"
 
             android:text="5th" />
+
         <Button
             android:id="@+id/btn6"
             android:layout_width="wrap_content"
@@ -76,14 +81,14 @@
 
             android:text="6th" />
         <!--<Button-->
-            <!--android:id="@+id/addRowMasterDBButton"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginLeft="5dp"-->
-            <!--android:textStyle="bold"-->
-            <!--android:layout_weight="1"-->
-            <!--android:tooltipText="Add new entry in Master DB"-->
-            <!--android:text="Add" />-->
+        <!--android:id="@+id/addRowMasterDBButton"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginLeft="5dp"-->
+        <!--android:textStyle="bold"-->
+        <!--android:layout_weight="1"-->
+        <!--android:tooltipText="Add new entry in Master DB"-->
+        <!--android:text="Add" />-->
 
     </GridLayout>
 

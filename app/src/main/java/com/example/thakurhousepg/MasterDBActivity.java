@@ -33,7 +33,7 @@ public class MasterDBActivity extends AppCompatActivity implements View.OnClickL
     ListView listView;
     TableClass roomTable;
 
-    private int currentSelectedButton=0;
+    private Button currentSelectedButton;
 
 
     ArrayAdapter<String> adapter;
@@ -78,6 +78,8 @@ public class MasterDBActivity extends AppCompatActivity implements View.OnClickL
 
         btn0.setBackgroundColor(Color.DKGRAY);
         btn0.setTextColor(Color.WHITE);
+
+        currentSelectedButton = btn0;
 
 //        Toast.makeText(MasterDBActivity.this, "Master DB Operations", Toast.LENGTH_SHORT).show();
 
@@ -153,38 +155,40 @@ public class MasterDBActivity extends AppCompatActivity implements View.OnClickL
     }
 
     boolean isButtonInRange(int rNo){
-        switch(this.currentSelectedButton){
-            case 0:
+        int currentBtn = this.currentSelectedButton.getId();
+
+        switch(currentBtn){
+            case R.id.btn0:
                 if(rNo >= 0 && rNo <= 100) {
                     return true;
                 }
                 break;
-            case 1:
+            case R.id.btn1:
                 if(rNo >= 101 && rNo <= 200) {
                     return true;
                 }
                 break;
-            case 2:
+            case R.id.btn2:
                 if(rNo >= 201 && rNo <= 300) {
                     return true;
                 }
                 break;
-            case 3:
+            case R.id.btn3:
                 if(rNo >= 301 && rNo <= 400) {
                     return true;
                 }
                 break;
-            case 4:
+            case R.id.btn4:
                 if(rNo >= 401 && rNo <= 500) {
                     return true;
                 }
                 break;
-            case 5:
+            case R.id.btn5:
                 if(rNo >= 501 && rNo <= 600) {
                     return true;
                 }
                 break;
-            case 6:
+            case R.id.btn6:
                 if(rNo >= 601 && rNo <= 100) {
                     return true;
                 }
@@ -250,101 +254,105 @@ public class MasterDBActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    private Button getSelectedButton(){
-        switch(this.currentSelectedButton){
-            case 0:
-                return btn0;
-            case 1:
-                return btn1;
-            case 2:
-                return btn2;
-            case 3:
-                return btn3;
-            case 4:
-                return btn4;
-            case 5:
-                return btn5;
-            case 6:
-                return btn6;
-        }
-        return null;
-    }
+//    private Button getSelectedButton(){
+//        switch(this.currentSelectedButton){
+//            case R.id.btn0:
+//                return btn0;
+//            case R.id.btn1:
+//                return btn1;
+//            case R.id.btn2:
+//                return btn2;
+//            case R.id.btn3:
+//                return btn3;
+//            case R.id.btn4:
+//                return btn4;
+//            case R.id.btn5:
+//                return btn5;
+//            case R.id.btn6:
+//                return btn6;
+//        }
+//        return null;
+//    }
 
     @Override
     public void onClick(View view) {
-        Button selectedButton = null;
-        switch (view.getId()){
-            case R.id.btn0:
-                selectedButton = getSelectedButton();
-                selectedButton.setBackgroundColor(Color.LTGRAY);
-                selectedButton.setTextColor(Color.BLACK);
+        Button selectedButton = this.currentSelectedButton;
+        selectedButton.setBackgroundColor(Color.LTGRAY);
+        selectedButton.setTextColor(Color.BLACK);
 
-                btn0.setBackgroundColor(Color.DKGRAY);
-                btn0.setTextColor(Color.WHITE);
-                this.currentSelectedButton = 0;
-                showMasterDBInListView();
-                break;
-            case R.id.btn1:
-                selectedButton = getSelectedButton();
-                selectedButton.setBackgroundColor(Color.LTGRAY);
-                selectedButton.setTextColor(Color.BLACK);
+        Button btn = (Button) view;
+        btn.setBackgroundColor(Color.DKGRAY);
+        btn.setTextColor(Color.WHITE);
+        this.currentSelectedButton = btn;
+        showMasterDBInListView();
 
-                btn1.setBackgroundColor(Color.DKGRAY);
-                btn1.setTextColor(Color.WHITE);
-                this.currentSelectedButton = 1;
-                showMasterDBInListView();
-                break;
-            case R.id.btn2:
-                selectedButton = getSelectedButton();
-                selectedButton.setBackgroundColor(Color.LTGRAY);
-                selectedButton.setTextColor(Color.BLACK);
-
-                btn2.setBackgroundColor(Color.DKGRAY);
-                btn2.setTextColor(Color.WHITE);
-                this.currentSelectedButton = 2;
-                showMasterDBInListView();
-                break;
-            case R.id.btn3:
-                selectedButton = getSelectedButton();
-                selectedButton.setBackgroundColor(Color.LTGRAY);
-                selectedButton.setTextColor(Color.BLACK);
-
-                btn3.setBackgroundColor(Color.DKGRAY);
-                btn3.setTextColor(Color.WHITE);
-                this.currentSelectedButton = 3;
-                showMasterDBInListView();
-                break;
-            case R.id.btn4:
-                selectedButton = getSelectedButton();
-                selectedButton.setBackgroundColor(Color.LTGRAY);
-                selectedButton.setTextColor(Color.BLACK);
-
-                btn4.setBackgroundColor(Color.DKGRAY);
-                btn4.setTextColor(Color.WHITE);
-                this.currentSelectedButton = 4;
-                showMasterDBInListView();
-                break;
-            case R.id.btn5:
-                selectedButton = getSelectedButton();
-                selectedButton.setBackgroundColor(Color.LTGRAY);
-                selectedButton.setTextColor(Color.BLACK);
-
-                btn5.setBackgroundColor(Color.DKGRAY);
-                btn5.setTextColor(Color.WHITE);
-                this.currentSelectedButton = 5;
-                showMasterDBInListView();
-                break;
-            case R.id.btn6:
-                selectedButton = getSelectedButton();
-                selectedButton.setBackgroundColor(Color.LTGRAY);
-                selectedButton.setTextColor(Color.BLACK);
-
-                btn6.setBackgroundColor(Color.DKGRAY);
-                btn6.setTextColor(Color.WHITE);
-                this.currentSelectedButton = 6;
-                showMasterDBInListView();
-                break;
-        }
+//        switch (view.getId()){
+//            case R.id.btn0:
+//                selectedButton.setBackgroundColor(Color.LTGRAY);
+//                selectedButton.setTextColor(Color.BLACK);
+//
+//                btn0.setBackgroundColor(Color.DKGRAY);
+//                btn0.setTextColor(Color.WHITE);
+//                this.currentSelectedButton = 0;
+//                showMasterDBInListView();
+//                break;
+//            case R.id.btn1:
+//                selectedButton.setBackgroundColor(Color.LTGRAY);
+//                selectedButton.setTextColor(Color.BLACK);
+//
+//                btn1.setBackgroundColor(Color.DKGRAY);
+//                btn1.setTextColor(Color.WHITE);
+//                this.currentSelectedButton = 1;
+//                showMasterDBInListView();
+//                break;
+//            case R.id.btn2:
+//                selectedButton.setBackgroundColor(Color.LTGRAY);
+//                selectedButton.setTextColor(Color.BLACK);
+//
+//                btn2.setBackgroundColor(Color.DKGRAY);
+//                btn2.setTextColor(Color.WHITE);
+//                this.currentSelectedButton = 2;
+//                showMasterDBInListView();
+//                break;
+//            case R.id.btn3:
+//                selectedButton.setBackgroundColor(Color.LTGRAY);
+//                selectedButton.setTextColor(Color.BLACK);
+//
+//                btn3.setBackgroundColor(Color.DKGRAY);
+//                btn3.setTextColor(Color.WHITE);
+//                this.currentSelectedButton = 3;
+//                showMasterDBInListView();
+//                break;
+//            case R.id.btn4:
+//                selectedButton = getSelectedButton();
+//                selectedButton.setTextColor(Color.BLACK);
+//
+//                btn4.setBackgroundColor(Color.DKGRAY);
+//                btn4.setTextColor(Color.WHITE);
+//                this.currentSelectedButton = 4;
+//                showMasterDBInListView();
+//                break;
+//            case R.id.btn5:
+//                selectedButton = getSelectedButton();
+//                selectedButton.setBackgroundColor(Color.LTGRAY);
+//                selectedButton.setTextColor(Color.BLACK);
+//
+//                btn5.setBackgroundColor(Color.DKGRAY);
+//                btn5.setTextColor(Color.WHITE);
+//                this.currentSelectedButton = 5;
+//                showMasterDBInListView();
+//                break;
+//            case R.id.btn6:
+//                selectedButton = getSelectedButton();
+//                selectedButton.setBackgroundColor(Color.LTGRAY);
+//                selectedButton.setTextColor(Color.BLACK);
+//
+//                btn6.setBackgroundColor(Color.DKGRAY);
+//                btn6.setTextColor(Color.WHITE);
+//                this.currentSelectedButton = 6;
+//                showMasterDBInListView();
+//                break;
+//        }
     }
 }
 
