@@ -76,6 +76,14 @@ public class MasterDBActivity extends AppCompatActivity implements View.OnClickL
         btn5.setOnClickListener(this);
         btn6.setOnClickListener(this);
 
+        btn0.setBackgroundResource(android.R.drawable.btn_default);
+        btn1.setBackgroundResource(android.R.drawable.btn_default);
+        btn2.setBackgroundResource(android.R.drawable.btn_default);
+        btn3.setBackgroundResource(android.R.drawable.btn_default);
+        btn4.setBackgroundResource(android.R.drawable.btn_default);
+        btn5.setBackgroundResource(android.R.drawable.btn_default);
+        btn6.setBackgroundResource(android.R.drawable.btn_default);
+
         btn0.setBackgroundColor(Color.DKGRAY);
         btn0.setTextColor(Color.WHITE);
 
@@ -277,8 +285,9 @@ public class MasterDBActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View view) {
         Button selectedButton = this.currentSelectedButton;
-        selectedButton.setBackgroundColor(Color.LTGRAY);
+//        selectedButton.setBackgroundColor(Color.LTGRAY);
         selectedButton.setTextColor(Color.BLACK);
+        selectedButton.setBackgroundResource(android.R.drawable.btn_default);
 
         Button btn = (Button) view;
         btn.setBackgroundColor(Color.DKGRAY);
