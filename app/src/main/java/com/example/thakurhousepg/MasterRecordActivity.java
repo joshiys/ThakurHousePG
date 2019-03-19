@@ -39,7 +39,7 @@ public class MasterRecordActivity extends AppCompatActivity implements View.OnCl
         dbHelper = new DatabaseHelper(this);
 
         if(masterData != null) {
-            String roomNumber = masterData.getString("ROOM_NUMBER");
+            String roomNumber = masterData.getString("TENANT_ROOM_NUMBER_COLUMN");
             String expectedRent = masterData.getString("EXPECTED_RENT");
             this.action = masterData.getString("ACTION");
 

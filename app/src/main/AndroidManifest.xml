@@ -9,10 +9,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MiscActivity"
-            android:label="Misc Data">
-
-        </activity>
+        <activity android:name=".NewFiles.OccupancyPackage.OccupancyAndBooking"></activity>
+        <activity
+            android:name=".NewFiles.Payment"
+            android:label="@string/title_activity_payment"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".MiscActivity"
+            android:label="Misc Data" />
         <activity android:name=".MasterRecordActivity" />
         <activity android:name=".TenantRecordActivity" />
         <activity

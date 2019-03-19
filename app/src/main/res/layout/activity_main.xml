@@ -15,25 +15,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    <TextView
-        android:id="@+id/totalOutstandingLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
 
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-        android:textStyle="bold"
-        android:textSize="25sp"
-        android:width="220dp"
-        android:text="Total Outstanding: "/>
-    <TextView
-        android:id="@+id/totalOutstandinValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-        android:textStyle="bold"
-        android:textSize="25sp"
-        android:textColor="@color/colorPrimary"/>
+        <TextView
+            android:id="@+id/totalOutstandinValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="0/10000"
+            android:textAlignment="center"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <!--<LinearLayout-->
@@ -69,54 +60,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
+        android:layout_marginTop="20dp"
         android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/roomNumberText"
+        <Button
+            android:id="@+id/receipt_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@android:color/holo_blue_light"
+            android:text="Receipt" />
 
-            android:hint="Enter Room Number"
-            android:inputType="number"
-            android:maxLines="1"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-
-            android:textStyle="bold" />
-
-        <LinearLayout
+        <Button
+            android:id="@+id/occupancy_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:background="@color/colorPrimary">
+            android:background="@android:color/holo_blue_light"
+            android:text="Occupancy" />
 
-            <Button
-                android:id="@+id/rentButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:layout_weight="1"
-                android:text="@string/rent"
-
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/depositButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/deposit"
-
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/penaltyButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="4dp"
-                android:layout_weight="1"
-                android:text="Penalty"
-                android:textStyle="bold" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/payments_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/holo_blue_light"
+            android:text="Payment" />
 
 
         <LinearLayout
@@ -124,11 +92,26 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
-            android:background="@color/colorForButtonPanel">
+            android:background="@android:color/holo_blue_light"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/roomNumberText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_marginLeft="5dp"
+                android:background="@android:color/holo_blue_light"
+                android:hint="Enter Room Number"
+                android:inputType="number"
+
+                android:maxLines="1"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/sendSMSButton"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_weight="1"
@@ -139,22 +122,12 @@
                 android:tooltipText="Send SMS to all rooms with Due peyment." />
 
 
-            <Button
-                android:id="@+id/listOfOutstandingPayments"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
-                android:text="Outstanding Payments"
-                android:textStyle="bold"
-                android:tooltipText="Send SMS to all Outstandings..." />
-
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorForAdminButtonPanel">>
+            android:background="@android:color/holo_blue_light">>
 
             <Button
                 android:id="@+id/viewRoomButton"

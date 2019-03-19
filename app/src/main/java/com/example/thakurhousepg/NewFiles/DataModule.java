@@ -1,0 +1,594 @@
+package com.example.thakurhousepg.NewFiles;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import java.lang.reflect.Array;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
+public class DataModule extends SQLiteOpenHelper {
+
+    private static final String DATABASE_NAME = "ThakurHouse.db";
+
+    private static final String MASTER_TABLE_NAME = "master_table";
+    private static final String MISC_TABLE_NAME = "misc_table";
+
+    public static final String TENANT_TABLE_NAME = "tenant_table";
+    public static final String PENDING_PENALTY_TABLE_NAME = "penalty_table";
+    public static final String BEDS_TABLE_NAME = "beds_table";
+    public static final String RECEIPTS_TABLE_NAME = "RECEIPTs_table";
+    public static final String OVERDUE_TABLE_NAME = "overdue_table";
+    public static final String BOOKING_TABLE_NAME = "bookings_table";
+
+
+    private static final String TENANT_ID = "TENANT_ID";
+    private static final String TENANT_NAME = "TENANT_NAME";
+    private static final String TENANT_EMAIL = "TENANT_EMAIL";
+    private static final String TENANT_MOBILE = "TENANT_MOBILE";
+    private static final String TENANT_MOBILE_2 = "TENANT_MOBILE_2";
+    private static final String TENANT_ADDRESS = "TENANT_ADDRESS";
+    private static final String TENANT_IS_CURRENT = "TENANT_IS_CURRENT";
+
+    private static final String BOOKING_ID = "BOOKING_ID";
+    private static final String BOOKING_RENT_AMT = "BOOKING_RENT_AMT";
+    private static final String BOOKING_DEPOSIT_AMT = "BOOKING_DEPOSIT_AMT";
+    private static final String BOOKING_DATE = "BOOKING_DATE";
+    private static final String BOOKING_IS_WHOLE_ROOM = "BOOKING_IS_WHOLE_ROOM";
+    private static final String BOOKING_CLOSE_DATE = "BOOKING_CLOSE_DATE";
+
+    private static final String PENALTY_ID = "PENALTY_ID";
+    private static final String PENALTY_AMOUNT = "PENALTY_AMOUNT";//Month number 1..12
+
+    private static final String BED_NUMBER = "BED_NUMBER";
+    private static final String BED_DEPOSIT = "BED_DEPOSIT";
+    private static final String BED_RENT = "BED_RENT";
+
+    private static final String OVERDUE_AMT = "OVERDUE_AMT";
+
+    private static final String RECEIPT_ID = "RECEIPT_ID";
+    private static final String RECEIPT_ONLINE_AMT = "RECEIPT_ONLINE_AMT";
+    private static final String RECEIPT_CASH_AMT = "RECEIPT_CASH_AMT";
+    private static final String RECEIPT_DATE = "RECEIPT_DATE";
+    private static final String RECEIPT_IS_DEPOSIT = "RECEIPT_IS_DEPOSIT";
+    private static final String RECEIPT_PENALTY_AMT = "RECEIPT_PENALTY_AMT";
+    private static final String RECEIPT_PENALTY_WAIVE_OFF_AMT = "RECEIPT_PENALTY_WAIVE_OFF_AMT";
+
+    public static final String KEY_ALL = "KEY_ALL";
+
+    public DataModule(Context context) {
+        super(context, DATABASE_NAME, null, 1);
+        createDefaultBeds();
+        insertSampleData();
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        String query;
+
+        query = "create table " + BEDS_TABLE_NAME +
+                " (BED_NUMBER TEXT PRIMARY KEY," +
+                " BED_RENT INTEGER NOT NULL," +
+                " BED_DEPOSIT INTEGER NOT NULL," +
+                " IS_OCCUPIED BOOLEAN," +
+                " BOOKING_ID INTEGER," +
+                 " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID))";
+        db.execSQL(query);
+
+
+        query = "create table " + TENANT_TABLE_NAME +
+                " (TENANT_ID INTEGER PRIMARY KEY," +
+                " TENANT_NAME TEXT," +
+                " TENANT_EMAIL TEXT," +
+                " TENANT_MOBILE TEXT," +
+                " TENANT_MOBILE_2 TEXT," +
+                " TENANT_ADDRESS TEXT," +
+                " TENANT_IS_CURRENT BOOLEAN," +
+                " BOOKING_ID INTEGER," +
+                " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)," +
+                " UNIQUE (TENANT_NAME, TENANT_EMAIL, TENANT_MOBILE) ON CONFLICT ABORT" +
+                ")";
+        db.execSQL(query);
+
+        query = "create table " + BOOKING_TABLE_NAME +
+                " (BOOKING_ID INTEGER PRIMARY KEY," +
+                " BOOKING_RENT_AMT INTEGER NOT NULL," +
+                " BOOKING_DEPOSIT_AMT INTEGER NOT NULL," +
+                " BOOKING_DATE DATE NOT NULL," +
+                " BOOKING_IS_WHOLE_ROOM BOOLEAN NOT NULL," +
+                " BOOKING_CLOSE_DATE DATE," +
+                " TENANT_ID INTEGER," +
+                " BED_NUMBER TEXT," +
+                " FOREIGN KEY (TENANT_ID) REFERENCES " + TENANT_TABLE_NAME + "(TENANT_ID)," +
+                " FOREIGN KEY (BED_NUMBER) REFERENCES " + BEDS_TABLE_NAME + "(BED_NUMBER)" +
+                ")";
+        db.execSQL(query);
+
+
+        query = "create table " + RECEIPTS_TABLE_NAME +
+                " (RECEIPT_ID INTEGER PRIMARY KEY," +
+                " RECEIPT_ONLINE_AMT INTEGER," +
+                " RECEIPT_CASH_AMT INTEGER," +
+                " RECEIPT_DATE DATE," +
+                " RECEIPT_IS_DEPOSIT BOOLEAN," +
+                " RECEIPT_PENALTY_AMT INTEGER," +
+                " RECEIPT_PENALTY_WAIVE_OFF_AMT INTEGER," +
+                " BOOKING_ID INTEGER," +
+                " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)" +
+                ")";
+        db.execSQL(query);
+
+
+
+        //Create Penalty table
+        query = "create table " + PENDING_PENALTY_TABLE_NAME +
+                "(PENALTY_AMOUNT INTEGER," +
+                " BOOKING_ID INTEGER," +
+                " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)" +
+                ")";
+        db.execSQL(query);
+    }
+
+    public void insertSampleData() {
+        String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
+        createNewBooking("000.1", newTenantId, "4000", "4000", Date.from(Instant.now()).toString(), false );
+
+        newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
+        createNewBooking("101.2", newTenantId, "4000", "4000", Date.from(Instant.now()).toString(), false );
+
+        newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
+        createNewBooking("103.1", newTenantId, "4000", "4000", Date.from(Instant.now()).toString(), true );
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + MASTER_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TENANT_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + MISC_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + PENDING_PENALTY_TABLE_NAME);
+        onCreate(db);
+
+    }
+
+
+    public boolean addNewBed(String bedNumber, String rent, String deposit) {
+        Boolean opSuccess = false;
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(BED_NUMBER, bedNumber);
+        contentValues.put(BED_RENT, rent);
+        contentValues.put(BED_DEPOSIT, deposit);
+        contentValues.put("IS_OCCUPIED", false);
+
+        String query = "select * from " + BEDS_TABLE_NAME + " where BED_NUMBER = " + bedNumber;
+        Cursor checkRecord = db.rawQuery(query, null);
+
+        if (checkRecord.getCount() != 0) {
+            db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
+            opSuccess = true;
+        } else {
+
+            long result = db.insert(BEDS_TABLE_NAME, null, contentValues);
+            if (result != -1) {
+                opSuccess = true;
+            }
+        }
+
+        checkRecord.close();
+        return opSuccess;
+    }
+
+    public String addNewTenant(String name, String mobile, String mobile2, String email, String address) {
+        Boolean opSuccess = false;
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        Integer highestTenantId = getNewTenantId();
+
+        contentValues.put(TENANT_ID, highestTenantId);
+
+        contentValues.put(TENANT_NAME, name);
+        contentValues.put(TENANT_EMAIL, email);
+        contentValues.put(TENANT_MOBILE, mobile);
+        contentValues.put(TENANT_MOBILE_2, mobile2);
+        contentValues.put(TENANT_ADDRESS, address);
+        contentValues.put(TENANT_IS_CURRENT, false);
+
+
+        String query = "select * from " + TENANT_TABLE_NAME + " where TENANT_ID = " + highestTenantId;
+        Cursor checkRecord = db.rawQuery(query, null);
+
+        if (checkRecord.getCount() != 0) {
+            db.update(TENANT_TABLE_NAME, contentValues, "TENANT_ID = ?", new String[]{highestTenantId.toString()});
+            opSuccess = true;
+        } else {
+
+            long result = db.insert(TENANT_TABLE_NAME, null, contentValues);
+            if (result != -1) {
+                opSuccess = true;
+            }
+        }
+
+        checkRecord.close();
+        return opSuccess ? highestTenantId.toString() : null;
+    }
+
+    public boolean updateTenant(String id, String name, String mobile, String mobile2, String email, String address, Boolean isCurrent) {
+        Boolean opSuccess = false;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        if(!name.isEmpty()) contentValues.put(TENANT_NAME, name);
+        if(!email.isEmpty()) contentValues.put(TENANT_EMAIL, email);
+        if(!mobile.isEmpty()) contentValues.put(TENANT_MOBILE, mobile);
+        if(!mobile2.isEmpty()) contentValues.put(TENANT_MOBILE_2, mobile2);
+        if(!address.isEmpty()) contentValues.put(TENANT_ADDRESS, address);
+        if(isCurrent != null) contentValues.put(TENANT_IS_CURRENT, false);
+
+
+        String query = "select * from " + TENANT_TABLE_NAME + " where TENANT_ID = " + id;
+        Cursor checkRecord = db.rawQuery(query, null);
+
+        if (checkRecord.getCount() != 0) {
+            db.update(TENANT_TABLE_NAME, contentValues, "TENANT_ID = ?", new String[]{id.toString()});
+            opSuccess = true;
+        }
+
+        checkRecord.close();
+
+        return opSuccess;
+    }
+
+    public boolean createNewBooking(String bedNumber, String tenantId, String rent, String deposit, String admissionDate, Boolean isWholeRoom) {
+        Boolean opSuccess = false;
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        Cursor checkRecord;
+
+        if (!bedNumber.isEmpty()) contentValues.put(BED_NUMBER, bedNumber);
+        if (!tenantId.isEmpty()) contentValues.put(TENANT_ID, tenantId);
+        if (!rent.isEmpty()) contentValues.put(BOOKING_RENT_AMT, rent);
+        if (!deposit.isEmpty()) contentValues.put(BOOKING_DEPOSIT_AMT, deposit);
+        if (!admissionDate.isEmpty())
+            contentValues.put(BOOKING_DATE, admissionDate);
+        else
+            contentValues.put(BOOKING_DATE, admissionDate); // current date
+
+        if (isWholeRoom != null)
+            contentValues.put(BOOKING_IS_WHOLE_ROOM, isWholeRoom);
+        else
+            contentValues.put(BOOKING_IS_WHOLE_ROOM, false);
+
+
+        if (isWholeRoom) {
+            String []parts = bedNumber.split("\\.");
+            String roomNo = parts[0];
+            checkRecord = db.rawQuery("select * from " + BEDS_TABLE_NAME + " where IS_OCCUPIED = ? AND BED_NUMBER LIKE ?", new String[]{"1", roomNo+"%"});
+            if (checkRecord.getCount() != 0) {
+                return opSuccess;
+            }
+        }
+        // Check if there is already a Booking for this TENANT_ID
+        // OR If the Bed is already booked
+
+        checkRecord = db.rawQuery("select BOOKING_ID from " + BOOKING_TABLE_NAME + " where BOOKING_CLOSE_DATE = NULL " +
+                " UNION select BOOKING_ID from " + TENANT_TABLE_NAME + " where TENANT_ID = ? AND TENANT_IS_CURRENT = ?", new String[]{tenantId, "1"});
+
+        if (checkRecord.getCount() == 0) {
+            // If the Whole room is to be booked, check if other beds of the room are free as well.
+
+            Integer bookingId = createNewBookingId();
+            contentValues.put(BOOKING_ID, bookingId);
+            db.insert(BOOKING_TABLE_NAME, null, contentValues);
+
+            contentValues.clear();
+            contentValues.put("IS_OCCUPIED", true);
+            contentValues.put(BOOKING_ID, bookingId);
+
+            //Also book the rest of the beds in the room, if whole room is to be booked
+            if (isWholeRoom) {
+                String roomNo = bedNumber.split("\\.")[0];
+                db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER LIKE ?", new String[]{roomNo+"%"});
+            } else {
+                db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
+            }
+
+            opSuccess = true;
+        }
+        return opSuccess;
+    }
+
+    public boolean closeBooking(String id, String closeingDate, boolean isRentPending, boolean isDepositPending) {
+        Boolean opSuccess = false;
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(BOOKING_CLOSE_DATE, closeingDate);
+        Cursor checkRecord = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " where " + BOOKING_ID + " = " + id, null);
+        if (checkRecord.getCount() != 0) {
+            Boolean isWholeRoom = checkRecord.getInt(checkRecord.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0;
+            db.update(BOOKING_TABLE_NAME, contentValues, "BOOKING_ID = ?", new String[]{id});
+
+            contentValues.clear();
+            contentValues.put("IS_CURRENT", false);
+            db.update(TENANT_TABLE_NAME, contentValues, "BOOKING_ID = ?", new String[]{id});
+
+            contentValues.clear();
+            contentValues.putNull(BOOKING_ID);
+            contentValues.put("IS_OCCUPIED", false);
+
+            checkRecord = db.rawQuery("select BED_NUMBER from " + BEDS_TABLE_NAME + " where BOOKING_ID = ?", new String[]{id});
+            String bedNumber = checkRecord.getString(checkRecord.getColumnIndex(BED_NUMBER));
+            if(isWholeRoom) {
+                String roomNo = bedNumber.split(".")[0];
+                db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER LIKE ?%", new String[]{roomNo});
+            } else {
+                db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
+            }
+//            db.delete(OCCUPANCY_TABLE_NAME, "where BOOKING_ID = ?", new String[]{id});
+
+            if(isRentPending) {
+                //TODO: Add a entry in the Overdue table
+            }
+
+            if(isDepositPending) {
+                //TODO: Add a entry in the Overdue table
+            }
+        }
+        return opSuccess;
+    }
+
+    /// Helper Functions
+    private void createDefaultBeds() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery("select BED_NUMBER from " + BEDS_TABLE_NAME + " LIMIT 1", null);
+        if (c.getCount() == 0) {
+            for (int floorNo = 100; floorNo <= 600; floorNo += 100) {
+                for (int roomNo = 1; roomNo <= 6; roomNo += 1) {
+                    for (Double bedNo = 1.0; bedNo <= 3; bedNo++) {
+                        Double bedNumber = Double.valueOf(floorNo + roomNo + bedNo / 10);
+
+                        addNewBed(bedNumber.toString(), "3000", "3000");
+//                        ContentValues contentValues = new ContentValues();
+//                        contentValues.put(BED_NUMBER, bedNumber.toString());
+//                        contentValues.put(BED_RENT, "3000");
+//                        contentValues.put(BED_DEPOSIT, "3000");
+//                        db.insert(BEDS_TABLE_NAME, null, contentValues);
+                    }
+                }
+            }
+        }
+
+        c.close();
+    }
+
+    private Integer getNewTenantId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Integer highestTenantId = 1;
+
+        Cursor highestIdCursor = db.rawQuery("select * from " + TENANT_TABLE_NAME + " ORDER BY TENANT_ID DESC LIMIT 1", null);
+        if(highestIdCursor.getCount() != 0) {
+            highestIdCursor.moveToNext();
+            highestTenantId = highestIdCursor.getInt(highestIdCursor.getColumnIndex(TENANT_ID));
+            highestTenantId += 1;
+        }
+
+        highestIdCursor.close();
+
+        return highestTenantId;
+    }
+
+    private Integer createNewBookingId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Integer highestTenantId = 1;
+
+        Cursor highestIdCursor = db.rawQuery("select * from " + TENANT_TABLE_NAME + " ORDER BY TENANT_ID DESC LIMIT 1", null);
+        if(highestIdCursor.getCount() != 0) {
+            highestIdCursor.moveToNext();
+            highestTenantId = highestIdCursor.getInt(highestIdCursor.getColumnIndex(TENANT_ID));
+            highestTenantId += 1;
+        }
+
+        highestIdCursor.close();
+
+        return highestTenantId;
+    }
+
+    private Integer getNewOccupancyId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Integer highestTenantId = 1;
+
+        Cursor highestIdCursor = db.rawQuery("select * from " + TENANT_TABLE_NAME + " ORDER BY TENANT_ID DESC LIMIT 1", null);
+        if(highestIdCursor.getCount() != 0) {
+            highestTenantId = highestIdCursor.getInt(highestIdCursor.getColumnIndex(TENANT_ID));
+            highestTenantId += 1;
+        }
+
+        highestIdCursor.close();
+
+        return highestTenantId;
+    }
+
+    public ArrayList<Bed> getBedsList() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Bed> beds = new ArrayList<Bed>();
+        Cursor result = db.rawQuery("select * from " + BEDS_TABLE_NAME, null);
+
+        if(result.getCount() != 0) {
+            while (result.moveToNext()) {
+                beds.add(new Bed(
+                        result.getString(result.getColumnIndex(BED_NUMBER)),
+                        result.getString(result.getColumnIndex(BOOKING_ID)),
+                        result.getString(result.getColumnIndex(BED_RENT)),
+                        result.getString(result.getColumnIndex(BED_DEPOSIT)),
+                        result.getInt(result.getColumnIndex("IS_OCCUPIED")) > 0
+                ));
+            }
+        }
+
+        return beds;
+    }
+
+    public ArrayList<Booking> getCurrentBookings() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Booking> bookings = new ArrayList<Booking>();
+        Cursor cursor = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " where " + BOOKING_CLOSE_DATE + " = NULL", null);
+        while (cursor.moveToNext()) {
+            bookings.add(new Booking(
+                            cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                            cursor.getString(cursor.getColumnIndex(BED_NUMBER)),
+                            cursor.getString(cursor.getColumnIndex(BOOKING_RENT_AMT)),
+                            cursor.getString(cursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
+                            cursor.getInt(cursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
+                            cursor.getString(cursor.getColumnIndex(TENANT_ID))
+                    ));
+        }
+
+        return bookings;
+    }
+
+    public Booking getBooking(String forId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Booking booking = null;
+        Cursor cursor = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " where BOOKING_ID = ?", new String[]{forId});
+        if (cursor.moveToNext()) {
+            booking = new Booking(
+                    cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                    cursor.getString(cursor.getColumnIndex(BED_NUMBER)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_RENT_AMT)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
+                    cursor.getInt(cursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
+                    cursor.getString(cursor.getColumnIndex(TENANT_ID))
+            );
+        }
+
+        return booking;
+    }
+
+    public Tenant getTenantInfoForBooking(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Tenant t = null;
+        Cursor cursor = db.rawQuery("select * from " + TENANT_TABLE_NAME + " where TENANT_ID = ?", new String[]{id});
+
+        if(cursor.moveToNext()) {
+            t = new Tenant(
+                    cursor.getString(cursor.getColumnIndex(TENANT_ID)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_NAME)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_MOBILE)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_EMAIL)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_ADDRESS)),
+                    cursor.getInt(cursor.getColumnIndex(TENANT_IS_CURRENT)) > 0
+                    );
+        }
+        return t;
+    }
+
+    public Cursor getTenantTableData(String key) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result;
+        String query;
+
+
+        if (key == KEY_ALL) {
+            query = "select * from " + TENANT_TABLE_NAME +" ORDER BY TENANT_ID ASC";
+            Log.d("TAG", "QUERY: " + query);
+            result = db.rawQuery(query, null);
+        } else {
+            key = Integer.valueOf(key).toString();
+            query = "select * from " + TENANT_TABLE_NAME +" where ROOM_NUMBER = " + "'"+ key + "'";
+            Log.d("TAG", "QUERY: " + query);
+            result = db.rawQuery(query, null);
+        }
+        return result;
+    }
+
+    public static class Bed {
+        public final String bedNumber;
+        public final String bookingId;
+        public final String rentAmount;
+        public final String depositAmount;
+        public final Boolean isOccupied;
+
+        public Bed(String bedNumber, String bookingId, String rentAmount, String depositAmount,  Boolean isOccupied) {
+            this.bedNumber = bedNumber;
+            this.bookingId = bookingId;
+            this.rentAmount = rentAmount;
+            this.depositAmount = depositAmount;
+            this.isOccupied = isOccupied;
+        }
+    }
+
+    public static class Booking {
+        public final String id;
+        public final String bedNumber;
+        public final String rentAmount;
+        public final String depositAmount;
+        public final Boolean isWholeRoom;
+        public final String tenantId;
+
+        public Booking(String bookingId, String bedNumber, String rentAmount, String depositAmount, Boolean isWholeRoom, String tenantId) {
+            this.bedNumber = bedNumber;
+            this.id = bookingId;
+            this.rentAmount = rentAmount;
+            this.depositAmount = depositAmount;
+            this.isWholeRoom = isWholeRoom;
+            this.tenantId = tenantId;
+        }
+    }
+
+    public static class Tenant {
+        public final String id;
+        public final String name;
+        public final String mobile;
+        public final String email;
+        public final String address;
+        public final Boolean isCurrent;
+        public final String bookingId;
+
+        public Tenant(String id, String bookingId, String name, String mobile, String email, String address, Boolean isCurrent) {
+            this.id = id;
+            this.bookingId = bookingId;
+            this.name = name;
+            this.mobile = mobile;
+            this.isCurrent = isCurrent;
+            this.email = email;
+            this.address = address;
+        }
+    }
+
+    public static class Receipt {
+        public final String id;
+        public final String onlineAmount;
+        public final String cashAmount;
+        public final String date;
+        public final String penaltyAmount;
+        public final String penaltyWaiveOffAmount;
+        public final Boolean isDeposit;
+        public final String bookingId;
+
+        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, String penaltyAmount, String penaltyWaiveOffAmount, String date, Boolean isDeposit) {
+            this.id = id;
+            this.bookingId = bookingId;
+            this.onlineAmount = onlineAmount;
+            this.cashAmount = cashAmount;
+            this.penaltyAmount = penaltyAmount;
+            this.penaltyWaiveOffAmount = penaltyWaiveOffAmount;
+            this.date = date;
+            this.isDeposit = isDeposit;
+        }
+    }
+
+    public static class Payment {
+
+    }
+}
+

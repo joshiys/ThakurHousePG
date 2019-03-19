@@ -99,6 +99,7 @@ public class RentActivity extends AppCompatActivity  {
 //        rentOnline.setFocusable(false);
         rentInCash.setEnabled(false);
 //        rentInCash.setFocusable(false);
+        Cursor d = getTenantRecord(roomNumberStr);
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override

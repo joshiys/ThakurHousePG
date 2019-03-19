@@ -8,4 +8,11 @@
     <string name="rent_amount">NEFT/UPI</string>
     <string name="KEY_ROOM_NUMBER">KEY_ROOM_NUMBER</string>
     <string name="KEY_OUTSTANDING">KEY_OUTSTANDING</string>
+    <string name="title_activity_payment">Payment</string>
+    <string name="tab_text_1">Rent</string>
+    <string name="tab_text_2">Deposit</string>
+    <string name="tab_text_3">Penalty</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="str_sixth_floor">6th</string>
 </resources>

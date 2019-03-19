@@ -292,25 +292,7 @@ public class TenantDataActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-//    private Button getSelectedButton(){
-//        switch(this.currentSelectedButton){
-//            case 0:
-//                return btn0;
-//            case 1:
-//                return btn1;
-//            case 2:
-//                return btn2;
-//            case 3:
-//                return btn3;
-//            case 4:
-//                return btn4;
-//            case 5:
-//                return btn5;
-//            case 6:
-//                return btn6;
-//        }
-//        return null;
-//    }
+
 
     @Override
     public void onClick(View view) {
@@ -328,79 +310,5 @@ public class TenantDataActivity extends AppCompatActivity implements View.OnClic
         btn.setTextColor(Color.WHITE);
         this.currentSelectedButton = btn;
         showTenantDBInListView();
-
-
-//        switch (view.getId()){
-//            case R.id.btn0:
-//                selectedButton = getSelectedButton();
-//                selectedButton.setBackgroundColor(Color.LTGRAY);
-//                selectedButton.setTextColor(Color.BLACK);
-//
-//                btn0.setBackgroundColor(Color.DKGRAY);
-//                btn0.setTextColor(Color.WHITE);
-//                this.currentSelectedButton = 0;
-//                showTenantDBInListView();
-//                break;
-//            case R.id.btn1:
-//                selectedButton = getSelectedButton();
-//                selectedButton.setBackgroundColor(Color.LTGRAY);
-//                selectedButton.setTextColor(Color.BLACK);
-//
-//                btn1.setBackgroundColor(Color.DKGRAY);
-//                btn1.setTextColor(Color.WHITE);
-//                this.currentSelectedButton = 1;
-//                showTenantDBInListView();
-//                break;
-//            case R.id.btn2:
-//                selectedButton = getSelectedButton();
-//                selectedButton.setBackgroundColor(Color.LTGRAY);
-//                selectedButton.setTextColor(Color.BLACK);
-//
-//                btn2.setBackgroundColor(Color.DKGRAY);
-//                btn2.setTextColor(Color.WHITE);
-//                this.currentSelectedButton = 2;
-//                showTenantDBInListView();
-//                break;
-//            case R.id.btn3:
-//                selectedButton = getSelectedButton();
-//                selectedButton.setBackgroundColor(Color.LTGRAY);
-//                selectedButton.setTextColor(Color.BLACK);
-//
-//                btn3.setBackgroundColor(Color.DKGRAY);
-//                btn3.setTextColor(Color.WHITE);
-//                this.currentSelectedButton = 3;
-//                showTenantDBInListView();
-//                break;
-//            case R.id.btn4:
-//                selectedButton = getSelectedButton();
-//                selectedButton.setBackgroundColor(Color.LTGRAY);
-//                selectedButton.setTextColor(Color.BLACK);
-//
-//                btn4.setBackgroundColor(Color.DKGRAY);
-//                btn4.setTextColor(Color.WHITE);
-//                this.currentSelectedButton = 4;
-//                showTenantDBInListView();
-//                break;
-//            case R.id.btn5:
-//                selectedButton = getSelectedButton();
-//                selectedButton.setBackgroundColor(Color.LTGRAY);
-//                selectedButton.setTextColor(Color.BLACK);
-//
-//                btn5.setBackgroundColor(Color.DKGRAY);
-//                btn5.setTextColor(Color.WHITE);
-//                this.currentSelectedButton = 5;
-//                showTenantDBInListView();
-//                break;
-//            case R.id.btn6:
-//                selectedButton = getSelectedButton();
-//                selectedButton.setBackgroundColor(Color.LTGRAY);
-//                selectedButton.setTextColor(Color.BLACK);
-//
-//                btn6.setBackgroundColor(Color.DKGRAY);
-//                btn6.setTextColor(Color.WHITE);
-//                this.currentSelectedButton = 6;
-//                showTenantDBInListView();
-//                break;
-//        }
     }
 }

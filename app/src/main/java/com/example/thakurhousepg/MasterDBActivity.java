@@ -244,7 +244,7 @@ public class MasterDBActivity extends AppCompatActivity implements View.OnClickL
                     if(i != 0) {
                         TableClass item = adapter.getItem(i);
                         Intent roomData = new Intent(MasterDBActivity.this, MasterRecordActivity.class);
-                        roomData.putExtra("ROOM_NUMBER", item.getRoomNumber());
+                        roomData.putExtra("TENANT_ROOM_NUMBER_COLUMN", item.getRoomNumber());
                         roomData.putExtra("EXPECTED_RENT", item.getRoomRent());
                         roomData.putExtra("ACTION", "VIEW_ONLY");
                         startActivity(roomData);

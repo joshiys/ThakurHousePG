@@ -28,88 +28,140 @@
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:rowCount="4"
-        android:columnCount="2">
+        android:columnCount="2"
+        android:rowCount="6">
 
         <TextView
             android:id="@+id/roomNumberLable"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_marginBottom="20dp"
-            android:textStyle="bold"
-            android:text="@string/room_number"/>
+            android:text="@string/room_number"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold" />
+
         <EditText
             android:id="@+id/roomNumberText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
             android:layout_marginLeft="10dp"
             android:layout_marginBottom="20dp"
             android:cursorVisible="false"
-            android:maxLines="1"
+            android:hint="Type Room Number"
             android:inputType="numberDecimal"
-            android:textStyle="bold"
+            android:maxLines="1"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
             android:textColor="@color/colorForText"
 
-            android:hint="Type Room Number"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/outstandingRentLable"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_marginBottom="20dp"
-            android:textStyle="bold"
-            android:text="Outstanding Rent"/>
+            android:text="Outstanding Rent"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold" />
+
         <TextView
             android:id="@+id/outstandingRentAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-            android:layout_marginBottom="20dp"
             android:layout_marginLeft="10dp"
-            android:textStyle="bold"/>
+            android:layout_marginBottom="20dp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:textStyle="bold" />
 
         <CheckBox
             android:id="@+id/rentOnlineCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_marginBottom="20dp"
-            android:textStyle="bold"
-            android:text="@string/rent_amount"/>
+            android:text="@string/rent_amount"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold" />
+
         <EditText
             android:id="@+id/rentOnlineValue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-            android:layout_marginBottom="20dp"
             android:layout_marginLeft="10dp"
-            android:maxLines="1"
-            android:inputType="numberDecimal"
+            android:layout_marginBottom="20dp"
             android:focusedByDefault="true"
-            android:hint="Rent Amount"/>
+            android:hint="0"
+            android:inputType="numberDecimal"
+            android:maxLines="1"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
 
         <CheckBox
             android:id="@+id/rentInCashCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_marginBottom="20dp"
-            android:textStyle="bold"
-            android:text="In Cash"/>
+            android:text="In Cash"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold" />
+
         <EditText
             android:id="@+id/rentInCashValue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-            android:layout_marginBottom="20dp"
             android:layout_marginLeft="10dp"
-            android:maxLines="1"
-            android:inputType="numberDecimal"
+            android:layout_marginBottom="20dp"
             android:focusedByDefault="true"
-            android:hint="Rent Amount"/>
+            android:hint="Rent Amount"
+            android:inputType="numberDecimal"
+            android:maxLines="1"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large" />
+
+        <TextView
+            android:id="@+id/PenaltyAdded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="20dp"
+            android:text="Penalty Added"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:textStyle="bold"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/PenaltyAddedAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="20dp"
+            android:focusedByDefault="true"
+            android:hint="Rent Amount"
+            android:inputType="numberDecimal"
+            android:maxLines="1"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:visibility="invisible" />
+
+        <CheckBox
+            android:id="@+id/WaiveOffPenalty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="Waive Off"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/WaiveOffPenaltyAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="20dp"
+            android:focusedByDefault="true"
+            android:hint="Rent Amount"
+            android:inputType="numberDecimal"
+            android:maxLines="1"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:visibility="invisible" />
+
 
     </GridLayout>
 

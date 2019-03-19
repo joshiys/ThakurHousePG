@@ -4,22 +4,26 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.thakurhousepg.NewFiles.DataModule;
+import com.example.thakurhousepg.NewFiles.OccupancyPackage.OccupancyAndBooking;
+import com.example.thakurhousepg.NewFiles.Payment;
+
 import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-    DatabaseHelper dbHelper;
+    DataModule dbHelper;
     Button rentButton, depositButton, penaltyButton, sendSMS, adminScreen, viewTenant;
+    Button btn_receipt, btn_occupancy, btn_payment;
     EditText roomNumber;
-    TextView totalOutstandinValue, totalOutstandingLabel;
+    TextView totalOutstandinValue;
 
     public static final int COLUMN_0 = 0;
     public static final int COLUMN_1 = 1;
@@ -34,27 +38,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rentButton = (Button) findViewById(R.id.rentButton);
-        depositButton = (Button) findViewById(R.id.depositButton);
-        penaltyButton = (Button) findViewById(R.id.penaltyButton);
+//        rentButton = (Button) findViewById(R.id.rentButton);
+//        depositButton = (Button) findViewById(R.id.depositButton);
+//        penaltyButton = (Button) findViewById(R.id.penaltyButton);
+         btn_receipt = (Button) findViewById(R.id.receipt_button);
+         btn_occupancy = (Button) findViewById(R.id.occupancy_button);
+         btn_payment = (Button) findViewById(R.id.payments_button);
+
         adminScreen = (Button) findViewById(R.id.adminScreen);
         viewTenant = (Button) findViewById(R.id.viewRoomButton);
 
         roomNumber = (EditText) findViewById(R.id.roomNumberText);
         sendSMS = (Button) findViewById(R.id.sendSMSButton);
         totalOutstandinValue = (TextView) findViewById(R.id.totalOutstandinValue);
-        totalOutstandingLabel = (TextView) findViewById(R.id.totalOutstandingLabel);
 
-        rentButton.setOnClickListener(this);
-        depositButton.setOnClickListener(this);
-        penaltyButton.setOnClickListener(this);
+        btn_receipt.setOnClickListener(this);
+        btn_occupancy.setOnClickListener(this);
+        btn_payment.setOnClickListener(this);
         adminScreen.setOnClickListener(this);
         viewTenant.setOnClickListener(this);
 
         roomNumber.setSelection(roomNumber.getText().length());
 
         sendSMS.setEnabled(false);
-        dbHelper = new DatabaseHelper(this);
+        dbHelper = new DataModule(this);
 
         setTotalOutstandingRent();
         setTitle(getTitle() + " - " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
@@ -63,64 +70,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        setTotalOutstandingRent();
+        //setTotalOutstandingRent();
     }
 
     @Override
     public void onClick(View view) {
         String outstandingRent = "", outstandingDeposit = "", outstandingPenalty = "";
-        if((view.getId() != R.id.adminScreen ) && (view.getId() != R.id.viewRoomButton)) {
-            if (roomNumber.getText().toString().isEmpty() == true) {
-                Toast.makeText(MainActivity.this, "Enter Room Number", Toast.LENGTH_SHORT).show();
-                return;
-            } /*else if ((outstanding = getRoomOutstanding(roomNumber.getText().toString())) == null) {
-                Toast.makeText(MainActivity.this, "No Such Room - " + roomNumber.getText().toString(), Toast.LENGTH_SHORT).show();
-                return;
-            }*/
-        }
+//        if((view.getId() != R.id.adminScreen ) && (view.getId() != R.id.viewRoomButton)) {
+//            if (roomNumber.getText().toString().isEmpty() == true) {
+//                Toast.makeText(MainActivity.this, "Enter Room Number", Toast.LENGTH_SHORT).show();
+//                return;
+//            } /*else if ((outstanding = getRoomOutstanding(roomNumber.getText().toString())) == null) {
+//                Toast.makeText(MainActivity.this, "No Such Room - " + roomNumber.getText().toString(), Toast.LENGTH_SHORT).show();
+//                return;
+//            }*/
+//        }
         switch(view.getId()){
-            case R.id.rentButton:
-                if ((outstandingRent = getRoomOutstandingRent(roomNumber.getText().toString())) == null) {
-                    Toast.makeText(MainActivity.this, "No Such Room - " + roomNumber.getText().toString(), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Toast.makeText(MainActivity.this, "Launching Rent Activity", Toast.LENGTH_SHORT).show();
-                Intent rentIntent = new Intent(MainActivity.this, RentActivity.class);
-                rentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
-                rentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingRent);
+            case R.id.receipt_button:
+//                if ((outstandingRent = getRoomOutstandingRent(roomNumber.getText().toString())) == null) {
+//                    Toast.makeText(MainActivity.this, "No Such Room - " + roomNumber.getText().toString(), Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
+                Toast.makeText(MainActivity.this, "Launching Receipts", Toast.LENGTH_SHORT).show();
+
+                Intent rentIntent = new Intent(MainActivity.this, Payment.class);
+                rentIntent.putExtra("section", "rent");
+//                rentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
+//                rentIntent.putExtra(getString(R.string.rent_amount), outstandingRent);
                 startActivity(rentIntent);
                 break;
-            case R.id.depositButton:
-                if ((outstandingDeposit = getRoomOutstandingDeposit(roomNumber.getText().toString())) == null) {
-                    Toast.makeText(MainActivity.this, "No Such Room - " + roomNumber.getText().toString(), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Toast.makeText(MainActivity.this, "Launching Deposit Activity", Toast.LENGTH_SHORT).show();
-                Intent depositIntent = new Intent(MainActivity.this, DepositActivity.class);
-                depositIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
-                depositIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingDeposit);
-                startActivity(depositIntent);
-
+            case R.id.occupancy_button:
+                Toast.makeText(MainActivity.this, "Launching Occupancy & Booking", Toast.LENGTH_SHORT).show();
+                Intent occupancyIntent = new Intent(MainActivity.this, OccupancyAndBooking.class);
+//                adminIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
+                startActivity(occupancyIntent);
                 break;
-            case R.id.penaltyButton:
+
+            case R.id.payments_button:
                 if ((outstandingPenalty = getRoomOutstandingPenalty(roomNumber.getText().toString())) == null) {
                     Toast.makeText(MainActivity.this, "No Such Room - " + roomNumber.getText().toString(), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Toast.makeText(MainActivity.this, "Launching Penalty Activity", Toast.LENGTH_SHORT).show();
-                Intent penaltyIntent = new Intent(MainActivity.this, PenaltyActivity.class);
-                penaltyIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
-                penaltyIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
-                startActivity(penaltyIntent);
-                break;
-            case R.id.adminScreen:
-                Toast.makeText(MainActivity.this, "Launching Admin Activity", Toast.LENGTH_SHORT).show();
-                Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
-                adminIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
-                startActivity(adminIntent);
+                Toast.makeText(MainActivity.this, "Launching Payments", Toast.LENGTH_SHORT).show();
+
+                Intent paymentIntent = new Intent(MainActivity.this, Payment.class);
+                paymentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
+                paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
+                startActivity(paymentIntent);
                 break;
             case R.id.viewRoomButton:
-                //fetch Tenant recod using Key ROOM_NUMBER and pass
+                //fetch Tenant recod using Key TENANT_ROOM_NUMBER_COLUMN and pass
 //                dbHelper = new DatabaseHelper(this);
                 if(roomNumber.getText().toString().isEmpty() == false) {
                     Cursor data = dbHelper.getTenantTableData(roomNumber.getText().toString());
