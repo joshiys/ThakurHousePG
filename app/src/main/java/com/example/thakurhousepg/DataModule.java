@@ -566,7 +566,7 @@ public class DataModule extends SQLiteOpenHelper {
 
         db.insert(RECEIPTS_TABLE_NAME, null, contentValues);
 
-//        Receipt receipt = new Receipt(String.valueOf(highestReceiptId), bookingId, onlineAmount, cashAmount, penaltyAmount, "", new SimpleDateFormat("dd/mm/yyyy").format(new Date()).toString(), (type == 2));
+//        ReceiptActivity receipt = new ReceiptActivity(String.valueOf(highestReceiptId), bookingId, onlineAmount, cashAmount, penaltyAmount, "", new SimpleDateFormat("dd/mm/yyyy").format(new Date()).toString(), (type == 2));
 
 //        return highestReceiptId;
     }

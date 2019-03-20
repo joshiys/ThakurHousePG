@@ -15,29 +15,29 @@ import com.example.thakurhousepg.BedsListContent.BedsListItem;
 /**
  * A fragment representing a list of Items.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnBedsListInteractionListener}
  * interface.
  */
-public class BedsListItemFragment extends Fragment {
+public class BedsListFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
     private int mColumnCount = 3;
-    private OnListFragmentInteractionListener mListener;
+    private OnBedsListInteractionListener mListener;
     private DataModule datamodule;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public BedsListItemFragment() {
+    public BedsListFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static BedsListItemFragment newInstance(int columnCount) {
-        BedsListItemFragment fragment = new BedsListItemFragment();
+    public static BedsListFragment newInstance(int columnCount) {
+        BedsListFragment fragment = new BedsListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -60,7 +60,7 @@ public class BedsListItemFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_bed_item_list, container, true);
+        View view = inflater.inflate(R.layout.fragment_beds_list, container, true);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -77,11 +77,11 @@ public class BedsListItemFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
+        if (context instanceof OnBedsListInteractionListener) {
+            mListener = (OnBedsListInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
+                    + " must implement OnBedsListInteractionListener");
         }
     }
 
@@ -91,8 +91,11 @@ public class BedsListItemFragment extends Fragment {
         mListener = null;
     }
 
-    public interface OnListFragmentInteractionListener {
+    public interface OnBedsListInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(BedsListItem item);
+        //void onListFragmentInteraction
+        void onBedItemClick(BedsListItem item);
+        void onTenantClick(BedsListItem item);
+        void onNewBookingClick(BedsListItem item);
     }
 }

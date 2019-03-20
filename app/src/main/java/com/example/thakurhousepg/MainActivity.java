@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                }
                 Toast.makeText(MainActivity.this, "Launching Receipts", Toast.LENGTH_SHORT).show();
 
-                Intent rentIntent = new Intent(MainActivity.this, Receipt.class);
+                Intent rentIntent = new Intent(MainActivity.this, ReceiptActivity.class);
                 rentIntent.putExtra("section", "rent");
 //                rentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
 //                rentIntent.putExtra(getString(R.string.rent_amount), outstandingRent);
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 Toast.makeText(MainActivity.this, "Launching Payments", Toast.LENGTH_SHORT).show();
 
-                Intent paymentIntent = new Intent(MainActivity.this, Receipt.class);
+                Intent paymentIntent = new Intent(MainActivity.this, ReceiptActivity.class);
                 paymentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
                 paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
                 startActivity(paymentIntent);

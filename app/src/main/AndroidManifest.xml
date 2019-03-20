@@ -9,9 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".OccupancyAndBookingActivity"></activity>
+        <activity android:name=".BedViewActivity"></activity>
+        <activity android:name=".OccupancyAndBookingActivity" />
         <activity
-            android:name=".Receipt"
+            android:name=".ReceiptActivity"
             android:label="@string/title_activity_payment"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".OldFiles.MasterRecordActivity" />

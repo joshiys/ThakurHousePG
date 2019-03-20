@@ -26,7 +26,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class Receipt extends AppCompatActivity {
+public class ReceiptActivity extends AppCompatActivity {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -55,7 +55,7 @@ public class Receipt extends AppCompatActivity {
 
     Cursor data = null;
 
-    private static final String TAG = "Receipt";
+    private static final String TAG = "ReceiptActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
