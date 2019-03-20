@@ -1,4 +1,4 @@
-package com.example.thakurhousepg.NewFiles.OccupancyPackage;
+package com.example.thakurhousepg;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,9 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.thakurhousepg.NewFiles.DataModule;
-import com.example.thakurhousepg.R;
-import com.example.thakurhousepg.NewFiles.OccupancyPackage.BedsListContent.BedsListItem;
+import com.example.thakurhousepg.BedsListContent.BedsListItem;
 
 /**
  * A fragment representing a list of Items.
@@ -20,7 +18,7 @@ import com.example.thakurhousepg.NewFiles.OccupancyPackage.BedsListContent.BedsL
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class ItemFragment extends Fragment {
+public class BedsListItemFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -33,13 +31,13 @@ public class ItemFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ItemFragment() {
+    public BedsListItemFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static ItemFragment newInstance(int columnCount) {
-        ItemFragment fragment = new ItemFragment();
+    public static BedsListItemFragment newInstance(int columnCount) {
+        BedsListItemFragment fragment = new BedsListItemFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -53,7 +51,7 @@ public class ItemFragment extends Fragment {
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
-        datamodule = ((OccupancyAndBooking) getActivity()).datamodule;
+        datamodule = ((OccupancyAndBookingActivity) getActivity()).datamodule;
 //        datamodule = new DataModule(getActivity());
 
         BedsListContent.create(datamodule);

@@ -1,4 +1,4 @@
-package com.example.thakurhousepg.NewFiles.OccupancyPackage;
+package com.example.thakurhousepg;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,9 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.thakurhousepg.NewFiles.OccupancyPackage.ItemFragment.OnListFragmentInteractionListener;
-import com.example.thakurhousepg.R;
-import com.example.thakurhousepg.NewFiles.OccupancyPackage.BedsListContent.BedsListItem;
+import com.example.thakurhousepg.BedsListItemFragment.OnListFragmentInteractionListener;
+import com.example.thakurhousepg.BedsListContent.BedsListItem;
 
 import java.util.List;
 

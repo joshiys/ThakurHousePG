@@ -1,4 +1,4 @@
-package com.example.thakurhousepg.NewFiles;
+package com.example.thakurhousepg;
 
 import android.database.Cursor;
 import android.support.design.widget.TabLayout;
@@ -12,21 +12,21 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.thakurhousepg.NewFiles.DataModule;
-import com.example.thakurhousepg.R;
-
-public class Payment extends AppCompatActivity {
+public class Receipt extends AppCompatActivity {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -45,8 +45,7 @@ public class Payment extends AppCompatActivity {
 
 
     Button btnSave;
-    EditText roomNumberText, rentOnline, rentInCash;
-    TextView pendingRent;
+    EditText roomNumberText, totalAmount, onlineAmt, cashAmt, penaltyAmt;
     CheckBox rentInCashCheckBox, rentOnlineCheckBox;
     DataModule dbHelper;
 
@@ -54,16 +53,14 @@ public class Payment extends AppCompatActivity {
 
     boolean onlineRentChecked = false, cashRentChecked = false;
 
-    String roomNumberStr = null;
-
     Cursor data = null;
 
-    String onlineRent = null, cashRent = null, outstandingRent = null;
+    private static final String TAG = "Receipt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_payment);
+        setContentView(R.layout.activity_receipt);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -73,15 +70,10 @@ public class Payment extends AppCompatActivity {
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        String section = bundle.getString("section");
-
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
@@ -122,22 +114,25 @@ public class Payment extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class ReceiptFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private EditText roomNumberText, totalAmount, onlineAmt, cashAmt, penaltyAmt;
+        private CheckBox penaltySwitch;
+        private Button saveButton;
 
-        public PlaceholderFragment() {
+        public ReceiptFragment() {
         }
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+        public static ReceiptFragment newInstance(int sectionNumber) {
+            ReceiptFragment fragment = new ReceiptFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -147,7 +142,53 @@ public class Payment extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_payment, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_receipt, container, false);
+
+
+            //TODO: Implement Bed number Validation and Automatic filling of the Rent amount
+            roomNumberText = (EditText) rootView.findViewById(R.id.receipt_te_bed_number);
+            roomNumberText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if (event != null || actionId == EditorInfo.IME_NULL) {
+                        Log.v(TAG, v.getText().toString());
+                    } else {
+                        Log.v(TAG, "performed some other action. ID = " + String.valueOf(actionId));
+                    }
+                    return true;
+                }
+            });
+            roomNumberText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                public void onFocusChange(View v, boolean hasFocus) {
+                    Log.v(TAG, roomNumberText.getText().toString());
+                }
+            });
+
+            onlineAmt = (EditText) rootView.findViewById(R.id.receipt_te_online_amt);
+            cashAmt = (EditText) rootView.findViewById(R.id.receipt_te_cash_amt);
+            penaltyAmt = (EditText) rootView.findViewById(R.id.receipt_te_penalty);
+            totalAmount = (EditText) rootView.findViewById(R.id.receipt_te_rent);
+
+            penaltySwitch = (CheckBox) rootView.findViewById(R.id.receipt_cb_penalty);
+            penaltySwitch.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Boolean isEnabled = penaltyAmt.isEnabled();
+                    if (isEnabled) {
+                        penaltyAmt.setText("");
+                    }
+                    penaltyAmt.setEnabled(!isEnabled);
+                }
+            });
+
+            saveButton = (Button) rootView.findViewById(R.id.receipt_button_save);
+            saveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i(TAG, "Save Button Tapped");
+                }
+            });
+
 //            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 //            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
             return rootView;
@@ -167,8 +208,8 @@ public class Payment extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            // Return a ReceiptFragment (defined as a static inner class below).
+            return ReceiptFragment.newInstance(position + 1);
         }
 
         @Override

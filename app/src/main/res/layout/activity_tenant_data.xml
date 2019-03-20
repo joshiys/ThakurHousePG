@@ -10,7 +10,7 @@
     android:paddingRight="30dp"
 
     android:orientation="vertical"
-    tools:context=".TenantDataActivity">
+    tools:context=".OldFiles.TenantDataActivity">
 
 
     <GridLayout

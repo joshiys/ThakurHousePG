@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.example.thakurhousepg.OldFiles;
 
 public class TenantTable {
     private String roomNumber;

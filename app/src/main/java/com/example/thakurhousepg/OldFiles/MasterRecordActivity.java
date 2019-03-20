@@ -1,12 +1,13 @@
-package com.example.thakurhousepg;
+package com.example.thakurhousepg.OldFiles;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.example.thakurhousepg.R;
 
 import java.util.Calendar;
 import java.util.Locale;

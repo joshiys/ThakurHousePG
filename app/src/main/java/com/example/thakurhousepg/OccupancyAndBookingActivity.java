@@ -1,14 +1,11 @@
-package com.example.thakurhousepg.NewFiles.OccupancyPackage;
+package com.example.thakurhousepg;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.widget.Toast;
 
-import com.example.thakurhousepg.NewFiles.DataModule;
-import com.example.thakurhousepg.R;
-
-public class OccupancyAndBooking extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
+public class OccupancyAndBookingActivity extends AppCompatActivity implements BedsListItemFragment.OnListFragmentInteractionListener {
     public DataModule datamodule;
 
     @Override
@@ -20,6 +17,6 @@ public class OccupancyAndBooking extends AppCompatActivity implements ItemFragme
     }
 
     public void onListFragmentInteraction(BedsListContent.BedsListItem item) {
-        Toast.makeText(OccupancyAndBooking.this, "Clicked Item "+ item.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(OccupancyAndBookingActivity.this, "Clicked Item "+ item.toString(), Toast.LENGTH_SHORT).show();
     }
 }

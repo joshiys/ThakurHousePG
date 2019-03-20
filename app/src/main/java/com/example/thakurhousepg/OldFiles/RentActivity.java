@@ -1,6 +1,5 @@
-package com.example.thakurhousepg;
+package com.example.thakurhousepg.OldFiles;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.support.v7.app.AlertDialog;
@@ -13,6 +12,8 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.thakurhousepg.R;
 
 import java.util.Calendar;
 import java.util.Locale;

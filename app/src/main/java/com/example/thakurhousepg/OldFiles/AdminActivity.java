@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.example.thakurhousepg.OldFiles;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -8,12 +8,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.thakurhousepg.R;
+
 import java.util.Calendar;
 import java.util.Locale;
 
 public class AdminActivity extends AppCompatActivity implements View.OnClickListener{
 
-    Button masterDB, tenantDataButton, miscDB;
+    Button masterDB, tenantDataButton;
     TextView totalExpectedRentValue, totalcollectedRentValue;
     DatabaseHelper dbHelper;
 
@@ -34,14 +36,12 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
 
         masterDB = (Button) findViewById(R.id.masterDBButton);
         tenantDataButton = (Button) findViewById(R.id.updateRoom);
-        miscDB = (Button) findViewById(R.id.miscDB);
 
         totalExpectedRentValue = (TextView) findViewById(R.id.totalExpectedRentValue);
         totalcollectedRentValue = (TextView) findViewById(R.id.totalcollectedRentValue);
 
         masterDB.setOnClickListener(this);
         tenantDataButton.setOnClickListener(this);
-        miscDB.setOnClickListener(this);
 
         setTitle(getTitle() + " - " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
 
@@ -73,10 +73,6 @@ public class AdminActivity extends AppCompatActivity implements View.OnClickList
             case R.id.updateRoom:
                 Intent tenantIntent = new Intent(AdminActivity.this, TenantDataActivity.class);
                 startActivity(tenantIntent);
-                break;
-            case R.id.miscDB:
-                Intent miscIntent = new Intent(AdminActivity.this, MiscActivity.class);
-                startActivity(miscIntent);
                 break;
         }
 

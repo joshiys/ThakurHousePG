@@ -10,9 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.thakurhousepg.NewFiles.DataModule;
-import com.example.thakurhousepg.NewFiles.OccupancyPackage.OccupancyAndBooking;
-import com.example.thakurhousepg.NewFiles.Payment;
+import com.example.thakurhousepg.OldFiles.TenantRecordActivity;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -93,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                }
                 Toast.makeText(MainActivity.this, "Launching Receipts", Toast.LENGTH_SHORT).show();
 
-                Intent rentIntent = new Intent(MainActivity.this, Payment.class);
+                Intent rentIntent = new Intent(MainActivity.this, Receipt.class);
                 rentIntent.putExtra("section", "rent");
 //                rentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
 //                rentIntent.putExtra(getString(R.string.rent_amount), outstandingRent);
@@ -101,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.occupancy_button:
                 Toast.makeText(MainActivity.this, "Launching Occupancy & Booking", Toast.LENGTH_SHORT).show();
-                Intent occupancyIntent = new Intent(MainActivity.this, OccupancyAndBooking.class);
+                Intent occupancyIntent = new Intent(MainActivity.this, OccupancyAndBookingActivity.class);
 //                adminIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
                 startActivity(occupancyIntent);
                 break;
@@ -113,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 Toast.makeText(MainActivity.this, "Launching Payments", Toast.LENGTH_SHORT).show();
 
-                Intent paymentIntent = new Intent(MainActivity.this, Payment.class);
+                Intent paymentIntent = new Intent(MainActivity.this, Receipt.class);
                 paymentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
                 paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
                 startActivity(paymentIntent);
@@ -170,13 +168,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     void setTotalOutstandingRent(){
-        Cursor data = dbHelper.getTenantTableData("KEY_ALL");
-        Calendar c = Calendar.getInstance();
-        int totalRent = 0;
-        while(data.moveToNext()) {
-            totalRent = totalRent + data.getInt(COLUMN_4);
-        }
+//        Cursor data = dbHelper.getTenantTableData("KEY_ALL");
+//        Calendar c = Calendar.getInstance();
+//        int totalRent = 0;
+//        while(data.moveToNext()) {
+//            totalRent = totalRent + data.getInt(COLUMN_4);
+//        }
 //        totalOutstandingLabel.setText(c.getDisplayName(c.MONTH, c.LONG, Locale.US) + " Outstanding: ");
-        totalOutstandinValue.setText(String.valueOf(totalRent));
+        totalOutstandinValue.setText(dbHelper.getTotalOutstandingRent());
     }
 }
