@@ -147,15 +147,15 @@ public class DataModule extends SQLiteOpenHelper {
 
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
         if(newTenantId != null)
-            createNewBooking("101.0", newTenantId, "8000", "8000", date, false );
+            createNewBooking("101.0", newTenantId, "8000", "8000", date);
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
         if(newTenantId != null)
-            createNewBooking("102.0", newTenantId, "9000", "9000", date, false );
+            createNewBooking("102.0", newTenantId, "9000", "9000", date);
 
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
         if(newTenantId != null)
-            createNewBooking("103.0", newTenantId, "9000", "9000", date, true );
+            createNewBooking("103.0", newTenantId, "9000", "9000", date);
     }
 
     @Override
@@ -182,11 +182,7 @@ public class DataModule extends SQLiteOpenHelper {
         String query = "select * from " + BEDS_TABLE_NAME + " where BED_NUMBER = " + bedNumber;
         Cursor checkRecord = db.rawQuery(query, null);
 
-        if (checkRecord.getCount() != 0) {
-            db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
-            opSuccess = true;
-        } else {
-
+        if (checkRecord.getCount() == 0) {
             long result = db.insert(BEDS_TABLE_NAME, null, contentValues);
             if (result != -1) {
                 opSuccess = true;
@@ -260,7 +256,7 @@ public class DataModule extends SQLiteOpenHelper {
     }
 
     //TODO: Validation Needed urgently, Duplicate bookings can be made right now, messing the data for rest of the activities
-    public boolean createNewBooking(String bedNumber, String tenantId, String rent, String deposit, String admissionDate, Boolean isWholeRoom) {
+    public boolean createNewBooking(String bedNumber, String tenantId, String rent, String deposit, String admissionDate) {
         Boolean opSuccess = false;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -275,10 +271,7 @@ public class DataModule extends SQLiteOpenHelper {
         else
             contentValues.put(BOOKING_DATE, admissionDate); // current date
 
-        if (isWholeRoom != null)
-            contentValues.put(BOOKING_IS_WHOLE_ROOM, isWholeRoom);
-        else
-            contentValues.put(BOOKING_IS_WHOLE_ROOM, false);
+        contentValues.put(BOOKING_IS_WHOLE_ROOM, false);
 
         // If the Whole room is to be booked, check if other beds of the room are free as well.
         // OR If the Bed is already booked
@@ -632,6 +625,22 @@ public class DataModule extends SQLiteOpenHelper {
 //        ReceiptActivity receipt = new ReceiptActivity(String.valueOf(highestReceiptId), bookingId, onlineAmount, cashAmount, penaltyAmount, "", new SimpleDateFormat("dd/mm/yyyy").format(new Date()).toString(), (type == 2));
 
 //        return highestReceiptId;
+    }
+
+/*    BED_NUMBER TEXT PRIMARY KEY," +
+            " BED_RENT INTEGER NOT NULL," +
+            " BED_DEPOSIT INTEGER NOT NULL," +
+            " IS_OCCUPIED*/
+    public void splitRoom(String roomNumber, int numRooms, String rent, String deposit) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ContentValues contentValues = new ContentValues();
+        String rentAmt = String.valueOf(Double.valueOf(rent) / numRooms);
+        String depositAmt = String.valueOf(Double.valueOf(deposit) / numRooms);
+
+        roomNumber = roomNumber.split("\\.")[0];
+        for (int i = 1; i< numRooms; i++) {
+            addNewBed(roomNumber + "." + String.valueOf(i), rentAmt, depositAmt);
+        }
     }
 
     //TODO: Check and remove this function

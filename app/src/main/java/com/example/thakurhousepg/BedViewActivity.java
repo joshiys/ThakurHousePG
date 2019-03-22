@@ -83,7 +83,7 @@ public class BedViewActivity extends AppCompatActivity {
 
         } else {
             tenantName.setVisibility(View.INVISIBLE);
-            bookingDate.setVisibility(View.INVISIBLE);
+            bookingDate.setVisibility(View.GONE);
             smsButton.hide();
             bedNumber.setBackgroundColor(Color.GREEN);
 

@@ -57,7 +57,12 @@ public class BedsListContent {
         }
     }
 
-    public static void update(String bedNumber, String tenantName, String rent){
+    public static void refresh(DataModule dataModule) {
+        items.clear();
+        create(dataModule);
+    }
+
+        public static void update(String bedNumber, String tenantName, String rent){
         for (BedsListItem item: items) {
             if(item.bedNumber == bedNumber) {
                 item.tenantName = tenantName;

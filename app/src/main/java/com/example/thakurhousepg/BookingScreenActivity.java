@@ -7,7 +7,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -25,7 +27,7 @@ public class BookingScreenActivity extends AppCompatActivity {
     private EditText depositAmount;
     private EditText bedNumber;
 
-    private Switch wholeRoomSwitch;
+    private SeekBar roomSplitSeeker;
     private Button bookButton;
 
     private static final String TAG = "BookingScreenActivity";
@@ -54,7 +56,8 @@ public class BookingScreenActivity extends AppCompatActivity {
         bedNumber = findViewById(R.id.booking_bed_number);
         bedNumber.setText(bundle.getString("BED_NUMBER"));
 
-        wholeRoomSwitch = findViewById(R.id.booking_book_whole_room);
+        roomSplitSeeker = findViewById(R.id.booking_split_room_seek_bar);
+        roomSplitSeeker.setProgress(0);
 
         bookButton = findViewById(R.id.booking_book_button);
         bookButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -69,13 +72,18 @@ public class BookingScreenActivity extends AppCompatActivity {
         bookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int numRooms = roomSplitSeeker.getProgress();
+                if(numRooms > 0) {
+                    dataModule.splitRoom(bedNumber.getText().toString(), numRooms, rentAmount.getText().toString(), depositAmount.getText().toString());
+                }
                 String tenantId = dataModule.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(), "", tenantEmail.getText().toString(), tenantAddress.getText().toString());
                 if(tenantId != null) {
-                    Boolean result = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), wholeRoomSwitch.isChecked());
+                    Boolean result = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
                     Log.i(TAG, "result is " + String.valueOf(result));
                     if(result) {
                         Toast.makeText(BookingScreenActivity.this,"Created new Booking successfully", Toast.LENGTH_SHORT).show();
-                        BedsListContent.update(bedNumber.getText().toString(), tenantName.getText().toString(), rentAmount.getText().toString());
+                        BedsListContent.refresh(dataModule);
+//                        BedsListContent.update(bedNumber.getText().toString(), tenantName.getText().toString(), rentAmount.getText().toString());
                         finish();
                     } else {
                         //TODO: Remove the new Tenant if the Booking Creation fails?
