@@ -18,6 +18,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         setContentView(R.layout.activity_occupancy_and_booking);
     }
 
+
     public void onBedItemClick(BedsListContent.BedsListItem item) {
         Toast.makeText(OccupancyAndBookingActivity.this, "Launching Bed View for: "+ item.bedNumber, Toast.LENGTH_SHORT).show();
         Intent bedViewIntent = new Intent(OccupancyAndBookingActivity.this, BedViewActivity.class);

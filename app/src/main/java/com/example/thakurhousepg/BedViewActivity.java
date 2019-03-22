@@ -33,6 +33,8 @@ public class BedViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bed_view);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         bedNumber = findViewById(R.id.bedview_bed_number);
         bookButton = findViewById(R.id.bedview_button_book);
         tenantName = findViewById(R.id.bedview_tenant_name);
@@ -107,5 +109,11 @@ public class BedViewActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
     }
 }
