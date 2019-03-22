@@ -147,15 +147,15 @@ public class DataModule extends SQLiteOpenHelper {
 
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
         if(newTenantId != null)
-            createNewBooking("101.0", newTenantId, "4000", "4000", date, false );
+            createNewBooking("101.0", newTenantId, "8000", "8000", date, false );
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
         if(newTenantId != null)
-            createNewBooking("102.0", newTenantId, "4000", "4000", date, false );
+            createNewBooking("102.0", newTenantId, "9000", "9000", date, false );
 
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
         if(newTenantId != null)
-            createNewBooking("104.0", newTenantId, "4000", "4000", date, true );
+            createNewBooking("103.0", newTenantId, "9000", "9000", date, true );
     }
 
     @Override
@@ -385,11 +385,11 @@ public class DataModule extends SQLiteOpenHelper {
         if (c.getCount() == 0) {
             for (int floorNo = 100; floorNo <= 600; floorNo += 100) {
                 for (int roomNo = 1; roomNo <= 6; roomNo += 1) {
-//                    for (Double bedNo = 1.0; bedNo <= 3; bedNo++) {
-                        Double bedNumber = Double.valueOf(floorNo + roomNo);
 
-                        addNewBed(bedNumber.toString(), "3000", "3000");
-//                    Double bedNumber = Double.valueOf(floorNo + roomNo + bedNo / 10);
+//                    for (Double bedNo = 1.0; bedNo <= 3.0; bedNo++) {
+                        Double bedNumber = Double.valueOf(floorNo + roomNo);// + bedNo / 10);
+
+                        addNewBed(bedNumber.toString(), "8000", "8000");
 //                        ContentValues contentValues = new ContentValues();
 //                        contentValues.put(BED_NUMBER, bedNumber.toString());
 //                        contentValues.put(BED_RENT, "3000");
