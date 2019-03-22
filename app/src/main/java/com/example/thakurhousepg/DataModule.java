@@ -147,15 +147,15 @@ public class DataModule extends SQLiteOpenHelper {
 
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
         if(newTenantId != null)
-            createNewBooking("000.1", newTenantId, "4000", "4000", date, false );
+            createNewBooking("101.0", newTenantId, "4000", "4000", date, false );
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
         if(newTenantId != null)
-            createNewBooking("101.2", newTenantId, "4000", "4000", date, false );
+            createNewBooking("102.0", newTenantId, "4000", "4000", date, false );
 
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
         if(newTenantId != null)
-            createNewBooking("103.1", newTenantId, "4000", "4000", date, true );
+            createNewBooking("104.0", newTenantId, "4000", "4000", date, true );
     }
 
     @Override
@@ -283,12 +283,12 @@ public class DataModule extends SQLiteOpenHelper {
         // If the Whole room is to be booked, check if other beds of the room are free as well.
         // OR If the Bed is already booked
         //TODO: This can combined with the WHoleRoom Logic in the inner if
-        if (isWholeRoom) {
-            String roomNo = bedNumber.split("\\.")[0];
-            checkRecord = db.rawQuery("select * from " + BEDS_TABLE_NAME + " where IS_OCCUPIED = ? AND BED_NUMBER LIKE ?", new String[]{"1", roomNo+"%"});
-        } else {
+//        if (isWholeRoom) {
+//            String roomNo = bedNumber.split("\\.")[0];
+//            checkRecord = db.rawQuery("select * from " + BEDS_TABLE_NAME + " where IS_OCCUPIED = ? AND BED_NUMBER LIKE ?", new String[]{"1", roomNo+"%"});
+//        } else {
             checkRecord = db.rawQuery("select * from " + BEDS_TABLE_NAME + " where IS_OCCUPIED = ? AND BED_NUMBER = ?", new String[]{"1", bedNumber});
-        }
+//        }
 
         if (checkRecord.getCount() != 0) {
             Log.i(TAG, "CreateNewBooking: Can not book the whole room");
@@ -310,16 +310,18 @@ public class DataModule extends SQLiteOpenHelper {
                 contentValues.clear();
                 contentValues.put("IS_OCCUPIED", true);
                 contentValues.put(BOOKING_ID, bookingId);
+                db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
 
                 //Also book the rest of the beds in the room, if whole room is to be booked
                 //TODO: Validate the Bed Number
+                /*
                 if (isWholeRoom) {
                     String roomNo = bedNumber.split("\\.")[0];
                     db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER LIKE ?", new String[]{roomNo + "%"});
                 } else {
                     db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
                 }
-
+*/
                 opSuccess = true;
             } else {
                 Log.i(TAG, "CreateNewBooking: Insert failed");
@@ -383,16 +385,17 @@ public class DataModule extends SQLiteOpenHelper {
         if (c.getCount() == 0) {
             for (int floorNo = 100; floorNo <= 600; floorNo += 100) {
                 for (int roomNo = 1; roomNo <= 6; roomNo += 1) {
-                    for (Double bedNo = 1.0; bedNo <= 3; bedNo++) {
-                        Double bedNumber = Double.valueOf(floorNo + roomNo + bedNo / 10);
+//                    for (Double bedNo = 1.0; bedNo <= 3; bedNo++) {
+                        Double bedNumber = Double.valueOf(floorNo + roomNo);
 
                         addNewBed(bedNumber.toString(), "3000", "3000");
+//                    Double bedNumber = Double.valueOf(floorNo + roomNo + bedNo / 10);
 //                        ContentValues contentValues = new ContentValues();
 //                        contentValues.put(BED_NUMBER, bedNumber.toString());
 //                        contentValues.put(BED_RENT, "3000");
 //                        contentValues.put(BED_DEPOSIT, "3000");
 //                        db.insert(BEDS_TABLE_NAME, null, contentValues);
-                    }
+//                    }
                 }
             }
         }
@@ -420,10 +423,10 @@ public class DataModule extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Integer highestTenantId = 1;
 
-        Cursor highestIdCursor = db.rawQuery("select * from " + TENANT_TABLE_NAME + " ORDER BY TENANT_ID DESC LIMIT 1", null);
+        Cursor highestIdCursor = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " ORDER BY BOOKING_ID DESC LIMIT 1", null);
         if(highestIdCursor.getCount() != 0) {
             highestIdCursor.moveToNext();
-            highestTenantId = highestIdCursor.getInt(highestIdCursor.getColumnIndex(TENANT_ID));
+            highestTenantId = highestIdCursor.getInt(highestIdCursor.getColumnIndex(BOOKING_ID));
             highestTenantId += 1;
         }
 

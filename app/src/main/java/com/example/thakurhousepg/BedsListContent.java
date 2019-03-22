@@ -1,5 +1,6 @@
 package com.example.thakurhousepg;
 
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class BedsListContent {
      * An array of Beds.
      */
     public static List<BedsListItem> items = new ArrayList<BedsListItem>();
+    private static ArraySet<String> rooms = new ArraySet<String>();
 
     public static void create(DataModule dataModule) {
         if(items.isEmpty()) {
@@ -38,6 +40,19 @@ public class BedsListContent {
                 }
 
                 items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : bed.rentAmount));
+
+                /*
+                String roomNo = bed.bedNumber.split("\\.")[0];
+
+                if(booking != null && !booking.isWholeRoom) {
+                    items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : bed.rentAmount));
+                }
+                else {
+                    if (!rooms.contains(roomNo)) {
+                        rooms.add(roomNo);
+                        items.add(new BedsListItem(roomNo, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : bed.rentAmount));
+                    }
+                }*/
             }
         }
     }
