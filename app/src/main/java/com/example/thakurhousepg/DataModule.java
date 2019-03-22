@@ -1,6 +1,5 @@
 package com.example.thakurhousepg;
 
-import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,12 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 public class DataModule extends SQLiteOpenHelper {
 
@@ -23,7 +19,7 @@ public class DataModule extends SQLiteOpenHelper {
     private static final String MISC_TABLE_NAME = "misc_table";
 
     public static final String TENANT_TABLE_NAME = "tenant_table";
-    public static final String PENDING_PENALTY_TABLE_NAME = "penalty_table";
+    public static final String PENDING_AMOUNT_TABLE_NAME = "penalty_table";
     public static final String BEDS_TABLE_NAME = "beds_table";
     public static final String RECEIPTS_TABLE_NAME = "RECEIPTs_table";
     public static final String OVERDUE_TABLE_NAME = "overdue_table";
@@ -52,7 +48,7 @@ public class DataModule extends SQLiteOpenHelper {
     private static final String BED_DEPOSIT = "BED_DEPOSIT";
     private static final String BED_RENT = "BED_RENT";
 
-    private static final String OVERDUE_AMT = "OVERDUE_AMT";
+    private static final String PENDING_AMT = "PENDING_AMT";
 
     private static final String RECEIPT_ID = "RECEIPT_ID";
     private static final String RECEIPT_ONLINE_AMT = "RECEIPT_ONLINE_AMT";
@@ -65,6 +61,15 @@ public class DataModule extends SQLiteOpenHelper {
     private static final String TAG = "DataModule";
 
     public static final String KEY_ALL = "KEY_ALL";
+
+    private static DataModule _instance = null;
+    public static DataModule getInstance() {
+        if(_instance!=null) {
+//            _instance = new DataModule(MainActivity.class);
+        }
+
+        return _instance;
+    }
 
     public DataModule(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -104,7 +109,7 @@ public class DataModule extends SQLiteOpenHelper {
                 " BOOKING_DEPOSIT_AMT INTEGER NOT NULL," +
                 " BOOKING_DATE DATE NOT NULL," +
                 " BOOKING_IS_WHOLE_ROOM BOOLEAN NOT NULL," +
-                " BOOKING_CLOSE_DATE DATE," +
+                " BOOKING_CLOSE_DATE TEXT," +
                 " TENANT_ID INTEGER," +
                 " BED_NUMBER TEXT," +
                 " FOREIGN KEY (TENANT_ID) REFERENCES " + TENANT_TABLE_NAME + "(TENANT_ID)" +
@@ -116,7 +121,7 @@ public class DataModule extends SQLiteOpenHelper {
                 " (RECEIPT_ID INTEGER PRIMARY KEY," +
                 " RECEIPT_ONLINE_AMT INTEGER," +
                 " RECEIPT_CASH_AMT INTEGER," +
-                " RECEIPT_DATE DATE," +
+                " RECEIPT_DATE TEXT," +
                 " RECEIPT_IS_DEPOSIT BOOLEAN," +
                 " RECEIPT_PENALTY_AMT INTEGER," +
                 " RECEIPT_PENALTY_WAIVE_OFF_AMT INTEGER," +
@@ -128,8 +133,9 @@ public class DataModule extends SQLiteOpenHelper {
 
 
         //Create Penalty table
-        query = "create table IF NOT EXISTS " + PENDING_PENALTY_TABLE_NAME +
-                "(PENALTY_AMOUNT INTEGER," +
+        query = "create table IF NOT EXISTS " + PENDING_AMOUNT_TABLE_NAME +
+                "(PENDING_AMOUNT INTEGER," +
+                " IS_PENALTY INTEGER," +
                 " BOOKING_ID INTEGER," +
                 " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)" +
                 ")";
@@ -137,16 +143,19 @@ public class DataModule extends SQLiteOpenHelper {
     }
 
     public void insertSampleData() {
-        String date = new SimpleDateFormat("dd/mm/yyyy").format(new Date()).toString();
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString();
 
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
-        createNewBooking("000.1", newTenantId, "4000", "4000", date, false );
+        if(newTenantId != null)
+            createNewBooking("000.1", newTenantId, "4000", "4000", date, false );
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
-        createNewBooking("101.2", newTenantId, "4000", "4000", date, false );
+        if(newTenantId != null)
+            createNewBooking("101.2", newTenantId, "4000", "4000", date, false );
 
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
-        createNewBooking("103.1", newTenantId, "4000", "4000", date, true );
+        if(newTenantId != null)
+            createNewBooking("103.1", newTenantId, "4000", "4000", date, true );
     }
 
     @Override
@@ -154,7 +163,7 @@ public class DataModule extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + MASTER_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + TENANT_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + MISC_TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + PENDING_PENALTY_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + PENDING_AMOUNT_TABLE_NAME);
         onCreate(db);
 
     }
@@ -192,7 +201,7 @@ public class DataModule extends SQLiteOpenHelper {
         Boolean opSuccess = false;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        Integer highestTenantId = getNewTenantId();
+        Integer highestTenantId = createNewTenantId();
 
         contentValues.put(TENANT_ID, highestTenantId);
 
@@ -207,15 +216,16 @@ public class DataModule extends SQLiteOpenHelper {
         String query = "select * from " + TENANT_TABLE_NAME + " where TENANT_ID = " + highestTenantId;
         Cursor checkRecord = db.rawQuery(query, null);
 
-        if (checkRecord.getCount() != 0) {
-            db.update(TENANT_TABLE_NAME, contentValues, "TENANT_ID = ?", new String[]{highestTenantId.toString()});
-            opSuccess = true;
-        } else {
-
+        if (checkRecord.getCount() == 0) {
             long result = db.insert(TENANT_TABLE_NAME, null, contentValues);
             if (result != -1) {
                 opSuccess = true;
+            } else {
+                Log.i(TAG, "Cannot insert tenant");
             }
+
+        } else {
+            Log.i(TAG, "tenant already exists");
         }
 
         checkRecord.close();
@@ -249,7 +259,7 @@ public class DataModule extends SQLiteOpenHelper {
         return opSuccess;
     }
 
-    //TODO: Validation Needed urgently, Duplicate bookings can be made right now, messing the datas for rest of the activities
+    //TODO: Validation Needed urgently, Duplicate bookings can be made right now, messing the data for rest of the activities
     public boolean createNewBooking(String bedNumber, String tenantId, String rent, String deposit, String admissionDate, Boolean isWholeRoom) {
         Boolean opSuccess = false;
         SQLiteDatabase db = this.getWritableDatabase();
@@ -281,11 +291,12 @@ public class DataModule extends SQLiteOpenHelper {
         }
 
         if (checkRecord.getCount() != 0) {
+            Log.i(TAG, "CreateNewBooking: Can not book the whole room");
             checkRecord.close();
             return opSuccess;
         }
         // Check if there is already a Booking for this TENANT_ID
-        checkRecord = db.rawQuery("select BOOKING_ID from " + BOOKING_TABLE_NAME + " where TENANT_ID = ? AND BOOKING_CLOSE_DATE = NULL", new String[]{tenantId});
+        checkRecord = db.rawQuery("select BOOKING_ID from " + BOOKING_TABLE_NAME + " where TENANT_ID = ? AND BOOKING_CLOSE_DATE is null", new String[]{tenantId});
 //                " INNER JOIN " + TENANT_TABLE_NAME + " ON " + TENANT_TABLE_NAME + ".BOOKING_ID = " + BOOKING_TABLE_NAME + ".BOOKING_ID" +
 //                " where BOOKING_CLOSE_DATE = NULL ", null);
 //                " UNION select BOOKING_ID from " + TENANT_TABLE_NAME + " where TENANT_ID = ? AND TENANT_IS_CURRENT = ?", new String[]{tenantId, "1"});
@@ -293,22 +304,27 @@ public class DataModule extends SQLiteOpenHelper {
         if (checkRecord.getCount() == 0) {
             Integer bookingId = createNewBookingId();
             contentValues.put(BOOKING_ID, bookingId);
-            db.insert(BOOKING_TABLE_NAME, null, contentValues);
+            long result = db.insert(BOOKING_TABLE_NAME, null, contentValues);
 
-            contentValues.clear();
-            contentValues.put("IS_OCCUPIED", true);
-            contentValues.put(BOOKING_ID, bookingId);
+            if(result!= -1) {
+                contentValues.clear();
+                contentValues.put("IS_OCCUPIED", true);
+                contentValues.put(BOOKING_ID, bookingId);
 
-            //Also book the rest of the beds in the room, if whole room is to be booked
-            //TODO: Validate the Bed Number
-            if (isWholeRoom) {
-                String roomNo = bedNumber.split("\\.")[0];
-                db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER LIKE ?", new String[]{roomNo+"%"});
+                //Also book the rest of the beds in the room, if whole room is to be booked
+                //TODO: Validate the Bed Number
+                if (isWholeRoom) {
+                    String roomNo = bedNumber.split("\\.")[0];
+                    db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER LIKE ?", new String[]{roomNo + "%"});
+                } else {
+                    db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
+                }
+
+                opSuccess = true;
             } else {
-                db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
+                Log.i(TAG, "CreateNewBooking: Insert failed");
             }
 
-            opSuccess = true;
         }
 
         checkRecord.close();
@@ -384,7 +400,7 @@ public class DataModule extends SQLiteOpenHelper {
         c.close();
     }
 
-    private Integer getNewTenantId() {
+    private Integer createNewTenantId() {
         SQLiteDatabase db = this.getReadableDatabase();
         Integer highestTenantId = 1;
 
@@ -416,20 +432,6 @@ public class DataModule extends SQLiteOpenHelper {
         return highestTenantId;
     }
 
-    private Integer getNewOccupancyId() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Integer highestTenantId = 1;
-
-        Cursor highestIdCursor = db.rawQuery("select * from " + TENANT_TABLE_NAME + " ORDER BY TENANT_ID DESC LIMIT 1", null);
-        if(highestIdCursor.getCount() != 0) {
-            highestTenantId = highestIdCursor.getInt(highestIdCursor.getColumnIndex(TENANT_ID));
-            highestTenantId += 1;
-        }
-
-        highestIdCursor.close();
-
-        return highestTenantId;
-    }
 
     public ArrayList<Bed> getBedsList() {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -462,6 +464,7 @@ public class DataModule extends SQLiteOpenHelper {
                             cursor.getString(cursor.getColumnIndex(BED_NUMBER)),
                             cursor.getString(cursor.getColumnIndex(BOOKING_RENT_AMT)),
                             cursor.getString(cursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
+                            cursor.getString(cursor.getColumnIndex(BOOKING_DATE)),
                             cursor.getInt(cursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
                             cursor.getString(cursor.getColumnIndex(TENANT_ID))
                     ));
@@ -471,7 +474,26 @@ public class DataModule extends SQLiteOpenHelper {
         return bookings;
     }
 
-    public Booking getBooking(String forId) {
+    //TODO: Validation
+    public Bed getBedInfo(String forBedNumber) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Bed bed = null;
+        Cursor cursor = db.rawQuery("select * from " + BEDS_TABLE_NAME + " where BED_NUMBER = ?", new String[]{forBedNumber});
+
+        if (cursor.moveToNext()) {
+            bed = new Bed(
+                    cursor.getString(cursor.getColumnIndex(BED_NUMBER)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                    cursor.getString(cursor.getColumnIndex(BED_RENT)),
+                    cursor.getString(cursor.getColumnIndex(BED_DEPOSIT)),
+                    cursor.getInt(cursor.getColumnIndex("IS_OCCUPIED")) > 0
+            );
+        }
+
+        return bed;
+    }
+
+    public Booking getBookingInfo(String forId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Booking booking = null;
         Cursor cursor = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " where BOOKING_ID = ?", new String[]{forId});
@@ -481,6 +503,7 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(BED_NUMBER)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_RENT_AMT)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_DATE)),
                     cursor.getInt(cursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
                     cursor.getString(cursor.getColumnIndex(TENANT_ID))
             );
@@ -526,6 +549,43 @@ public class DataModule extends SQLiteOpenHelper {
 
         cursor.close();
         return String.valueOf(totalRent);
+    }
+
+    //TODO: Finish the Functions
+    public String getOutstandingRentForBooking(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Integer outstandingRent = 0;
+
+        //First check if there is any receipt for the booking_id in current month
+        Cursor cursor = db.rawQuery("select * from " + RECEIPTS_TABLE_NAME + " WHERE BOOKING_ID = ? AND date(RECEIPT_DATE) >= date('now', 'start of month')", new String[]{id});
+        if (cursor.getCount() == 0) {
+            // No receipts means the rent is due.
+            cursor = db.rawQuery("select BOOKING_RENT_AMT from " + BOOKING_TABLE_NAME + " WHERE BOOKING_ID = ?", new String[]{id});
+            if (cursor.moveToNext())
+                outstandingRent += cursor.getInt(cursor.getColumnIndex(BOOKING_RENT_AMT));
+
+            //Now check if there are any outstandings from previous month
+            cursor = db.rawQuery("select PENDING_AMT from " + PENDING_AMOUNT_TABLE_NAME + " WHERE BOOKING_ID = ?", new String[]{id});
+            while (cursor.moveToNext()) {
+                outstandingRent += cursor.getInt(cursor.getColumnIndex(PENDING_AMT));
+            }
+        }
+
+
+        return String.valueOf(outstandingRent);
+    }
+
+    public String getTotalDuesForBooking(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from " + RECEIPTS_TABLE_NAME + " WHERE BOOKING_ID = ?", new String[]{id});
+        Integer outstandingRent = 0;
+
+        if (cursor.moveToNext()) {
+            outstandingRent += cursor.getInt(cursor.getColumnIndex(BOOKING_RENT_AMT));
+            //cursor.getS
+        }
+
+        return String.valueOf(outstandingRent);
     }
 
     private int getNewReceiptId() {
@@ -615,14 +675,16 @@ public class DataModule extends SQLiteOpenHelper {
         public final String bedNumber;
         public final String rentAmount;
         public final String depositAmount;
+        public final String bookingDate;
         public final Boolean isWholeRoom;
         public final String tenantId;
 
-        public Booking(String bookingId, String bedNumber, String rentAmount, String depositAmount, Boolean isWholeRoom, String tenantId) {
+        public Booking(String bookingId, String bedNumber, String rentAmount, String depositAmount, String bookingDate, Boolean isWholeRoom, String tenantId) {
             this.bedNumber = bedNumber;
             this.id = bookingId;
             this.rentAmount = rentAmount;
             this.depositAmount = depositAmount;
+            this.bookingDate = bookingDate;
             this.isWholeRoom = isWholeRoom;
             this.tenantId = tenantId;
         }

@@ -2,8 +2,6 @@ package com.example.thakurhousepg;
 
 import android.util.Log;
 
-import com.example.thakurhousepg.DataModule;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +33,7 @@ public class BedsListContent {
                 DataModule.Tenant tenant = null;
                 DataModule.Booking booking = null;
                 if (bed.bookingId != null) {
-                    booking = dataModule.getBooking(bed.bookingId);
+                    booking = dataModule.getBookingInfo(bed.bookingId);
                     tenant = dataModule.getTenantInfoForBooking(bed.bookingId);
                 }
 
@@ -44,23 +42,32 @@ public class BedsListContent {
         }
     }
 
+    public static void update(String bedNumber, String tenantName, String rent){
+        for (BedsListItem item: items) {
+            if(item.bedNumber == bedNumber) {
+                item.tenantName = tenantName;
+                item.rentPayble = rent;
+            }
+        }
+    }
+
     /**
      * Represents a single Item in the Beds List.
      */
     public static class BedsListItem {
-        public final String bedNumber;
-        public final String tenantName;
-        public final String rentPending;
+        public String bedNumber;
+        public String tenantName;
+        public String rentPayble;
 
         public BedsListItem(String bedNumber, String tenantName, String rentPending) {
             this.bedNumber = bedNumber;
             this.tenantName = tenantName;
-            this.rentPending = rentPending;
+            this.rentPayble = rentPending;
         }
 
         @Override
         public String toString() {
-            return bedNumber + " " + tenantName + " " +rentPending;
+            return bedNumber + " " + tenantName + " " + rentPayble;
         }
     }
 }

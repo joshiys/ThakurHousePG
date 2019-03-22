@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.example.thakurhousepg.BedsListFragment.OnBedsListInteractionListener;
 import com.example.thakurhousepg.BedsListContent.BedsListItem;
@@ -39,7 +38,7 @@ public class BedsListRecyclerViewAdapter extends RecyclerView.Adapter<BedsListRe
         holder.mItem = mValues.get(position);
         holder.mBedNumber.setText(mValues.get(position).bedNumber);
         holder.mTenantName.setText(mValues.get(position).tenantName);
-        holder.mRentView.setText(mValues.get(position).rentPending);
+        holder.mRentView.setText(mValues.get(position).rentPayble);
 
         holder.mBedNumber.setOnClickListener(new View.OnClickListener() {
             @Override
