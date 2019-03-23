@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +28,7 @@ public class BedsListFragment extends Fragment {
     private OnBedsListInteractionListener mListener;
     private DataModule datamodule;
     private RecyclerView recyclerView;
-    private BedsListRecyclerViewAdapter mAdapter;
+    private static BedsListRecyclerViewAdapter mAdapter;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -60,6 +61,7 @@ public class BedsListFragment extends Fragment {
 
     @Override
     public void onResume() {
+        Log.e("TAGG", "BedListFragment.....onResume()");
         super.onResume();
         mAdapter.notifyDataSetChanged();
     }
@@ -105,5 +107,11 @@ public class BedsListFragment extends Fragment {
         void onBedItemClick(BedsListItem item);
         void onTenantClick(BedsListItem item);
         void onNewBookingClick(BedsListItem item);
+    }
+
+    public static void refresh(){
+        if(mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 }

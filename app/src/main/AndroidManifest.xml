@@ -10,7 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".BookingScreenActivity"></activity>
+
         <activity android:name=".BedViewActivity" />
+
         <activity android:name=".OccupancyAndBookingActivity" />
         <activity
             android:name=".ReceiptActivity"
