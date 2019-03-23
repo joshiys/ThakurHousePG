@@ -26,7 +26,8 @@ public class BedsListFragment extends Fragment {
     private int mColumnCount = 3;
     private OnBedsListInteractionListener mListener;
     private DataModule datamodule;
-
+    private RecyclerView recyclerView;
+    private BedsListRecyclerViewAdapter mAdapter;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -60,6 +61,7 @@ public class BedsListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -70,9 +72,10 @@ public class BedsListFragment extends Fragment {
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView = (RecyclerView) view;
+            mAdapter = new BedsListRecyclerViewAdapter(BedsListContent.items, mListener);
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new BedsListRecyclerViewAdapter(BedsListContent.items, mListener));
+            recyclerView.setAdapter(mAdapter);
             recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
         }
         return view;
