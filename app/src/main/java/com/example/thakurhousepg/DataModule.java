@@ -172,14 +172,70 @@ public class DataModule extends SQLiteOpenHelper {
 
     /* Should ONLY be called on the first launch of the app every month.
      * This function DOES NOT make date validations. MUST be done by the caller. */
-    public void createPendingEntries() {
+    public boolean createPendingEntries() {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
+        boolean opSuccess = false;
 
         //TODO: Write the query to get all current bookings and calculate the expected rent for them
-        String query = "select * from " + BOOKING_TABLE_NAME + " where BOOKING_CLOSE_DATE is null";
-        Cursor checkRecord = db.rawQuery(query, null);
+        ArrayList<Booking> bookings = getCurrentBookings();
 
+        for (Booking booking: bookings) {
+
+            contentValues.put("PENDING_AMOUNT", booking.rentAmount);
+            contentValues.put("IS_PENALTY", false);
+            contentValues.put(BOOKING_ID, booking.id);
+
+            if(db.insert(PENDING_AMOUNT_TABLE_NAME, null, contentValues) != -1) {
+                opSuccess = true;
+            }
+        }
+
+        return opSuccess;
+    }
+
+    public int getTotalPendingAmountForBooking(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int totalPendingAmount = 0;
+        String query = "select * from " + PENDING_AMOUNT_TABLE_NAME + " where BOOKING_ID = " + id;
+        Cursor cursor = db.rawQuery(query, null);
+        while (cursor.moveToNext()) {
+            totalPendingAmount += cursor.getInt(cursor.getColumnIndex("PENDING_AMOUNT"));
+        }
+
+        cursor.close();
+        return totalPendingAmount;
+    }
+
+    public ArrayList<Pending> getPendingEntriesForTenant(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ArrayList<Pending> pendingEntries = new ArrayList<Pending>();
+        Cursor cursor = db.rawQuery("select * from " + PENDING_AMOUNT_TABLE_NAME + " WHERE TENANT_ID = ?", new String[]{id});
+
+        while (cursor.moveToNext()) {
+            pendingEntries.add(new Pending(
+                    cursor.getInt(cursor.getColumnIndex("PENDING_AMOUNT")),
+                    cursor.getString(cursor.getColumnIndex("BOOKING_ID")),
+                    cursor.getString(cursor.getColumnIndex("TENANT_ID")),
+                    cursor.getInt(cursor.getColumnIndex("IS_PENALTY")) > 0
+            ));
+        }
+
+        cursor.close();
+        return pendingEntries;
+    }
+
+    public ArrayList<Pending> getPendingEntriesForBooking(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ArrayList<Pending> pendingEntries = null;
+        Cursor cursor = db.rawQuery("select TENANT_ID from " + PENDING_AMOUNT_TABLE_NAME + " WHERE BOOKING_ID = ?", new String[]{id});
+        if (cursor.moveToNext()) {
+            pendingEntries = getPendingEntriesForTenant(cursor.getString(0));
+        }
+
+        cursor.close();
+        return pendingEntries;
     }
 
     public boolean addNewBed(String bedNumber, String rent, String deposit) {
@@ -752,6 +808,21 @@ public class DataModule extends SQLiteOpenHelper {
     }
 
     public static class Payment {
+
+    }
+
+    public static class Pending {
+        public final int pendingAmt;
+        public final String bookingId;
+        public final String tenantId;
+        public final boolean isPenalty;
+
+        public Pending(int pendingAmt, String bookingId, String tenantId, boolean isPenalty) {
+            this.pendingAmt = pendingAmt;
+            this.bookingId = bookingId;
+            this.tenantId = tenantId;
+            this.isPenalty = isPenalty;
+        }
 
     }
 }
