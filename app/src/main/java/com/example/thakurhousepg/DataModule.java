@@ -99,7 +99,7 @@ public class DataModule extends SQLiteOpenHelper {
                 " TENANT_MOBILE_2 TEXT," +
                 " TENANT_ADDRESS TEXT," +
                 " TENANT_IS_CURRENT BOOLEAN," +
-                " UNIQUE (TENANT_NAME, TENANT_EMAIL, TENANT_MOBILE) ON CONFLICT ABORT" +
+                " UNIQUE (TENANT_NAME, TENANT_MOBILE) ON CONFLICT ABORT" +
                 ")";
         db.execSQL(query);
 
@@ -137,7 +137,9 @@ public class DataModule extends SQLiteOpenHelper {
                 "(PENDING_AMOUNT INTEGER," +
                 " IS_PENALTY INTEGER," +
                 " BOOKING_ID INTEGER," +
-                " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)" +
+                " TENANT_ID INTEGER," +
+                " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)," +
+                " FOREIGN KEY (TENANT_ID) REFERENCES " + TENANT_TABLE_NAME + "(BOOKING_ID)" +
                 ")";
         db.execSQL(query);
     }
@@ -168,6 +170,17 @@ public class DataModule extends SQLiteOpenHelper {
 
     }
 
+    /* Should ONLY be called on the first launch of the app every month.
+     * This function DOES NOT make date validations. MUST be done by the caller. */
+    public void createPendingEntries() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        //TODO: Write the query to get all current bookings and calculate the expected rent for them
+        String query = "select * from " + BOOKING_TABLE_NAME + " where BOOKING_CLOSE_DATE is null";
+        Cursor checkRecord = db.rawQuery(query, null);
+
+    }
 
     public boolean addNewBed(String bedNumber, String rent, String deposit) {
         Boolean opSuccess = false;
@@ -185,7 +198,10 @@ public class DataModule extends SQLiteOpenHelper {
         if (checkRecord.getCount() == 0) {
             long result = db.insert(BEDS_TABLE_NAME, null, contentValues);
             if (result != -1) {
+                Log.i(TAG, "Successfully added new Bed. Number: " + bedNumber);
                 opSuccess = true;
+            } else {
+                Log.i(TAG, "Can not add new Bed Number: " + bedNumber);
             }
         }
 
@@ -333,28 +349,25 @@ public class DataModule extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
 
         contentValues.put(BOOKING_CLOSE_DATE, closeingDate);
-        Cursor checkRecord = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " where " + BOOKING_ID + " = " + id, null);
+        Cursor checkRecord = db.rawQuery("select TENANT_ID from " + BOOKING_TABLE_NAME + " where " + BOOKING_ID + " = " + id, null);
         if (checkRecord.getCount() != 0) {
-            Boolean isWholeRoom = checkRecord.getInt(checkRecord.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0;
             db.update(BOOKING_TABLE_NAME, contentValues, "BOOKING_ID = ?", new String[]{id});
 
+            checkRecord.moveToNext();
+            String tenantId = checkRecord.getString(checkRecord.getColumnIndex(TENANT_ID));
             contentValues.clear();
-            contentValues.put("IS_CURRENT", false);
-            db.update(TENANT_TABLE_NAME, contentValues, "BOOKING_ID = ?", new String[]{id});
+            contentValues.put("TENANT_IS_CURRENT", false);
+            db.update(TENANT_TABLE_NAME, contentValues, "TENANT_ID = ?", new String[]{tenantId});
 
             contentValues.clear();
             contentValues.putNull(BOOKING_ID);
             contentValues.put("IS_OCCUPIED", false);
 
             checkRecord = db.rawQuery("select BED_NUMBER from " + BEDS_TABLE_NAME + " where BOOKING_ID = ?", new String[]{id});
-            String bedNumber = checkRecord.getString(checkRecord.getColumnIndex(BED_NUMBER));
-            if(isWholeRoom) {
-                String roomNo = bedNumber.split(".")[0];
-                db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER LIKE ?%", new String[]{roomNo});
-            } else {
+            if(checkRecord.moveToNext()) {
+                String bedNumber = checkRecord.getString(checkRecord.getColumnIndex(BED_NUMBER));
                 db.update(BEDS_TABLE_NAME, contentValues, "BED_NUMBER = ?", new String[]{bedNumber});
             }
-//            db.delete(OCCUPANCY_TABLE_NAME, "where BOOKING_ID = ?", new String[]{id});
 
             if(isRentPending) {
                 //TODO: Add a entry in the Overdue table
@@ -432,7 +445,7 @@ public class DataModule extends SQLiteOpenHelper {
     public ArrayList<Bed> getBedsList() {
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<Bed> beds = new ArrayList<Bed>();
-        Cursor cursor = db.rawQuery("select * from " + BEDS_TABLE_NAME, null);
+        Cursor cursor = db.rawQuery("select * from " + BEDS_TABLE_NAME + " ORDER BY BED_NUMBER ASC", null);
 
         if(cursor.getCount() != 0) {
             while (cursor.moveToNext()) {
@@ -627,19 +640,15 @@ public class DataModule extends SQLiteOpenHelper {
 //        return highestReceiptId;
     }
 
-/*    BED_NUMBER TEXT PRIMARY KEY," +
-            " BED_RENT INTEGER NOT NULL," +
-            " BED_DEPOSIT INTEGER NOT NULL," +
-            " IS_OCCUPIED*/
+
     public void splitRoom(String roomNumber, int numRooms, String rent, String deposit) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues contentValues = new ContentValues();
-        String rentAmt = String.valueOf(Double.valueOf(rent) / numRooms);
-        String depositAmt = String.valueOf(Double.valueOf(deposit) / numRooms);
+
 
         roomNumber = roomNumber.split("\\.")[0];
         for (int i = 1; i< numRooms; i++) {
-            addNewBed(roomNumber + "." + String.valueOf(i), rentAmt, depositAmt);
+            addNewBed(roomNumber + "." + String.valueOf(i), rent, deposit);
         }
     }
 

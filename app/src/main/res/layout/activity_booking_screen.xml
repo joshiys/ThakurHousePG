@@ -152,6 +152,7 @@
         android:enabled="false"
         android:inputType="numberDecimal"
         android:textAlignment="center"
+        android:textColor="@android:color/white"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -105,7 +105,11 @@ public class BedViewActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(BedViewActivity.this, "Closing the Booking", Toast.LENGTH_SHORT).show();
 
-                    dataModule.closeBooking(bedInfo.bookingId, new SimpleDateFormat("dd/mm/yyyy").format(new Date()).toString(), false, false);
+                    Boolean result = dataModule.closeBooking(bedInfo.bookingId, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), false, false);
+                    if(result) {
+                        BedsListContent.refresh(dataModule);
+                    }
+                    finish();
                 }
             }
         });

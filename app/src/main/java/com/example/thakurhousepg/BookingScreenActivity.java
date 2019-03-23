@@ -57,7 +57,6 @@ public class BookingScreenActivity extends AppCompatActivity {
         bedNumber.setText(bundle.getString("BED_NUMBER"));
 
         roomSplitSeeker = findViewById(R.id.booking_split_room_seek_bar);
-        roomSplitSeeker.setProgress(0);
 
         bookButton = findViewById(R.id.booking_book_button);
         bookButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -73,10 +72,12 @@ public class BookingScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 int numRooms = roomSplitSeeker.getProgress();
-                if(numRooms > 0) {
+                if(numRooms > 1) {
                     dataModule.splitRoom(bedNumber.getText().toString(), numRooms, rentAmount.getText().toString(), depositAmount.getText().toString());
                 }
+
                 String tenantId = dataModule.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(), "", tenantEmail.getText().toString(), tenantAddress.getText().toString());
+
                 if(tenantId != null) {
                     Boolean result = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
                     Log.i(TAG, "result is " + String.valueOf(result));
