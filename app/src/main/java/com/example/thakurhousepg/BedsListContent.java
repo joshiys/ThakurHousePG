@@ -39,7 +39,9 @@ public class BedsListContent {
                     tenant = dataModule.getTenantInfoForBooking(bed.bookingId);
                 }
 
-                items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : bed.rentAmount));
+                if(OccupancyAndBookingActivity.isRoomForSelectedTab(Integer.valueOf(bed.bedNumber.split("\\.")[0]))) {
+                    items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : bed.rentAmount));
+                }
 
                 /*
                 String roomNo = bed.bedNumber.split("\\.")[0];

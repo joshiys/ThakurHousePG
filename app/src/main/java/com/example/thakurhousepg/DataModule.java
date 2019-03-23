@@ -389,8 +389,21 @@ public class DataModule extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor c = db.rawQuery("select BED_NUMBER from " + BEDS_TABLE_NAME + " LIMIT 1", null);
         if (c.getCount() == 0) {
+            /* For Ground Floor */
+            addNewBed("000.1", "4250", "4250");
+            addNewBed("000.2", "4250", "4250");
+            addNewBed("000.3", "4250", "4250");
+            addNewBed("000.4", "4250", "4250");
+            addNewBed("000.5", "4250", "4250");
+            addNewBed("000.6", "4250", "4250");
+
             for (int floorNo = 100; floorNo <= 600; floorNo += 100) {
-                for (int roomNo = 1; roomNo <= 6; roomNo += 1) {
+                int numOfRooms = 7;
+
+                if(floorNo >= 200) {
+                    numOfRooms = 8;
+                }
+                for (int roomNo = 1; roomNo <= numOfRooms; roomNo += 1) {
 
 //                    for (Double bedNo = 1.0; bedNo <= 3.0; bedNo++) {
                         Double bedNumber = Double.valueOf(floorNo + roomNo);// + bedNo / 10);
