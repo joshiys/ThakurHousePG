@@ -34,13 +34,16 @@ public class BedsListContent {
             for (DataModule.Bed bed : beds) {
                 DataModule.Tenant tenant = null;
                 DataModule.Booking booking = null;
+                String pendingAmount = bed.rentAmount;
+
                 if (bed.bookingId != null) {
                     booking = dataModule.getBookingInfo(bed.bookingId);
                     tenant = dataModule.getTenantInfoForBooking(bed.bookingId);
+                    pendingAmount = String.valueOf(dataModule.getTotalPendingAmountForBooking(booking.id));
                 }
 
                 if(OccupancyAndBookingActivity.isRoomForSelectedTab(Integer.valueOf(bed.bedNumber.split("\\.")[0]))) {
-                    items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : bed.rentAmount));
+                    items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : pendingAmount));
                 }
 
                 /*
@@ -64,7 +67,7 @@ public class BedsListContent {
         create(dataModule);
     }
 
-        public static void update(String bedNumber, String tenantName, String rent){
+    public static void update(String bedNumber, String tenantName, String rent){
         for (BedsListItem item: items) {
             if(item.bedNumber == bedNumber) {
                 item.tenantName = tenantName;
@@ -80,11 +83,13 @@ public class BedsListContent {
         public String bedNumber;
         public String tenantName;
         public String rentPayble;
+        public boolean isPending;
 
-        public BedsListItem(String bedNumber, String tenantName, String rentPending) {
+        public BedsListItem(String bedNumber, String tenantName, String rentPayble) {
             this.bedNumber = bedNumber;
             this.tenantName = tenantName;
-            this.rentPayble = rentPending;
+            this.rentPayble = rentPayble;
+            this.isPending = false;
         }
 
         @Override
