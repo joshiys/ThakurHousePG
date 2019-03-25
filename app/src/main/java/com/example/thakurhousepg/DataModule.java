@@ -575,7 +575,7 @@ public class DataModule extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Booking booking = null;
         Cursor cursor = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " where BOOKING_ID = ?", new String[]{forId});
-        if (cursor != null && cursor.moveToNext()) {
+        if (cursor.moveToNext()) {
             booking = new Booking(
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                     cursor.getString(cursor.getColumnIndex(BED_NUMBER)),

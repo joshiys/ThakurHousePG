@@ -57,7 +57,6 @@ public class BedsListRecyclerViewAdapter extends RecyclerView.Adapter<BedsListRe
             @Override
             public void onClick(View v) {
                 //TODO: Do we need to do something here?
-                mListener.onReceiptClick(holder.mItem);
             }
         });
     }
