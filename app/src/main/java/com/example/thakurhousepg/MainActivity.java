@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(receiptIntent);
                 break;
             case R.id.occupancy_button:
-                Toast.makeText(MainActivity.this, "Launching Occupancy & Booking", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Launching Occupancy & Booking", Toast.LENGTH_SHORT).show();
                 Intent occupancyIntent = new Intent(MainActivity.this, OccupancyAndBookingActivity.class);
 //                adminIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
                 startActivity(occupancyIntent);

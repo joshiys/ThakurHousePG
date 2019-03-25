@@ -76,8 +76,18 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     public void onTenantClick(BedsListContent.BedsListItem item) {
         Toast.makeText(OccupancyAndBookingActivity.this, "Clicked Tenant "+ item.tenantName, Toast.LENGTH_SHORT).show();
     }
-    public void onNewBookingClick(BedsListContent.BedsListItem item){
-        Toast.makeText(OccupancyAndBookingActivity.this, "Clicked New Booking ", Toast.LENGTH_SHORT).show();
+    public void onReceiptClick(BedsListContent.BedsListItem item){
+        //Check if Booking is already done
+        DataModule.Bed bed = datamodule.getBedInfo(item.bedNumber);
+        if(bed != null && bed.bookingId != null) {
+            Toast.makeText(OccupancyAndBookingActivity.this, "Clicked Receipt", Toast.LENGTH_SHORT).show();
+            Intent receiptViewIntent = new Intent(OccupancyAndBookingActivity.this, ReceiptActivity.class);
+            receiptViewIntent.putExtra("BED_NUMBER", item.bedNumber);
+            startActivity(receiptViewIntent);
+        }else {
+            Toast.makeText(OccupancyAndBookingActivity.this, "Room Not Booked Yet", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     /* SAHIRE Make this function generic. Use tab infor in switch case */

@@ -106,7 +106,8 @@ public class BedsListFragment extends Fragment {
         //void onListFragmentInteraction
         void onBedItemClick(BedsListItem item);
         void onTenantClick(BedsListItem item);
-        void onNewBookingClick(BedsListItem item);
+        void onReceiptClick(BedsListItem item);
+//        void onNewBookingClick(BedsListItem item);
     }
 
     public static void refresh(){
