@@ -29,6 +29,9 @@ public class BedsListFragment extends Fragment {
     private DataModule datamodule;
     private RecyclerView recyclerView;
     private static BedsListRecyclerViewAdapter mAdapter;
+
+    private static final String TAG = "BedsListFragment";
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -61,7 +64,7 @@ public class BedsListFragment extends Fragment {
 
     @Override
     public void onResume() {
-        Log.e("TAGG", "BedListFragment.....onResume()");
+        Log.e(TAG, "onResume()");
         super.onResume();
         mAdapter.notifyDataSetChanged();
     }
@@ -106,7 +109,7 @@ public class BedsListFragment extends Fragment {
         //void onListFragmentInteraction
         void onBedItemClick(BedsListItem item);
         void onTenantClick(BedsListItem item);
-        void onNewBookingClick(BedsListItem item);
+        void onRentClick(BedsListItem item);
     }
 
     public static void refresh(){

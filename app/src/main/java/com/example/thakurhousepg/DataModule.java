@@ -48,7 +48,9 @@ public class DataModule extends SQLiteOpenHelper {
     private static final String BED_DEPOSIT = "BED_DEPOSIT";
     private static final String BED_RENT = "BED_RENT";
 
-    private static final String PENDING_AMT = "PENDING_AMT";
+    private static final String PENDING_AMOUNT = "PENDING_AMOUNT";
+    private static final String PENDING_IS_DEPOSIT = "PENDING_IS_DEPOSIT";
+    private static final String PENDING_IS_PENALTY = "PENDING_IS_PENALTY";
 
     private static final String RECEIPT_ID = "RECEIPT_ID";
     private static final String RECEIPT_ONLINE_AMT = "RECEIPT_ONLINE_AMT";
@@ -135,7 +137,8 @@ public class DataModule extends SQLiteOpenHelper {
         //Create Penalty table
         query = "create table IF NOT EXISTS " + PENDING_AMOUNT_TABLE_NAME +
                 "(PENDING_AMOUNT INTEGER," +
-                " IS_PENALTY INTEGER," +
+                " PENDING_IS_PENALTY BOOLEAN," +
+                " PENDING_IS_DEPOSIT BOOLEAN," +
                 " BOOKING_ID INTEGER," +
                 " TENANT_ID INTEGER," +
                 " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)," +
@@ -172,40 +175,83 @@ public class DataModule extends SQLiteOpenHelper {
 
     /* Should ONLY be called on the first launch of the app every month.
      * This function DOES NOT make date validations. MUST be done by the caller. */
-    public boolean createPendingEntries() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
+    public boolean createMonthlyPendingEntries() {
         boolean opSuccess = false;
 
-        //TODO: Write the query to get all current bookings and calculate the expected rent for them
         ArrayList<Booking> bookings = getCurrentBookings();
 
         for (Booking booking: bookings) {
-
-            contentValues.put("PENDING_AMOUNT", booking.rentAmount);
-            contentValues.put("IS_PENALTY", false);
-            contentValues.put(BOOKING_ID, booking.id);
-
-            if(db.insert(PENDING_AMOUNT_TABLE_NAME, null, contentValues) != -1) {
-                opSuccess = true;
-            }
+            opSuccess = createPendingEntryForBooking(booking.id, 1, booking.rentAmount);
         }
 
         return opSuccess;
     }
 
-    public int getTotalPendingAmountForBooking(String id) {
+    public boolean createPendingEntryForBooking(String id, int type, String amount) {
         SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        boolean opSuccess = false;
+
+        contentValues.put(PENDING_AMOUNT, amount);
+        contentValues.put(BOOKING_ID, id);
+        contentValues.put(PENDING_IS_DEPOSIT, (type == 2));
+        contentValues.put(PENDING_IS_PENALTY, (type == 3));
+
+        if(db.insert(PENDING_AMOUNT_TABLE_NAME, null, contentValues) != -1) {
+            opSuccess = true;
+        }
+
+        return opSuccess;
+    }
+
+    public void updatePendingEntryForBooking(String id, int type, String amount) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(BOOKING_ID, id);
+        String appendWhereClause = " and ";
+
+        switch(type) {
+            case 1:
+                appendWhereClause += "PENDING_IS_DEPOSIT = 0 and PENDING_IS_PENALTY = 0";
+                break;
+            case 2:
+                appendWhereClause += "PENDING_IS_DEPOSIT = 1 and PENDING_IS_PENALTY = 0";
+                break;
+            case 3:
+                appendWhereClause += "PENDING_IS_PENALTY = 1 and PENDING_IS_DEPOSIT = 0";
+        }
+
+        String query = "select * from " + PENDING_AMOUNT_TABLE_NAME + " where BOOKING_ID = " + id + appendWhereClause;
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToNext()) {
+            int totalPendingAmount = cursor.getInt(cursor.getColumnIndex("PENDING_AMOUNT"));
+            totalPendingAmount -= Integer.parseInt(amount);
+
+            if (totalPendingAmount <= 0) {
+                db.delete(PENDING_AMOUNT_TABLE_NAME, BOOKING_ID + " = ?" + appendWhereClause, new String[]{id});
+            } else {
+                contentValues.put(PENDING_AMOUNT, totalPendingAmount);
+                db.update(PENDING_AMOUNT_TABLE_NAME, contentValues, BOOKING_ID + " = ?" + appendWhereClause, new String[]{id});
+            }
+        }
+
+        cursor.close();
+    }
+
+    public int getTotalPendingAmountForBooking(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
         int totalPendingAmount = 0;
         String query = "select * from " + PENDING_AMOUNT_TABLE_NAME + " where BOOKING_ID = " + id;
         Cursor cursor = db.rawQuery(query, null);
         while (cursor.moveToNext()) {
-            totalPendingAmount += cursor.getInt(cursor.getColumnIndex("PENDING_AMOUNT"));
+            totalPendingAmount += cursor.getInt(cursor.getColumnIndex(PENDING_AMOUNT));
         }
 
         cursor.close();
         return totalPendingAmount;
     }
+
 
     public ArrayList<Pending> getPendingEntriesForTenant(String id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -218,7 +264,7 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndex("PENDING_AMOUNT")),
                     cursor.getString(cursor.getColumnIndex("BOOKING_ID")),
                     cursor.getString(cursor.getColumnIndex("TENANT_ID")),
-                    cursor.getInt(cursor.getColumnIndex("IS_PENALTY")) > 0
+                    cursor.getInt(cursor.getColumnIndex("PENDING_IS_PENALTY")) > 0
             ));
         }
 
@@ -645,7 +691,7 @@ public class DataModule extends SQLiteOpenHelper {
             //Now check if there are any outstandings from previous month
             cursor = db.rawQuery("select PENDING_AMT from " + PENDING_AMOUNT_TABLE_NAME + " WHERE BOOKING_ID = ?", new String[]{id});
             while (cursor.moveToNext()) {
-                outstandingRent += cursor.getInt(cursor.getColumnIndex(PENDING_AMT));
+                outstandingRent += cursor.getInt(cursor.getColumnIndex(PENDING_AMOUNT));
             }
         }
 
@@ -673,7 +719,7 @@ public class DataModule extends SQLiteOpenHelper {
         Cursor highestIdCursor = db.rawQuery("select * from " + RECEIPTS_TABLE_NAME + " ORDER BY RECEIPT_ID DESC LIMIT 1", null);
         if(highestIdCursor.getCount() != 0) {
             highestIdCursor.moveToNext();
-            highestReceiptId = highestIdCursor.getInt(highestIdCursor.getColumnIndex(TENANT_ID));
+            highestReceiptId = highestIdCursor.getInt(highestIdCursor.getColumnIndex(RECEIPT_ID));
             highestReceiptId += 1;
         }
 
@@ -682,21 +728,20 @@ public class DataModule extends SQLiteOpenHelper {
         return highestReceiptId;
     }
     //TODO: Validation
-    public void createReceipt(int type, String bookingId, String onlineAmount, String cashAmount, String penaltyAmount) {
+    public void createReceipt(int type, String bookingId, String onlineAmount, String cashAmount) {
         SQLiteDatabase db = this.getReadableDatabase();
         Integer highestReceiptId = getNewReceiptId();
 
-        Log.i(TAG, "highestReceiptId: ?, current date: "+ new SimpleDateFormat("dd/mm/yyyy").format(new Date()).toString());
+        Log.i(TAG, "highestReceiptId: ?, current date: "+ new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
 
         ContentValues contentValues = new ContentValues();
-        Integer totalPayment = Integer.valueOf(onlineAmount) + Integer.valueOf(cashAmount) - Integer.valueOf(penaltyAmount);
+        Integer totalPayment = Integer.valueOf(onlineAmount) + Integer.valueOf(cashAmount);
 
         contentValues.put(RECEIPT_ID, highestReceiptId);
         contentValues.put(BOOKING_ID, bookingId);
         contentValues.put(RECEIPT_CASH_AMT, cashAmount);
         contentValues.put(RECEIPT_ONLINE_AMT, onlineAmount);
-        contentValues.put(RECEIPT_PENALTY_AMT, penaltyAmount);
-        contentValues.put(RECEIPT_DATE, new SimpleDateFormat("dd/mm/yyyy").format(new Date()).toString());
+        contentValues.put(RECEIPT_DATE, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
         if(type == 2)
             contentValues.put(RECEIPT_IS_DEPOSIT, true);
         else

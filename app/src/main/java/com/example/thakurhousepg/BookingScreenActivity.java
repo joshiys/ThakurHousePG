@@ -1,6 +1,9 @@
 package com.example.thakurhousepg;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -82,14 +85,38 @@ public class BookingScreenActivity extends AppCompatActivity {
                     Boolean result = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
                     Log.i(TAG, "result is " + String.valueOf(result));
                     if(result) {
-                        Toast.makeText(BookingScreenActivity.this,"Created new Booking successfully", Toast.LENGTH_SHORT).show();
+                        //TODO: Add Deposit and Rent entries to Pending table
                         BedsListContent.refresh(dataModule);
-//                        BedsListContent.update(bedNumber.getText().toString(), tenantName.getText().toString(), rentAmount.getText().toString());
-                        finish();
+                        new AlertDialog.Builder(BookingScreenActivity.this)
+                                .setTitle("Created new Booking successfully")
+                                .setMessage("Do you want to pay the deposit for this booking?")
+
+                                // Specifying a listener allows you to take an action before dismissing the dialog.
+                                // The dialog is automatically dismissed when a dialog button is clicked.
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent receiptIntent = new Intent(BookingScreenActivity.this, ReceiptActivity.class);
+                                        receiptIntent.putExtra("SECTION", "Deposit");
+                                        receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
+                                        receiptIntent.putExtra("AMOUNT", depositAmount .getText().toString());
+
+                                        startActivity(receiptIntent);                                    }
+                                })
+
+                                // A null listener allows the button to dismiss the dialog and take no further action.
+                                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        finish();
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
                     } else {
                         //TODO: Remove the new Tenant if the Booking Creation fails?
                     }
                 } else {
+                    Toast.makeText(BookingScreenActivity.this, "Can not create a new Tenant", Toast.LENGTH_SHORT).show();
                     Log.i(TAG, "Tenant creation failed");
                 }
             }

@@ -1,5 +1,6 @@
 package com.example.thakurhousepg;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -12,6 +13,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -21,10 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ReceiptActivity extends AppCompatActivity {
 
@@ -43,18 +49,6 @@ public class ReceiptActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
-
-    Button btnSave;
-    EditText roomNumberText, totalAmount, onlineAmt, cashAmt, penaltyAmt;
-    CheckBox rentInCashCheckBox, rentOnlineCheckBox;
-    DataModule dbHelper;
-
-    boolean confirm = false;
-
-    boolean onlineRentChecked = false, cashRentChecked = false;
-
-    Cursor data = null;
-
     private static final String TAG = "ReceiptActivity";
 
     @Override
@@ -62,10 +56,9 @@ public class ReceiptActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receipt);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Bundle bundle = getIntent().getExtras();
 
@@ -78,6 +71,11 @@ public class ReceiptActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+        String selectedSection = bundle.getString("SECTION");
+        if(selectedSection != null && selectedSection.equals("Rent")) {
+            mViewPager.setCurrentItem(0);
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -128,9 +126,12 @@ public class ReceiptActivity extends AppCompatActivity {
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-        private EditText roomNumberText, totalAmount, onlineAmt, cashAmt, penaltyAmt;
-        private CheckBox penaltySwitch;
+        private EditText roomNumber, totalAmount, onlineAmt, cashAmt;
         private Button saveButton;
+        private DataModule dbHelper;
+
+        private CheckBox onlineCheckBox, cashCheckBox;
+        public boolean onlineRentChecked = false, cashRentChecked = false;
 
         public ReceiptFragment() {
         }
@@ -152,56 +153,188 @@ public class ReceiptActivity extends AppCompatActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_receipt, container, false);
 
+            Bundle bundle = getActivity().getIntent().getExtras();
+            dbHelper = new DataModule(getActivity());
 
             //TODO: Implement Bed number Validation and Automatic filling of the Rent amount
-            roomNumberText = (EditText) rootView.findViewById(R.id.receipt_te_bed_number);
-            roomNumberText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (event != null || actionId == EditorInfo.IME_NULL) {
-                        Log.v(TAG, v.getText().toString());
-                    } else {
-                        Log.v(TAG, "performed some other action. ID = " + String.valueOf(actionId));
-                    }
-                    return true;
-                }
-            });
-            roomNumberText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            roomNumber = (EditText) rootView.findViewById(R.id.receipt_bed_number);
+            onlineAmt = (EditText) rootView.findViewById(R.id.receipt_online_amt);
+            cashAmt = (EditText) rootView.findViewById(R.id.receipt_cash_amt);
+            totalAmount = (EditText) rootView.findViewById(R.id.receipt_total_amount);
+
+            if(bundle.getString("ROOM_NUMBER") != null) {
+                roomNumber.setText(bundle.getString("ROOM_NUMBER"));
+            }
+
+            roomNumber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange(View v, boolean hasFocus) {
-                    Log.v(TAG, roomNumberText.getText().toString());
+                    Log.v(TAG, roomNumber.getText().toString());
                 }
             });
 
-            onlineAmt = (EditText) rootView.findViewById(R.id.receipt_te_online_amt);
-            cashAmt = (EditText) rootView.findViewById(R.id.receipt_te_cash_amt);
-            penaltyAmt = (EditText) rootView.findViewById(R.id.receipt_te_penalty);
-            totalAmount = (EditText) rootView.findViewById(R.id.receipt_te_rent);
 
-            penaltySwitch = (CheckBox) rootView.findViewById(R.id.receipt_cb_penalty);
-            penaltySwitch.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Boolean isEnabled = penaltyAmt.isEnabled();
-                    if (isEnabled) {
-                        penaltyAmt.setText("");
+            if(bundle.getString("AMOUNT") != null) {
+                totalAmount.setText(bundle.getString("AMOUNT"));
+            }
+
+            cashAmt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (event != null || actionId == EditorInfo.IME_NULL) {
+                    Log.v(TAG, v.getText().toString());
+                } else {
+                    Log.v(TAG, "performed some other action. ID = " + String.valueOf(actionId));
+                }
+                return true;
+                }
+            });
+
+
+            roomNumber.addTextChangedListener(fieldWatcher);
+            onlineAmt.addTextChangedListener(fieldWatcher);
+            cashAmt.addTextChangedListener(fieldWatcher);
+            totalAmount.addTextChangedListener(fieldWatcher);
+
+            onlineCheckBox = (CheckBox) rootView.findViewById(R.id.onlineCheckBox);
+            cashCheckBox = (CheckBox) rootView.findViewById(R.id.cashCheckBox);
+            onlineAmt.setEnabled(false);
+            cashAmt.setEnabled(false);
+
+            roomNumber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                public void onFocusChange(View v, boolean hasFocus) {
+                    Log.v(TAG, roomNumber.getText().toString());
+
+                    /* SAHIRE Fetch Rent for room number from Booking Table */
+                    if(roomNumber.getText().toString().isEmpty() == false){
+                        Log.v(TAG, "Focus Changed: " + roomNumber.getText().toString());
+                        DataModule.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
+                        if(bed != null && bed.bookingId != null) {
+                            DataModule.Booking booking = dbHelper.getBookingInfo(bed.bookingId);
+                            if (booking != null) {
+                                /* SAHIRE: Do I have to take pending rent from pending table or from Booking table?????? */
+                                totalAmount.setText(booking.rentAmount);
+                                totalAmount.setSelection(totalAmount.getText().length());
+                            }
+                        }
+                    } else{
+                        totalAmount.setText("");
+                        totalAmount.setSelection(totalAmount.getText().length());
                     }
-                    penaltyAmt.setEnabled(!isEnabled);
                 }
             });
 
             saveButton = (Button) rootView.findViewById(R.id.receipt_button_save);
+            saveButton.setEnabled(false);
+
+            saveButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                public void onFocusChange (View v, boolean hasFocus) {
+                    if(hasFocus) {
+                        InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    }
+                }
+            });
+
             saveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.i(TAG, "Save Button Tapped");
+
+                    if(validationSuccessful()) {
+                        //SAHIRE: which all tables to modify???
+                        Log.i(TAG, "Amount present");
+                        DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+                        dbHelper.createReceipt(1, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString());
+                        dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, 1, totalAmount.getText().toString());
+
+                        BedsListContent.refresh(dbHelper);
+                        getActivity().finish();
+                    } else {
+                        Toast.makeText(getActivity(), "Please Enter the Amounts Correctly", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
-//            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-//            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+            onlineCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if(b){ //checked
+                        onlineAmt.setEnabled(true);
+                        onlineAmt.setText(totalAmount.getText().toString());
+                        onlineAmt.setSelection(onlineAmt.getText().length());
+                        onlineAmt.requestFocus();
+                        onlineRentChecked = true;
+
+                    }else {
+                        onlineAmt.setEnabled(false);
+                        onlineAmt.setText("");
+                        onlineAmt.setSelection(onlineAmt.getText().length());
+                        onlineRentChecked = false;
+                    }
+                }
+            });
+
+            cashCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if(b){ //checked
+                        cashAmt.setEnabled(true);
+                        cashAmt.setText(totalAmount.getText().toString());
+                        cashAmt.setSelection(cashAmt.getText().length());
+                        cashAmt.requestFocus();
+                        cashRentChecked = true;
+
+                    }else {
+                        cashAmt.setEnabled(false);
+                        cashAmt.setText("");
+                        cashAmt.setSelection(cashAmt.getText().length());
+                        cashRentChecked = false;
+                    }
+                }
+            });
+
+
             return rootView;
         }
+
+        private boolean validationSuccessful() {
+            boolean isValid = true;
+
+            if(!onlineRentChecked && !cashRentChecked) {
+                isValid = false;
+            }
+            if(onlineAmt.getText().toString().isEmpty() && cashAmt.getText().toString().isEmpty()) {
+                isValid = false;
+            }
+            if(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString()) != Integer.parseInt(totalAmount.getText().toString())) {
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        private final TextWatcher fieldWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(roomNumber.getText().length() != 0 && totalAmount.getText().length() != 0 &&
+                        (onlineAmt.getText().length() != 0 || cashAmt.getText().length() != 0)) {
+                    saveButton.setEnabled(true);
+                }
+
+            }
+        };
     }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

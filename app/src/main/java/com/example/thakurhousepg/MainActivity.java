@@ -3,7 +3,6 @@ package com.example.thakurhousepg;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,10 +12,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.thakurhousepg.OldFiles.TenantRecordActivity;
-
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -78,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "Launching Receipts", Toast.LENGTH_SHORT).show();
 
                 Intent receiptIntent = new Intent(MainActivity.this, ReceiptActivity.class);
-                receiptIntent.putExtra("section", "rent");
+                receiptIntent.putExtra("SECTION", "Rent");
 
                 startActivity(receiptIntent);
                 break;
@@ -120,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(monthUpdated == 0 || monthUpdated != rightNow.get(Calendar.MONTH)) {
             Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.DAY_OF_MONTH, Calendar.SHORT, Locale.US));
 
-            if(dbHelper.createPendingEntries()) {
+            if(dbHelper.createMonthlyPendingEntries()) {
                 SharedPreferences.Editor settingsEditor = settings.edit();
                 settingsEditor.putInt("pendingEntriesUpdatedForMonth", rightNow.get(Calendar.MONTH));
                 settingsEditor.commit();
