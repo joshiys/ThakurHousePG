@@ -1,7 +1,6 @@
 package com.example.thakurhousepg;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -130,8 +129,7 @@ public class ReceiptActivity extends AppCompatActivity {
         private Button saveButton;
         private DataModule dbHelper;
 
-        private CheckBox onlineCheckBox, cashCheckBox;
-        public boolean onlineRentChecked = false, cashRentChecked = false;
+        private CheckBox onlineCheckBox, cashCheckBox, depositCheckBox;
 
         public ReceiptFragment() {
         }
@@ -154,13 +152,26 @@ public class ReceiptActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_receipt, container, false);
 
             Bundle bundle = getActivity().getIntent().getExtras();
+
             dbHelper = new DataModule(getActivity());
 
-            //TODO: Implement Bed number Validation and Automatic filling of the Rent amount
             roomNumber = (EditText) rootView.findViewById(R.id.receipt_bed_number);
             onlineAmt = (EditText) rootView.findViewById(R.id.receipt_online_amt);
             cashAmt = (EditText) rootView.findViewById(R.id.receipt_cash_amt);
             totalAmount = (EditText) rootView.findViewById(R.id.receipt_total_amount);
+
+            roomNumber.addTextChangedListener(fieldWatcher);
+            onlineAmt.addTextChangedListener(fieldWatcher);
+            cashAmt.addTextChangedListener(fieldWatcher);
+            totalAmount.addTextChangedListener(fieldWatcher);
+
+            onlineCheckBox = (CheckBox) rootView.findViewById(R.id.onlineCheckBox);
+            cashCheckBox = (CheckBox) rootView.findViewById(R.id.cashCheckBox);
+            onlineAmt.setEnabled(false);
+            cashAmt.setEnabled(false);
+            cashAmt.setText("0");
+
+            depositCheckBox = (CheckBox) rootView.findViewById(R.id.receipt_deposit_checkbox);
 
             if(bundle.getString("ROOM_NUMBER") != null) {
                 roomNumber.setText(bundle.getString("ROOM_NUMBER"));
@@ -172,10 +183,6 @@ public class ReceiptActivity extends AppCompatActivity {
                 }
             });
 
-
-            if(bundle.getString("AMOUNT") != null) {
-                totalAmount.setText(bundle.getString("AMOUNT"));
-            }
 
             cashAmt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -189,16 +196,6 @@ public class ReceiptActivity extends AppCompatActivity {
                 }
             });
 
-
-            roomNumber.addTextChangedListener(fieldWatcher);
-            onlineAmt.addTextChangedListener(fieldWatcher);
-            cashAmt.addTextChangedListener(fieldWatcher);
-            totalAmount.addTextChangedListener(fieldWatcher);
-
-            onlineCheckBox = (CheckBox) rootView.findViewById(R.id.onlineCheckBox);
-            cashCheckBox = (CheckBox) rootView.findViewById(R.id.cashCheckBox);
-            onlineAmt.setEnabled(false);
-            cashAmt.setEnabled(false);
 
             roomNumber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange(View v, boolean hasFocus) {
@@ -225,7 +222,6 @@ public class ReceiptActivity extends AppCompatActivity {
 
             saveButton = (Button) rootView.findViewById(R.id.receipt_button_save);
             saveButton.setEnabled(false);
-
             saveButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange (View v, boolean hasFocus) {
                     if(hasFocus) {
@@ -234,18 +230,34 @@ public class ReceiptActivity extends AppCompatActivity {
                     }
                 }
             });
-
             saveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Log.i(TAG, "Save Button Tapped");
 
-                    if(validationSuccessful()) {
-                        //SAHIRE: which all tables to modify???
-                        Log.i(TAG, "Amount present");
+                    if(validate()) {
                         DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
-                        dbHelper.createReceipt(1, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString());
-                        dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, 1, totalAmount.getText().toString());
+
+                        DataModule.ReceiptType type = DataModule.ReceiptType.RENT;
+                        switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
+                            case 2:
+                                type = DataModule.ReceiptType.DEPOSIT;
+                                break;
+                            case 3:
+                                type = DataModule.ReceiptType.PENALTY;
+                                break;
+                        }
+
+                        if (depositCheckBox.isChecked()) {
+                            type = DataModule.ReceiptType.ADVANCE;
+                        }
+
+                        //TODO: Check if the cash+online amount exceeds total amount, and ask user if they want to create and advance payment entry
+                        dbHelper.createReceipt(type, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString());
+                        if(type != DataModule.ReceiptType.ADVANCE) {
+                            dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, type,
+                                    String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())));
+                        }
 
                         BedsListContent.refresh(dbHelper);
                         getActivity().finish();
@@ -263,13 +275,10 @@ public class ReceiptActivity extends AppCompatActivity {
                         onlineAmt.setText(totalAmount.getText().toString());
                         onlineAmt.setSelection(onlineAmt.getText().length());
                         onlineAmt.requestFocus();
-                        onlineRentChecked = true;
-
                     }else {
                         onlineAmt.setEnabled(false);
-                        onlineAmt.setText("");
+                        onlineAmt.setText("0");
                         onlineAmt.setSelection(onlineAmt.getText().length());
-                        onlineRentChecked = false;
                     }
                 }
             });
@@ -279,34 +288,39 @@ public class ReceiptActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     if(b){ //checked
                         cashAmt.setEnabled(true);
-                        cashAmt.setText(totalAmount.getText().toString());
+                        cashAmt.setText(String.valueOf(Integer.valueOf(totalAmount.getText().toString()) - Integer.valueOf(onlineAmt.getText().toString())));
                         cashAmt.setSelection(cashAmt.getText().length());
                         cashAmt.requestFocus();
-                        cashRentChecked = true;
 
                     }else {
                         cashAmt.setEnabled(false);
-                        cashAmt.setText("");
+                        cashAmt.setText("0");
                         cashAmt.setSelection(cashAmt.getText().length());
-                        cashRentChecked = false;
                     }
                 }
             });
 
 
+            if(bundle.getString("AMOUNT") != null) {
+                totalAmount.setText(bundle.getString("AMOUNT"));
+                onlineCheckBox.setChecked(true);
+            }
+
             return rootView;
         }
 
-        private boolean validationSuccessful() {
+        private boolean validate() {
             boolean isValid = true;
 
-            if(!onlineRentChecked && !cashRentChecked) {
+            if(!onlineCheckBox.isChecked() && !cashCheckBox.isChecked()) {
                 isValid = false;
             }
+
             if(onlineAmt.getText().toString().isEmpty() && cashAmt.getText().toString().isEmpty()) {
                 isValid = false;
             }
-            if(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString()) != Integer.parseInt(totalAmount.getText().toString())) {
+
+            if(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString()) > Integer.parseInt(totalAmount.getText().toString())) {
                 isValid = false;
             }
 
@@ -316,12 +330,11 @@ public class ReceiptActivity extends AppCompatActivity {
         private final TextWatcher fieldWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+                //TODO: Set TotalAmount to be equal to Online_Cash AMount
             }
 
             @Override

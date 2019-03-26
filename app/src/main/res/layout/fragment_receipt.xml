@@ -17,6 +17,7 @@
         android:background="#8EB1FD"
         android:text="Room/Bed Number"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:textSize="22sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -32,6 +33,7 @@
         android:background="#8EB1FD"
         android:text="Total Amount"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:textSize="22sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent" />
@@ -46,6 +48,7 @@
         android:background="#8EB1FD"
         android:text="Online Amount"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:textSize="22sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintHorizontal_bias="0.0"
@@ -61,10 +64,25 @@
         android:background="#8EB1FD"
         android:text="CashAmount"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:textSize="22sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <CheckBox
+        android:id="@+id/receipt_deposit_checkbox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="42dp"
+        android:layout_marginEnd="8dp"
+        android:background="#8EB1FD"
+        android:text="Is Advance?"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cashCheckBox" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline2"

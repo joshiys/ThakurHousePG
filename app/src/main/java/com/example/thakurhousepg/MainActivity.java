@@ -113,12 +113,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
         int monthUpdated = settings.getInt("pendingEntriesUpdatedForMonth", 0);
 
-        if(monthUpdated == 0 || monthUpdated != rightNow.get(Calendar.MONTH)) {
+        if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
             Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.DAY_OF_MONTH, Calendar.SHORT, Locale.US));
 
             if(dbHelper.createMonthlyPendingEntries()) {
                 SharedPreferences.Editor settingsEditor = settings.edit();
-                settingsEditor.putInt("pendingEntriesUpdatedForMonth", rightNow.get(Calendar.MONTH));
+                    /* Calendar object in Java starts the month entries from 0, (as in 0 for Jauary to 11 for December)
+                        But SQlite starts them from 1, so make calculation in DataModule easier, add 1 here
+                    */
+                settingsEditor.putInt("pendingEntriesUpdatedForMonth", (rightNow.get(Calendar.MONTH) + 1));
                 settingsEditor.commit();
             }
         }
