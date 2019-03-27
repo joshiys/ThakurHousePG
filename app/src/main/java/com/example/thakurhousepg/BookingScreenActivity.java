@@ -153,6 +153,8 @@ public class BookingScreenActivity extends AppCompatActivity {
             bookButton.setVisibility(View.GONE);
             saveButton.setVisibility(View.VISIBLE);
             roomSplitSeeker.setVisibility(View.GONE);
+            reduceFirstRentCheckbox.setVisibility(View.GONE);
+            firstRent.setVisibility(View.GONE);
 
             DataModule.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
             if(bedInfo.bookingId != null) {
