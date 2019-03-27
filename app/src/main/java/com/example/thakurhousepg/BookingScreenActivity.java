@@ -105,7 +105,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                         dataModule.createPendingEntryForBooking(newBookingId, 1, pendingRent);
                         dataModule.createPendingEntryForBooking(newBookingId, 2, depositAmount.getText().toString());
 
-                        BedsListContent.refresh(dataModule);
+                        BedsListContent.refresh();
                         new AlertDialog.Builder(BookingScreenActivity.this)
                                 .setTitle("Created new Booking successfully")
                                 .setMessage("Do you want to pay the deposit for this booking?")

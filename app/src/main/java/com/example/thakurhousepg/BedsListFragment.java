@@ -56,16 +56,16 @@ public class BedsListFragment extends Fragment {
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
-        datamodule = DataModule.getInstance();
+//        datamodule = DataModule.getInstance();
 
-        BedsListContent.create(datamodule);
+        BedsListContent.create();
     }
 
     @Override
     public void onResume() {
         Log.e(TAG, "onResume()");
         super.onResume();
-        mAdapter.notifyDataSetChanged();
+        reloadData();
     }
 
     @Override
@@ -77,7 +77,8 @@ public class BedsListFragment extends Fragment {
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             recyclerView = (RecyclerView) view;
-            mAdapter = new BedsListRecyclerViewAdapter(BedsListContent.items, mListener);
+            mAdapter = new BedsListRecyclerViewAdapter(BedsListContent.itemMap.get(OccupancyAndBookingActivity.getSelectedTab()),
+                    mListener);
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(mAdapter);
             recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
@@ -111,8 +112,9 @@ public class BedsListFragment extends Fragment {
         void onRentClick(BedsListItem item);
     }
 
-    public static void refresh(){
+    public void reloadData(){
         if(mAdapter != null) {
+            mAdapter.setmValues(BedsListContent.itemMap.get(OccupancyAndBookingActivity.getSelectedTab()));
             mAdapter.notifyDataSetChanged();
         }
     }

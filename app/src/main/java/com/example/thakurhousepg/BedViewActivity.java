@@ -157,7 +157,7 @@ public class BedViewActivity extends AppCompatActivity {
     private void closeBooking(String id) {
         Boolean result = dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
         if (result) {
-            BedsListContent.refresh(dataModule);
+            BedsListContent.refresh();
         }
         finish();
     }

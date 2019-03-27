@@ -31,22 +31,24 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         setContentView(R.layout.activity_occupancy_and_booking);
 
         tabLayout = (TabLayout) findViewById(R.id.floor_tabs_id);
+//        tabLayout.tab
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        currentSelectedTab = 0;
 
         tabLayout.addOnTabSelectedListener(new TabLayout.BaseOnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
 //                Log.e("TAGG", "OccupancyAnd... onTabSelected: " + tab.getPosition());
                 currentSelectedTab = tab.getPosition();
-                BedsListContent.refresh(datamodule);
+//                BedsListContent.refresh();
                 /* SAHIRE Need to find someother way to update Fragment here */
-                BedsListFragment.refresh();
-
+                BedsListFragment bedsFrag = (BedsListFragment) getSupportFragmentManager().findFragmentById(R.id.beds_fragment);
+                bedsFrag.reloadData();
             }
 
             @Override
@@ -64,6 +66,8 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     @Override
     protected void onStop() {
         super.onStop();
+//        currentSelectedTab = 0;
+        BedsListContent.refresh();
         //tabLayout.removeOnTabSelectedListener();
     }
 
@@ -139,9 +143,11 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         }
     }
 
+    public static Integer getSelectedTab(){
+        return Integer.valueOf(currentSelectedTab);
+    }
     /* SAHIRE Make this function generic. Use tab infor in switch case */
-    public static boolean isRoomForSelectedTab(int rNo){
-        int floor = currentSelectedTab;
+    public static boolean isRoomForSelectedTab(int rNo, int floor){
         switch(floor){
             case 0:
                 if(rNo >= 0 && rNo <= 100) {

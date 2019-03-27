@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class BedsListRecyclerViewAdapter extends RecyclerView.Adapter<BedsListRecyclerViewAdapter.ViewHolder> {
 
-    private final List<BedsListItem> mValues;
+    private List<BedsListItem> mValues;
     private final BedsListFragment.OnBedsListInteractionListener mListener;
 
     public BedsListRecyclerViewAdapter(List<BedsListItem> items, OnBedsListInteractionListener listener) {
@@ -85,5 +85,9 @@ public class BedsListRecyclerViewAdapter extends RecyclerView.Adapter<BedsListRe
         public String toString() {
             return super.toString() + " '" + mTenantName.getText() + "'";
         }
+    }
+
+    public void setmValues(List<BedsListItem> newValues) {
+        mValues = newValues;
     }
 }

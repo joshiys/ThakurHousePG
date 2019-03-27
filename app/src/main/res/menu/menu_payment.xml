@@ -17,4 +17,9 @@
         android:orderInCategory="100"
         android:title="Add Penalty"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/actionEmailReceipts"
+        android:orderInCategory="100"
+        android:title="Email Receipts"
+        app:showAsAction="never" />
 </menu>

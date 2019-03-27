@@ -266,7 +266,7 @@ public class ReceiptActivity extends AppCompatActivity {
                                     String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())));
                         }
 
-                        BedsListContent.refresh(dbHelper);
+                        BedsListContent.refresh();
                         getActivity().finish();
                     } else {
                         Toast.makeText(getActivity(), "Please Enter the Amounts Correctly", Toast.LENGTH_SHORT).show();
