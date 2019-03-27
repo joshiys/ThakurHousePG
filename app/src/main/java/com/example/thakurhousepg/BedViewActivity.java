@@ -1,9 +1,11 @@
 package com.example.thakurhousepg;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,7 +45,7 @@ public class BedViewActivity extends AppCompatActivity {
         bookingDate = findViewById(R.id.bedview_booking_date);
         smsButton = findViewById(R.id.bedview_floating_sms);
 
-        dataModule = new DataModule(this);
+        dataModule = DataModule.getInstance();
 
         Bundle bundle = getIntent().getExtras();
         bedNumber.setText(bundle.getString("BED_NUMBER"));
@@ -101,23 +103,62 @@ public class BedViewActivity extends AppCompatActivity {
                     bookingIntent.putExtra("BED_NUMBER", bedNumber.getText().toString());
                     bookingIntent.putExtra("RENT", bedInfo.rentAmount);
                     bookingIntent.putExtra("DEPOSIT", bedInfo.rentAmount);
-                    startActivity(bookingIntent);
+                    startActivityForResult(bookingIntent, 0);
                 } else {
                     Toast.makeText(BedViewActivity.this, "Closing the Booking", Toast.LENGTH_SHORT).show();
+                    final int pendingAmount = dataModule.getPendingAmountForBooking(bedInfo.bookingId);
+                    if(pendingAmount > 0) {
+                        new AlertDialog.Builder(BedViewActivity.this)
+                                .setTitle("Dues Pending")
+                                .setMessage("Go to Receipt screen before closing the booking?")
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent receiptIntent = new Intent(BedViewActivity.this, ReceiptActivity.class);
+                                        receiptIntent.putExtra("SECTION", "Rent");
+                                        receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
+                                        receiptIntent.putExtra("AMOUNT", String.valueOf(pendingAmount));
 
-                    Boolean result = dataModule.closeBooking(bedInfo.bookingId, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), false, false);
-                    if(result) {
-                        BedsListContent.refresh(dataModule);
+                                        startActivityForResult(receiptIntent, 1);
+                                    }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        closeBooking(bedInfo.bookingId);
+                                    }
+                                })
+                                .show();
+                    } else {
+                        closeBooking(bedInfo.bookingId);
                     }
-                    finish();
                 }
             }
         });
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i(TAG, "Back from the Booking activity");
+        if(requestCode == 1) {
+            DataModule.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
+            closeBooking(bedInfo.bookingId);
+        }
+        finish();
+    }
+
+    @Override
     public boolean onSupportNavigateUp(){
         finish();
         return true;
+    }
+
+    private void closeBooking(String id) {
+        Boolean result = dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
+        if (result) {
+            BedsListContent.refresh(dataModule);
+        }
+        finish();
     }
 }

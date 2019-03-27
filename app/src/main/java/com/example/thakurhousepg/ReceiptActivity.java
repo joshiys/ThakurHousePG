@@ -72,8 +72,12 @@ public class ReceiptActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
         String selectedSection = bundle.getString("SECTION");
-        if(selectedSection != null && selectedSection.equals("Rent")) {
-            mViewPager.setCurrentItem(0);
+        if(selectedSection != null) {
+            if (selectedSection.equals("Rent")) {
+                mViewPager.setCurrentItem(0);
+            } else if (selectedSection.equals("Deposit")) {
+                mViewPager.setCurrentItem(1);
+            }
         }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -129,7 +133,7 @@ public class ReceiptActivity extends AppCompatActivity {
         private Button saveButton;
         private DataModule dbHelper;
 
-        private CheckBox onlineCheckBox, cashCheckBox, depositCheckBox;
+        private CheckBox onlineCheckBox, cashCheckBox, advanceCheckBox;
 
         public ReceiptFragment() {
         }
@@ -153,7 +157,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
             Bundle bundle = getActivity().getIntent().getExtras();
 
-            dbHelper = new DataModule(getActivity());
+            dbHelper = DataModule.getInstance();
 
             roomNumber = (EditText) rootView.findViewById(R.id.receipt_bed_number);
             onlineAmt = (EditText) rootView.findViewById(R.id.receipt_online_amt);
@@ -171,7 +175,10 @@ public class ReceiptActivity extends AppCompatActivity {
             cashAmt.setEnabled(false);
             cashAmt.setText("0");
 
-            depositCheckBox = (CheckBox) rootView.findViewById(R.id.receipt_deposit_checkbox);
+            advanceCheckBox = (CheckBox) rootView.findViewById(R.id.receipt_advance_checkbox);
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 2) {
+                advanceCheckBox.setVisibility(View.INVISIBLE);
+            }
 
             if(bundle.getString("ROOM_NUMBER") != null) {
                 roomNumber.setText(bundle.getString("ROOM_NUMBER"));
@@ -248,7 +255,7 @@ public class ReceiptActivity extends AppCompatActivity {
                                 break;
                         }
 
-                        if (depositCheckBox.isChecked()) {
+                        if (advanceCheckBox.isChecked()) {
                             type = DataModule.ReceiptType.ADVANCE;
                         }
 

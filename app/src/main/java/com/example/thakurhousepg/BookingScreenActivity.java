@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -31,10 +32,14 @@ public class BookingScreenActivity extends AppCompatActivity {
     private EditText bedNumber;
 
     private SeekBar roomSplitSeeker;
+
     private Button bookButton, saveButton;
 
     private String action = null;
     private DataModule.Tenant tenant = null;
+    private CheckBox reduceFirstRentCheckbox;
+    private EditText firstRent;
+
 
     private static final String TAG = "BookingScreenActivity";
     @Override
@@ -55,7 +60,11 @@ public class BookingScreenActivity extends AppCompatActivity {
         rentAmount = findViewById(R.id.booking_deposit);
         depositAmount = findViewById(R.id.booking_rent);
         bedNumber = findViewById(R.id.booking_bed_number);
+
         saveButton = findViewById(R.id.saveTenanButton);
+
+        reduceFirstRentCheckbox = findViewById(R.id.booking_first_rent_checkbox);
+        firstRent = findViewById(R.id.booking_first_rent);
 
         rentAmount.setText(bundle.getString("RENT"));
         depositAmount.setText(bundle.getString("DEPOSIT"));
@@ -88,10 +97,14 @@ public class BookingScreenActivity extends AppCompatActivity {
                 String tenantId = dataModule.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(), "", tenantEmail.getText().toString(), tenantAddress.getText().toString());
 
                 if(tenantId != null) {
-                    Boolean result = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
-                    Log.i(TAG, "result is " + String.valueOf(result));
-                    if(result) {
+                    String newBookingId = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
+                    Log.i(TAG, "result is " + newBookingId);
+                    if(!newBookingId.equals("-1")) {
                         //TODO: Add Deposit and Rent entries to Pending table
+                        String pendingRent = reduceFirstRentCheckbox.isChecked() ? firstRent.getText().toString():rentAmount.getText().toString();
+                        dataModule.createPendingEntryForBooking(newBookingId, 1, pendingRent);
+                        dataModule.createPendingEntryForBooking(newBookingId, 2, depositAmount.getText().toString());
+
                         BedsListContent.refresh(dataModule);
                         new AlertDialog.Builder(BookingScreenActivity.this)
                                 .setTitle("Created new Booking successfully")
@@ -106,7 +119,9 @@ public class BookingScreenActivity extends AppCompatActivity {
                                         receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
                                         receiptIntent.putExtra("AMOUNT", depositAmount .getText().toString());
 
-                                        startActivity(receiptIntent);                                    }
+                                        startActivity(receiptIntent);
+                                        finish();
+                                    }
                                 })
 
                                 // A null listener allows the button to dismiss the dialog and take no further action.
@@ -116,9 +131,11 @@ public class BookingScreenActivity extends AppCompatActivity {
                                         finish();
                                     }
                                 })
-                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setIcon(android.R.drawable.ic_dialog_info)
                                 .show();
                     } else {
+                        Toast.makeText(BookingScreenActivity.this, "Can not create the Booking", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "Booking creation failed");
                         //TODO: Remove the new Tenant if the Booking Creation fails?
                     }
                 } else {
@@ -166,11 +183,29 @@ public class BookingScreenActivity extends AppCompatActivity {
             });
         }
 
+        reduceFirstRentCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    firstRent.setEnabled(true);
+                    firstRent.setText(rentAmount.getText());
+                } else {
+                    firstRent.setEnabled(false);
+                    firstRent.setText("0");
+                }
+            }
+        });
+
     }
 
     @Override
     public boolean onSupportNavigateUp(){
         finish();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

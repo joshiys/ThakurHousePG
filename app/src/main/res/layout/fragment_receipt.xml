@@ -71,7 +71,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <CheckBox
-        android:id="@+id/receipt_deposit_checkbox"
+        android:id="@+id/receipt_advance_checkbox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

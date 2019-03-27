@@ -21,7 +21,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button sendSMS, adminScreen, viewTenant;
     Button btn_receipt, btn_occupancy, btn_payment;
     EditText roomNumber;
-    TextView totalOutstandinValue;
+    Button receivedValue, pendingValue, totalOutstandingValue;
+    TextView headerView;
 
     private static final String TAG = "MainActivity";
 
@@ -31,16 +32,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
 
-         btn_receipt = (Button) findViewById(R.id.receipt_button);
-         btn_occupancy = (Button) findViewById(R.id.occupancy_button);
-         btn_payment = (Button) findViewById(R.id.payments_button);
+         btn_receipt = findViewById(R.id.receipt_button);
+         btn_occupancy = findViewById(R.id.occupancy_button);
+         btn_payment = findViewById(R.id.payments_button);
 
-        adminScreen = (Button) findViewById(R.id.adminScreen);
-        viewTenant = (Button) findViewById(R.id.viewRoomButton);
+        adminScreen = findViewById(R.id.adminScreen);
+        viewTenant = findViewById(R.id.viewRoomButton);
 
-        roomNumber = (EditText) findViewById(R.id.roomNumberText);
-        sendSMS = (Button) findViewById(R.id.sendSMSButton);
-        totalOutstandinValue = (TextView) findViewById(R.id.totalOutstandinValue);
+        roomNumber = findViewById(R.id.roomNumberText);
+        sendSMS = findViewById(R.id.sendSMSButton);
+
+        receivedValue = (Button) findViewById(R.id.main_current_received);
+        pendingValue = (Button) findViewById(R.id.main_current_pending);
+        totalOutstandingValue = (Button) findViewById(R.id.main_total_outstanding);
+
+        headerView = findViewById(R.id.main_month);
 
         btn_receipt.setOnClickListener(this);
         btn_occupancy.setOnClickListener(this);
@@ -51,17 +57,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         roomNumber.setSelection(roomNumber.getText().length());
 
         sendSMS.setEnabled(false);
-        dbHelper = new DataModule(this);
+        DataModule.setContext(this);
+        dbHelper = DataModule.getInstance();
 
         setPendingAmountEntries();
-        setTotalOutstandingRent();
-        setTitle(getTitle() + " - " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
+        headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //setTotalOutstandingRent();
+        setTotalOutstandingRent();
     }
 
     @Override
@@ -104,7 +110,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     void setTotalOutstandingRent(){
-        totalOutstandinValue.setText(dbHelper.getTotalOutstandingRent());
+        totalOutstandingValue.setText(dbHelper.getTotalExpectedRent());
+        pendingValue.setText(String.valueOf(dbHelper.getTotalPendingAmount()));
+        receivedValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1));
     }
 
     private void setPendingAmountEntries() {
@@ -114,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int monthUpdated = settings.getInt("pendingEntriesUpdatedForMonth", 0);
 
         if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
-            Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.DAY_OF_MONTH, Calendar.SHORT, Locale.US));
+            Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
 
             if(dbHelper.createMonthlyPendingEntries()) {
                 SharedPreferences.Editor settingsEditor = settings.edit();

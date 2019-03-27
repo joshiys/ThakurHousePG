@@ -26,11 +26,6 @@ public class BedsListContent {
             Log.i(TAG, "Creating Beds list");
             ArrayList<DataModule.Bed> beds = dataModule.getBedsList();
 
-            //        Cursor cursor = db.rawQuery("select TENANT_NAME, " + DataModule.TENANT_TABLE_NAME + ".TENANT_ID from " + DataModule.TENANT_TABLE_NAME +
-            //                " LEFT JOIN " + DataModule.BOOKING_TABLE_NAME + " ON " + DataModule.BOOKING_TABLE_NAME + ".BOOKING_ID = " + DataModule.TENANT_TABLE_NAME + ".BOOKING_ID" +
-            //                " where TENANT_IS_CURRENT = 1" ,
-            //                null);
-
             for (DataModule.Bed bed : beds) {
                 DataModule.Tenant tenant = null;
                 DataModule.Booking booking = null;
@@ -39,25 +34,12 @@ public class BedsListContent {
                 if (bed.bookingId != null) {
                     booking = dataModule.getBookingInfo(bed.bookingId);
                     tenant = dataModule.getTenantInfoForBooking(bed.bookingId);
-                    pendingAmount = String.valueOf(dataModule.getTotalPendingAmountForBooking(booking.id));
+                    pendingAmount = String.valueOf(dataModule.getPendingAmountForBooking(booking.id));
                 }
 
                 if(OccupancyAndBookingActivity.isRoomForSelectedTab(Integer.valueOf(bed.bedNumber.split("\\.")[0]))) {
                     items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? pendingAmount : bed.rentAmount));
                 }
-
-                /*
-                String roomNo = bed.bedNumber.split("\\.")[0];
-
-                if(booking != null && !booking.isWholeRoom) {
-                    items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : bed.rentAmount));
-                }
-                else {
-                    if (!rooms.contains(roomNo)) {
-                        rooms.add(roomNo);
-                        items.add(new BedsListItem(roomNo, (tenant != null) ? tenant.name : "", (booking != null) ? booking.rentAmount : bed.rentAmount));
-                    }
-                }*/
             }
         }
     }
