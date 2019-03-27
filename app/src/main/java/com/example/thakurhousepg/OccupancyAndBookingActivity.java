@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TableLayout;
@@ -65,6 +67,33 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         //tabLayout.removeOnTabSelectedListener();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_payment, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        switch(id) {
+            case R.id.actionAddPenalty:
+                break;
+            case R.id.actionShowOutstandings:
+                break;
+            case R.id.actionShowReceipts:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     public void onBedItemClick(BedsListContent.BedsListItem item) {
         Toast toast = Toast.makeText(OccupancyAndBookingActivity.this, "Launching Bed View for: "+ item.bedNumber, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
@@ -74,7 +103,25 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         startActivity(bedViewIntent);
     }
     public void onTenantClick(BedsListContent.BedsListItem item) {
-        Toast.makeText(OccupancyAndBookingActivity.this, "Clicked Tenant "+ item.tenantName, Toast.LENGTH_SHORT).show();
+        Toast toast;
+
+        DataModule.Bed bedInfo = datamodule.getBedInfo(item.bedNumber);
+        if(bedInfo.bookingId != null) {
+            toast = Toast.makeText(OccupancyAndBookingActivity.this, "Modify Tenant "+ item.tenantName, Toast.LENGTH_SHORT);
+//            toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
+            toast.show();
+
+            Intent modifyTenantIntent = new Intent(OccupancyAndBookingActivity.this, BookingScreenActivity.class);
+            modifyTenantIntent.putExtra("BED_NUMBER", item.bedNumber);
+            modifyTenantIntent.putExtra("RENT", item.rentPayble);
+            modifyTenantIntent.putExtra("ACTION", "MODIFY_TENANT");
+//        bookingIntent.putExtra("DEPOSIT", bedInfo.rentAmount);
+            startActivity(modifyTenantIntent);
+        } else {
+            toast = Toast.makeText(OccupancyAndBookingActivity.this, "Empty Tenant: "+ item.bedNumber, Toast.LENGTH_SHORT);
+            toast.show();
+//            toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
+        }
     }
     public void onRentClick(BedsListContent.BedsListItem item){
         DataModule.Bed bed = datamodule.getBedInfo(item.bedNumber);

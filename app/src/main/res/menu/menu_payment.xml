@@ -3,8 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.thakurhousepg.ReceiptActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/actionShowOutstandings"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Show Outstandings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/actionShowReceipts"
+        android:orderInCategory="100"
+        android:title="Show Receipts"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/actionAddPenalty"
+        android:orderInCategory="100"
+        android:title="Add Penalty"
         app:showAsAction="never" />
 </menu>

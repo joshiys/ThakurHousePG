@@ -31,7 +31,10 @@ public class BookingScreenActivity extends AppCompatActivity {
     private EditText bedNumber;
 
     private SeekBar roomSplitSeeker;
-    private Button bookButton;
+    private Button bookButton, saveButton;
+
+    private String action = null;
+    private DataModule.Tenant tenant = null;
 
     private static final String TAG = "BookingScreenActivity";
     @Override
@@ -52,12 +55,15 @@ public class BookingScreenActivity extends AppCompatActivity {
         rentAmount = findViewById(R.id.booking_deposit);
         depositAmount = findViewById(R.id.booking_rent);
         bedNumber = findViewById(R.id.booking_bed_number);
+        saveButton = findViewById(R.id.saveTenanButton);
 
         rentAmount.setText(bundle.getString("RENT"));
         depositAmount.setText(bundle.getString("DEPOSIT"));
 
         bedNumber = findViewById(R.id.booking_bed_number);
         bedNumber.setText(bundle.getString("BED_NUMBER"));
+
+        action = bundle.getString("ACTION");
 
         roomSplitSeeker = findViewById(R.id.booking_split_room_seek_bar);
 
@@ -121,6 +127,44 @@ public class BookingScreenActivity extends AppCompatActivity {
                 }
             }
         });
+        if(action != null && action.equals("MODIFY_TENANT")){
+            View view = findViewById(R.id.divider);
+
+            view.setVisibility(View.GONE);
+            rentAmount.setVisibility(View.GONE);
+            depositAmount.setVisibility(View.GONE);
+            bookButton.setVisibility(View.GONE);
+            saveButton.setVisibility(View.VISIBLE);
+            roomSplitSeeker.setVisibility(View.GONE);
+
+            DataModule.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
+            if(bedInfo.bookingId != null) {
+                DataModule.Booking booking = dataModule.getBookingInfo(bedInfo.bookingId);
+                Log.i(TAG, "Found Booking with Id " + bedInfo.bookingId);
+
+                tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
+
+                tenantName.setText(tenant.name);
+                tenantEmail.setText(tenant.email);
+                tenantMobile.setText(tenant.mobile);
+                tenantAddress.setText(tenant.address);
+            }
+
+            saveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(tenant != null) {
+                        boolean status = dataModule.updateTenant(tenant.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
+                                "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), false);
+                        if (status == true) {
+                            Toast.makeText(BookingScreenActivity.this, "Tenant Record Updated Successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(BookingScreenActivity.this, "Tenant Record Update Failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+        }
 
     }
 
