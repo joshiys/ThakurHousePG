@@ -56,8 +56,7 @@ public class BedsListFragment extends Fragment {
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
-        datamodule = ((OccupancyAndBookingActivity) getActivity()).datamodule;
-//        datamodule = new DataModule(getActivity());
+        datamodule = DataModule.getInstance();
 
         BedsListContent.create(datamodule);
     }

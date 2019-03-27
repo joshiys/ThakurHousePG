@@ -24,7 +24,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        datamodule = new DataModule(this);
+        datamodule = DataModule.getInstance();
 
         setContentView(R.layout.activity_occupancy_and_booking);
 
