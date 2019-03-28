@@ -165,6 +165,7 @@ public class BookingScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent addTenantIntent = new Intent(BookingScreenActivity.this, TenantInformationActivity.class);
+                addTenantIntent.putExtra("ACTION", "ADD_TENANT");
                 startActivityForResult(addTenantIntent, 0);
             }
         });
