@@ -3,22 +3,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.thakurhousepg.ReceiptActivity">
     <item
-        android:id="@+id/actionShowOutstandings"
+        android:id="@+id/menu_actionShowOutstandings"
         android:orderInCategory="100"
         android:title="Show Outstandings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/actionShowReceipts"
+        android:id="@+id/menu_actionShowReceipts"
         android:orderInCategory="100"
         android:title="Show Receipts"
         app:showAsAction="never" />
     <item
-        android:id="@+id/actionAddPenalty"
+        android:id="@+id/menu_actionAddPenalty"
         android:orderInCategory="100"
         android:title="Add Penalty"
         app:showAsAction="never" />
     <item
-        android:id="@+id/actionEmailReceipts"
+        android:id="@+id/menu_actionEmailReceipts"
         android:orderInCategory="100"
         android:title="Email Receipts"
         app:showAsAction="never" />

@@ -31,8 +31,6 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         setContentView(R.layout.activity_occupancy_and_booking);
 
         tabLayout = (TabLayout) findViewById(R.id.floor_tabs_id);
-//        tabLayout.tab
-
     }
 
     @Override
@@ -87,11 +85,11 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
 
         //noinspection SimplifiableIfStatement
         switch(id) {
-            case R.id.actionAddPenalty:
+            case R.id.menu_actionAddPenalty:
                 break;
-            case R.id.actionShowOutstandings:
+            case R.id.menu_actionShowOutstandings:
                 break;
-            case R.id.actionShowReceipts:
+            case R.id.menu_actionShowReceipts:
                 break;
         }
 
@@ -106,27 +104,25 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         bedViewIntent.putExtra("BED_NUMBER", item.bedNumber);
         startActivity(bedViewIntent);
     }
+
     public void onTenantClick(BedsListContent.BedsListItem item) {
         Toast toast;
 
         DataModule.Bed bedInfo = datamodule.getBedInfo(item.bedNumber);
         if(bedInfo.bookingId != null) {
             toast = Toast.makeText(OccupancyAndBookingActivity.this, "Modify Tenant "+ item.tenantName, Toast.LENGTH_SHORT);
-//            toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
             toast.show();
 
-            Intent modifyTenantIntent = new Intent(OccupancyAndBookingActivity.this, BookingScreenActivity.class);
+            Intent modifyTenantIntent = new Intent(OccupancyAndBookingActivity.this, TenantInformationActivity.class);
             modifyTenantIntent.putExtra("BED_NUMBER", item.bedNumber);
-            modifyTenantIntent.putExtra("RENT", item.rentPayble);
             modifyTenantIntent.putExtra("ACTION", "MODIFY_TENANT");
-//        bookingIntent.putExtra("DEPOSIT", bedInfo.rentAmount);
             startActivity(modifyTenantIntent);
         } else {
             toast = Toast.makeText(OccupancyAndBookingActivity.this, "Empty Tenant: "+ item.bedNumber, Toast.LENGTH_SHORT);
             toast.show();
-//            toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
         }
     }
+
     public void onRentClick(BedsListContent.BedsListItem item){
         DataModule.Bed bed = datamodule.getBedInfo(item.bedNumber);
 
@@ -146,6 +142,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     public static Integer getSelectedTab(){
         return Integer.valueOf(currentSelectedTab);
     }
+
     /* SAHIRE Make this function generic. Use tab infor in switch case */
     public static boolean isRoomForSelectedTab(int rNo, int floor){
         switch(floor){

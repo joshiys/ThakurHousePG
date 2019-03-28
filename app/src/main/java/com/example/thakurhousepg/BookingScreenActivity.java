@@ -9,37 +9,39 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class BookingScreenActivity extends AppCompatActivity {
 
     private DataModule dataModule;
-    private EditText tenantName;
-    private EditText tenantEmail;
-    private EditText tenantMobile;
-    private EditText tenantAddress;
-    private EditText rentAmount;
-    private EditText depositAmount;
-    private EditText bedNumber;
+    private EditText rentAmount, depositAmount, bedNumber;
 
     private SeekBar roomSplitSeeker;
 
     private Button bookButton, saveButton;
 
+    private ImageButton addTenantButton;
     private String action = null;
     private DataModule.Tenant tenant = null;
     private CheckBox reduceFirstRentCheckbox;
     private EditText firstRent;
 
+    private String tenantId = null;
+    private ArrayList<String> tenantNamesList = new ArrayList<String>();
+    private ArrayAdapter tenantListAdapter = null;
+    private ListView tenantsListView;
 
     private static final String TAG = "BookingScreenActivity";
     @Override
@@ -53,10 +55,6 @@ public class BookingScreenActivity extends AppCompatActivity {
 
         dataModule = new DataModule(this);
 
-        tenantName = findViewById(R.id.booking_tenant_name);
-        tenantEmail = findViewById(R.id.booking_tenant_email);
-        tenantMobile = findViewById(R.id.booking_tenant_mobile);
-        tenantAddress = findViewById(R.id.booking_tenant_address);
         rentAmount = findViewById(R.id.booking_deposit);
         depositAmount = findViewById(R.id.booking_rent);
         bedNumber = findViewById(R.id.booking_bed_number);
@@ -65,6 +63,11 @@ public class BookingScreenActivity extends AppCompatActivity {
 
         reduceFirstRentCheckbox = findViewById(R.id.booking_first_rent_checkbox);
         firstRent = findViewById(R.id.booking_first_rent);
+        addTenantButton = findViewById(R.id.booking_add_tenant);
+
+        tenantsListView = findViewById(R.id.booking_tenant_list);
+        tenantListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tenantNamesList);
+        tenantsListView.setAdapter(tenantListAdapter);
 
         rentAmount.setText(bundle.getString("RENT"));
         depositAmount.setText(bundle.getString("DEPOSIT"));
@@ -94,7 +97,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                     dataModule.splitRoom(bedNumber.getText().toString(), numRooms, rentAmount.getText().toString(), depositAmount.getText().toString());
                 }
 
-                String tenantId = dataModule.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(), "", tenantEmail.getText().toString(), tenantAddress.getText().toString());
+                //dataModule.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(), "", tenantEmail.getText().toString(), tenantAddress.getText().toString());
 
                 if(tenantId != null) {
                     String newBookingId = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
@@ -144,46 +147,6 @@ public class BookingScreenActivity extends AppCompatActivity {
                 }
             }
         });
-        if(action != null && action.equals("MODIFY_TENANT")){
-            View view = findViewById(R.id.divider);
-
-            view.setVisibility(View.GONE);
-            rentAmount.setVisibility(View.GONE);
-            depositAmount.setVisibility(View.GONE);
-            bookButton.setVisibility(View.GONE);
-            saveButton.setVisibility(View.VISIBLE);
-            roomSplitSeeker.setVisibility(View.GONE);
-            reduceFirstRentCheckbox.setVisibility(View.GONE);
-            firstRent.setVisibility(View.GONE);
-
-            DataModule.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
-            if(bedInfo.bookingId != null) {
-                DataModule.Booking booking = dataModule.getBookingInfo(bedInfo.bookingId);
-                Log.i(TAG, "Found Booking with Id " + bedInfo.bookingId);
-
-                tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
-
-                tenantName.setText(tenant.name);
-                tenantEmail.setText(tenant.email);
-                tenantMobile.setText(tenant.mobile);
-                tenantAddress.setText(tenant.address);
-            }
-
-            saveButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(tenant != null) {
-                        boolean status = dataModule.updateTenant(tenant.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
-                                "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), false);
-                        if (status == true) {
-                            Toast.makeText(BookingScreenActivity.this, "Tenant Record Updated Successfully", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(BookingScreenActivity.this, "Tenant Record Update Failed", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            });
-        }
 
         reduceFirstRentCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -198,6 +161,14 @@ public class BookingScreenActivity extends AppCompatActivity {
             }
         });
 
+        addTenantButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent addTenantIntent = new Intent(BookingScreenActivity.this, TenantInformationActivity.class);
+                startActivityForResult(addTenantIntent, 0);
+            }
+        });
+
     }
 
     @Override
@@ -209,5 +180,18 @@ public class BookingScreenActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            String newTenanId = data.getStringExtra("TENANT_ID");
+            if (tenantId == null) {
+                tenantId = newTenanId;
+            }
+            tenantNamesList.add(dataModule.getTenantInfo(newTenanId).name);
+            tenantListAdapter.notifyDataSetChanged();
+        }
+
     }
 }

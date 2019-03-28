@@ -597,6 +597,25 @@ public class DataModule extends SQLiteOpenHelper {
         return t;
     }
 
+    public Tenant getTenantInfo(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Tenant t = null;
+        Cursor cursor = db.rawQuery("select * from " + TENANT_TABLE_NAME + " where TENANT_ID = ?", new String[]{id});
+        if(cursor.moveToNext()) {
+            t = new Tenant(
+                    cursor.getString(cursor.getColumnIndex(TENANT_ID)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_NAME)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_MOBILE)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_EMAIL)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_ADDRESS)),
+                    cursor.getInt(cursor.getColumnIndex(TENANT_IS_CURRENT)) > 0
+            );
+        }
+
+        cursor.close();
+        return t;
+    }
+
     /* Total Expected rent for current month */
     public String getTotalExpectedRent() {
         SQLiteDatabase db = this.getWritableDatabase();
