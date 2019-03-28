@@ -29,6 +29,8 @@ public class TenantInformationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tenant_information);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         dataModule = DataModule.getInstance();
         final Bundle bundle = getIntent().getExtras();
 
@@ -37,7 +39,7 @@ public class TenantInformationActivity extends AppCompatActivity {
         tenantMobile = findViewById(R.id.add_tenant_mobile);
         tenantAddress = findViewById(R.id.add_tenant_address);
 
-        if(bundle.getString("BED_NUMBER") != null) {
+        if(bundle != null && bundle.getString("BED_NUMBER") != null) {
             String bedNumber = bundle.getString("BED_NUMBER");
             tenantInfoForModification = dataModule.getTenantInfoForBooking(dataModule.getBedInfo(bedNumber).bookingId);
 
@@ -59,7 +61,7 @@ public class TenantInformationActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if("MODIFY_TENANT".equals(bundle.getString("ACTION"))) {
+                if(bundle != null && ("MODIFY_TENANT".equals(bundle.getString("ACTION")))) {
                     boolean status = false;
                     if(tenantInfoForModification != null) {
                         status = dataModule.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
@@ -101,5 +103,11 @@ public class TenantInformationActivity extends AppCompatActivity {
             setResult(Activity.RESULT_CANCELED, returnIntent);
         }
     }
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
+    }
+
 
 }

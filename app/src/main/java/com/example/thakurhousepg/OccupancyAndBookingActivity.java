@@ -30,13 +30,17 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
 
         setContentView(R.layout.activity_occupancy_and_booking);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         tabLayout = (TabLayout) findViewById(R.id.floor_tabs_id);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        currentSelectedTab = 0;
+//        currentSelectedTab = 0;
+        tabLayout.getTabAt(currentSelectedTab).select();
+
 
         tabLayout.addOnTabSelectedListener(new TabLayout.BaseOnTabSelectedListener() {
             @Override
@@ -184,4 +188,10 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         }
         return false;
     }
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
+    }
+
 }
