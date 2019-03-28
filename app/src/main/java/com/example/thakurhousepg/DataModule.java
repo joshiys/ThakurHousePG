@@ -785,6 +785,30 @@ public class DataModule extends SQLiteOpenHelper {
         db.insert(RECEIPTS_TABLE_NAME, null, contentValues);
     }
 
+    public ArrayList<Receipt> getAllReceipts(int month){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        ArrayList<Receipt> receipts = new ArrayList<Receipt>();
+        String query = "select * from " + RECEIPTS_TABLE_NAME + " WHERE strftime('%m', RECEIPT_DATE) = " +
+                "'0" + String.valueOf(month) + "' ORDER BY BOOKING_ID ASC"; //sorting on Booking Id to get sorted list of room nos.
+        Cursor cursor = db.rawQuery(query, null);
+
+        if(cursor.getCount() != 0) {
+            while (cursor.moveToNext()) {
+                receipts.add(new Receipt(
+                        cursor.getString(cursor.getColumnIndex(RECEIPT_ID)),
+                        cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                        cursor.getString(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)),
+                        cursor.getString(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT)),
+                        "", "",
+                        cursor.getString(cursor.getColumnIndex(RECEIPT_DATE)),
+                        cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))));
+            }
+        }
+        cursor.close();
+        return receipts;
+    }
+
 
     public void splitRoom(String roomNumber, int numRooms, String rent, String deposit) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -883,7 +907,31 @@ public class DataModule extends SQLiteOpenHelper {
         public final String penaltyWaiveOffAmount;
         public final Boolean isDeposit;
         public final String bookingId;
+        public final int receiptType;
 
+        public Receipt(){
+            this.id = "";
+            this.bookingId = "";
+            this.onlineAmount = "";
+            this.cashAmount = "";
+            this.penaltyAmount = "";
+            this.penaltyWaiveOffAmount = "";
+            this.date = "";
+            this.isDeposit = false;
+            this.receiptType = -1;
+        }
+        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, String penaltyAmount,
+                       String penaltyWaiveOffAmount, String date, int receiptType) {
+            this.id = id;
+            this.bookingId = bookingId;
+            this.onlineAmount = onlineAmount;
+            this.cashAmount = cashAmount;
+            this.penaltyAmount = penaltyAmount;
+            this.penaltyWaiveOffAmount = penaltyWaiveOffAmount;
+            this.date = date;
+            this.isDeposit = false;
+            this.receiptType = receiptType;
+        }
         public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, String penaltyAmount, String penaltyWaiveOffAmount, String date, Boolean isDeposit) {
             this.id = id;
             this.bookingId = bookingId;
@@ -893,6 +941,7 @@ public class DataModule extends SQLiteOpenHelper {
             this.penaltyWaiveOffAmount = penaltyWaiveOffAmount;
             this.date = date;
             this.isDeposit = isDeposit;
+            this.receiptType = -1;
         }
     }
 

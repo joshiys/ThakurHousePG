@@ -55,6 +55,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         adminScreen.setOnClickListener(this);
         viewTenant.setOnClickListener(this);
 
+        receivedRentValue.setOnClickListener(this);
+        outstandingRentValue.setOnClickListener(this);
+
         roomNumber.setSelection(roomNumber.getText().length());
 
         sendSMS.setEnabled(false);
@@ -76,6 +79,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String outstandingRent = "", outstandingDeposit = "", outstandingPenalty = "";
 
         switch(view.getId()){
+            case R.id.receivedRent:
+                Intent receivedIntent = new Intent(MainActivity.this, ViewReceiptsActivity.class);
+                startActivity(receivedIntent);
+                break;
             case R.id.receipt_button:
 
                 Toast.makeText(MainActivity.this, "Launching Receipts", Toast.LENGTH_SHORT).show();
