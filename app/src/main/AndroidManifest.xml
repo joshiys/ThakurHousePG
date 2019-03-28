@@ -17,37 +17,6 @@
             android:name=".ReceiptActivity"
             android:label="@string/title_activity_payment"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".OldFiles.MasterRecordActivity" />
-        <activity android:name=".OldFiles.TenantRecordActivity" />
-        <activity
-            android:name=".OldFiles.TenantDataActivity"
-            android:label="Tenant Data">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
-
-        </activity>
-        <activity
-            android:name=".OldFiles.RentActivity"
-            android:label="Rent" />
-        <activity
-            android:name=".OldFiles.AdminActivity"
-            android:label="Admin" />
-        <activity
-            android:name=".OldFiles.MasterDBActivity"
-            android:label="Master Table">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN"/> -->
-
-
-            <!-- <category android:name="android.intent.category.LAUNCHER"/> -->
-            <!-- </intent-filter> -->
-        </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
