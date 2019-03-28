@@ -18,6 +18,8 @@ import android.widget.TableLayout;
 import android.widget.Toast;
 import com.example.thakurhousepg.BedViewActivity;
 
+import java.util.ArrayList;
+
 public class OccupancyAndBookingActivity extends AppCompatActivity implements BedsListFragment.OnBedsListInteractionListener {
     public DataModule datamodule;
     public TabLayout tabLayout;
@@ -133,9 +135,23 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         if(bed != null && bed.bookingId != null) {
             Toast.makeText(OccupancyAndBookingActivity.this, "Launching Rent Payment", Toast.LENGTH_SHORT).show();
             Intent receiptIntent = new Intent(OccupancyAndBookingActivity.this, ReceiptActivity.class);
-            receiptIntent.putExtra("SECTION", "rent");
+            receiptIntent.putExtra("SECTION", "Rent");
             receiptIntent.putExtra("ROOM_NUMBER", item.bedNumber);
-            receiptIntent.putExtra("AMOUNT", item.rentPayble);
+
+            //XXX : Assuming there will be maximum three entries
+            ArrayList<DataModule.Pending> pendingEntries = datamodule.getPendingEntriesForBooking(bed.bookingId);
+            String rent = "", deposit = "";
+            for (DataModule.Pending pendingEntry : pendingEntries) {
+                if(pendingEntry.isDeposit){
+                    deposit = String.valueOf(pendingEntry.pendingAmt);
+                }
+                if(!pendingEntry.isDeposit && !pendingEntry.isPenalty){
+                    rent = String.valueOf(pendingEntry.pendingAmt);
+                }
+            }
+            //XXX : Booking should not be null because bed is already booked.
+            receiptIntent.putExtra("RENT_AMOUNT", rent);
+            receiptIntent.putExtra("DEPOSIT_AMOUNT", deposit);
 
             startActivity(receiptIntent);
         } else {

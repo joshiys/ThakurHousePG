@@ -157,16 +157,26 @@ public class DataModule extends SQLiteOpenHelper {
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString();
 
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
-        if(newTenantId != null)
-            createNewBooking("101.0", newTenantId, "8000", "8000", date);
+        if(newTenantId != null) {
+            String newBookingId = createNewBooking("101.0", newTenantId, "8000", "8000", date);
+            createPendingEntryForBooking(newBookingId, 1, "8000");
+            createPendingEntryForBooking(newBookingId, 2, "8000");
+        }
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
-        if(newTenantId != null)
-            createNewBooking("102.0", newTenantId, "9000", "9000", date);
+        if(newTenantId != null) {
+            String newBookingId = createNewBooking("102.0", newTenantId, "9000", "9000", date);
+            createPendingEntryForBooking(newBookingId, 1, "9000");
+            createPendingEntryForBooking(newBookingId, 2, "9000");
+        }
+
 
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
-        if(newTenantId != null)
-            createNewBooking("103.0", newTenantId, "9000", "9000", date);
+        if(newTenantId != null) {
+            String newBookingId = createNewBooking("103.0", newTenantId, "9000", "9000", date);
+            createPendingEntryForBooking(newBookingId, 1, "9000");
+            createPendingEntryForBooking(newBookingId, 2, "9000");
+        }
     }
 
     @Override
@@ -657,21 +667,27 @@ public class DataModule extends SQLiteOpenHelper {
         return String.valueOf(outstandingRent);
     }
 
-    public String getTotalReceivedAmountForMonth(int month) {
+    public String getTotalReceivedAmountForMonth(int month, ReceiptType type) {
+//        ReceiptType type = ReceiptType.RENT;
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "select RECEIPT_CASH_AMOUNT + RECEIPT_ONLINE_AMOUNT from " + RECEIPTS_TABLE_NAME + " WHERE strftime('%m', RECEIPT_DATE) = " +
-                "'0" + String.valueOf(month) + "'";
+                "'0" + String.valueOf(month) + "' and RECEIPT_TYPE = " + type.getIntValue();
         Cursor cursor = db.rawQuery(query, null);
 
         Integer receivedAmount = 0;
 
-        if (cursor.moveToNext()) {
-            receivedAmount += cursor.getInt(0);
+        while(cursor.moveToNext()) {
+//            if(cursor.getInt(1) == ReceiptType.RENT.getIntValue()) {
+                receivedAmount += cursor.getInt(0);
+//            } else if()
         }
+//            receivedAmount += cursor.getInt(0);
+
 
         cursor.close();
         return String.valueOf(receivedAmount);
     }
+
 
     public int getTotalPendingAmount() {
         SQLiteDatabase db = this.getReadableDatabase();

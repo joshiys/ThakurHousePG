@@ -31,6 +31,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class ReceiptActivity extends AppCompatActivity {
 
     /**
@@ -135,6 +137,9 @@ public class ReceiptActivity extends AppCompatActivity {
 
         private CheckBox onlineCheckBox, cashCheckBox, advanceCheckBox;
 
+//        String bookingRent = "", bookingDeposit = "", bookingPenalty = "";
+        String dueAmount = "0";
+
         public ReceiptFragment() {
         }
 
@@ -145,6 +150,9 @@ public class ReceiptActivity extends AppCompatActivity {
         public static ReceiptFragment newInstance(int sectionNumber) {
             ReceiptFragment fragment = new ReceiptFragment();
             Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
             return fragment;
@@ -176,13 +184,15 @@ public class ReceiptActivity extends AppCompatActivity {
             cashAmt.setText("0");
 
             advanceCheckBox = (CheckBox) rootView.findViewById(R.id.receipt_advance_checkbox);
-            if (getArguments().getInt(ARG_SECTION_NUMBER) == 2) {
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 2 || getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
                 advanceCheckBox.setVisibility(View.INVISIBLE);
             }
 
             if(bundle.getString("ROOM_NUMBER") != null) {
                 roomNumber.setText(bundle.getString("ROOM_NUMBER"));
             }
+
+            reloadDueAmount();
 
             roomNumber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange(View v, boolean hasFocus) {
@@ -213,15 +223,21 @@ public class ReceiptActivity extends AppCompatActivity {
                         Log.v(TAG, "Focus Changed: " + roomNumber.getText().toString());
                         DataModule.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
                         if(bed != null && bed.bookingId != null) {
-                            DataModule.Booking booking = dbHelper.getBookingInfo(bed.bookingId);
-                            if (booking != null) {
-                                /* SAHIRE: Do I have to take pending rent from pending table or from Booking table?????? */
-                                totalAmount.setText(booking.rentAmount);
-                                totalAmount.setSelection(totalAmount.getText().length());
+                            reloadDueAmount();
+                            totalAmount.setText(dueAmount);
+                            totalAmount.setSelection(totalAmount.getText().length());
+                            if(onlineCheckBox.isChecked()){ //checked
+                                onlineAmt.setEnabled(true);
+                                onlineAmt.setText(totalAmount.getText().toString());
+                                onlineAmt.setSelection(onlineAmt.getText().length());
+                            }else if(cashCheckBox.isChecked()) {
+                                cashAmt.setEnabled(false);
+                                cashAmt.setText("0");
+                                cashAmt.setSelection(cashAmt.getText().length());
                             }
                         }
                     } else{
-                        totalAmount.setText("");
+                        totalAmount.setText("0");
                         totalAmount.setSelection(totalAmount.getText().length());
                     }
                 }
@@ -242,6 +258,7 @@ public class ReceiptActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Log.i(TAG, "Save Button Tapped");
 
+                    //SAHIRE: Do we need AlterDialog to confirm Room Payment
                     if(validate()) {
                         DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
 
@@ -308,8 +325,9 @@ public class ReceiptActivity extends AppCompatActivity {
             });
 
 
-            if(bundle.getString("AMOUNT") != null) {
-                totalAmount.setText(bundle.getString("AMOUNT"));
+            /*if(bundle.getString("RENT_AMOUNT") != null) */{
+//                totalAmount.setText(bundle.getString("RENT_AMOUNT"));
+                totalAmount.setText(dueAmount);
                 onlineCheckBox.setChecked(true);
             }
 
@@ -327,8 +345,13 @@ public class ReceiptActivity extends AppCompatActivity {
                 isValid = false;
             }
 
-            if(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString()) > Integer.parseInt(totalAmount.getText().toString())) {
-                isValid = false;
+            if(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())
+                    > Integer.parseInt(totalAmount.getText().toString())) {
+                if(totalAmount.getText().toString().equals("0") && advanceCheckBox.isChecked()){
+                    isValid = true;
+                } else {
+                    isValid = false;
+                }
             }
 
             return isValid;
@@ -353,6 +376,39 @@ public class ReceiptActivity extends AppCompatActivity {
 
             }
         };
+        private void reloadDueAmount() {
+            String bookingRent = "0", bookingDeposit = "0", bookingPenalty = "0";
+            if(roomNumber.getText().toString().isEmpty() == false){
+                DataModule.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
+                if (bed != null && bed.bookingId != null) {
+
+                    ArrayList<DataModule.Pending> entry = dbHelper.getPendingEntriesForBooking(bed.bookingId);
+                    for (DataModule.Pending pendingEntry : entry) {
+                        if (pendingEntry.isDeposit) {
+                            bookingDeposit = String.valueOf(pendingEntry.pendingAmt);
+
+                        }
+                        if (pendingEntry.isPenalty) {
+                            bookingPenalty = String.valueOf(pendingEntry.pendingAmt);
+                        }
+                        if (!pendingEntry.isDeposit && !pendingEntry.isPenalty) {
+                            bookingRent = String.valueOf(pendingEntry.pendingAmt);
+                        }
+                    }
+                }
+            }
+            switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
+                case 1:
+                    dueAmount = bookingRent;
+                    break;
+                case 2:
+                    dueAmount = bookingDeposit;
+                    break;
+                case 3:
+                    dueAmount = bookingPenalty;
+                    break;
+            }
+        }
     }
 
 

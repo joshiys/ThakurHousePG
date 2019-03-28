@@ -28,7 +28,7 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/main_current_received"
+            android:id="@+id/receivedRent"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
             android:textColor="@android:color/holo_green_dark" />
 
         <Button
-            android:id="@+id/main_current_pending"
+            android:id="@+id/outstandingRent"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,7 +46,38 @@
             android:textColor="@android:color/holo_red_dark" />
 
         <Button
-            android:id="@+id/main_total_outstanding"
+            android:id="@+id/totalRent"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Total" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <Button
+            android:id="@+id/receivedDeposit"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Received"
+            android:textColor="@android:color/holo_green_dark" />
+
+        <Button
+            android:id="@+id/outstandingDeposit"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Pending"
+            android:textColor="@android:color/holo_red_dark" />
+
+        <Button
+            android:id="@+id/totalDeposit"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

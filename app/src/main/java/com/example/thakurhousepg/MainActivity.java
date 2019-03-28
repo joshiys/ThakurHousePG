@@ -21,7 +21,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button sendSMS, adminScreen, viewTenant;
     Button btn_receipt, btn_occupancy, btn_payment;
     EditText roomNumber;
-    Button receivedValue, pendingValue, totalOutstandingValue;
+    Button receivedRentValue, outstandingRentValue, totalExpectedRentValue;
+    Button receivedDepositValue, outstandingDepositValue, totalExpectedDepositValue;
     TextView headerView;
 
     private static final String TAG = "MainActivity";
@@ -32,9 +33,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
 
-         btn_receipt = findViewById(R.id.receipt_button);
-         btn_occupancy = findViewById(R.id.occupancy_button);
-         btn_payment = findViewById(R.id.payments_button);
+        btn_receipt = findViewById(R.id.receipt_button);
+        btn_occupancy = findViewById(R.id.occupancy_button);
+        btn_payment = findViewById(R.id.payments_button);
 
         adminScreen = findViewById(R.id.adminScreen);
         viewTenant = findViewById(R.id.viewRoomButton);
@@ -42,9 +43,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         roomNumber = findViewById(R.id.roomNumberText);
         sendSMS = findViewById(R.id.sendSMSButton);
 
-        receivedValue = (Button) findViewById(R.id.main_current_received);
-        pendingValue = (Button) findViewById(R.id.main_current_pending);
-        totalOutstandingValue = (Button) findViewById(R.id.main_total_outstanding);
+        receivedRentValue = (Button) findViewById(R.id.receivedRent);
+        outstandingRentValue = (Button) findViewById(R.id.outstandingRent);
+        totalExpectedRentValue = (Button) findViewById(R.id.totalRent);
 
         headerView = findViewById(R.id.main_month);
 
@@ -110,9 +111,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     void setTotalOutstandingRent(){
-        totalOutstandingValue.setText(dbHelper.getTotalExpectedRent());
-        pendingValue.setText(String.valueOf(dbHelper.getTotalPendingAmount()));
-        receivedValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1));
+        receivedRentValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
+                DataModule.ReceiptType.RENT));
+        outstandingRentValue.setText(String.valueOf(dbHelper.getTotalPendingAmount()));
+        totalExpectedRentValue.setText(dbHelper.getTotalExpectedRent());
     }
 
     private void setPendingAmountEntries() {
