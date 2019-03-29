@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+
 public class TenantInformationActivity extends AppCompatActivity implements ReceiptsListFragment.OnListFragmentInteractionListener {
     private DataModule dataModule;
     private EditText tenantName;
@@ -62,6 +64,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
             setTitle("Add Tenant");
         }
 
+        this.getWindow().setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         saveButton = findViewById(R.id.add_tenant_save);
         saveButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {

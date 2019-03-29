@@ -21,12 +21,15 @@ import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
 
 public class BookingScreenActivity extends AppCompatActivity {
 
     private DataModule dataModule;
-    private EditText rentAmount, depositAmount, bedNumber;
+    private EditText rentAmount, depositAmount, bedNumber, bookingDate;
 
     private SeekBar roomSplitSeeker;
 
@@ -59,6 +62,7 @@ public class BookingScreenActivity extends AppCompatActivity {
         rentAmount = findViewById(R.id.booking_deposit);
         depositAmount = findViewById(R.id.booking_rent);
         bedNumber = findViewById(R.id.booking_bed_number);
+        bookingDate = findViewById(R.id.bookingDate);
 
         saveButton = findViewById(R.id.saveTenanButton);
 
@@ -80,6 +84,8 @@ public class BookingScreenActivity extends AppCompatActivity {
 
         roomSplitSeeker = findViewById(R.id.booking_split_room_seek_bar);
 
+        bookingDate.setText(new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
+
         bookButton = findViewById(R.id.booking_book_button);
         bookButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             public void onFocusChange (View v, boolean hasFocus) {
@@ -89,6 +95,9 @@ public class BookingScreenActivity extends AppCompatActivity {
                 }
             }
         });
+
+        this.getWindow().setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
 
         bookButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,11 +110,21 @@ public class BookingScreenActivity extends AppCompatActivity {
                 //dataModule.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(), "", tenantEmail.getText().toString(), tenantAddress.getText().toString());
 
                 if(tenantId != null) {
-                    String newBookingId = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
+                    String newBookingId = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), bookingDate.getText().toString());
                     Log.i(TAG, "result is " + newBookingId);
+
+//                    SimpleDateFormat sdf  =   new SimpleDateFormat("yyyy-MM-dd");
+//                    Date date = sdf.parse(bookingDate.getText().toString());
+//                    Calendar cal = Calendar.getInstance();
+//                    cal.setTime(date);
+//                    int month = cal.get(Calendar.MONTH);
+//                    int currentMonth = Calendar.getInstance().get(Calendar.MONTH);
+
                     if(!newBookingId.equals("-1")) {
+//                        if(month == currentMonth) {
                         //TODO: Add Deposit and Rent entries to Pending table
                         String pendingRent = reduceFirstRentCheckbox.isChecked() ? firstRent.getText().toString():rentAmount.getText().toString();
+                        //XXX : Do not create pending entry if Booking date is advance because penalty will be added automatically if month changes
                         dataModule.createPendingEntryForBooking(newBookingId, 1, pendingRent);
                         dataModule.createPendingEntryForBooking(newBookingId, 2, depositAmount.getText().toString());
 
@@ -157,7 +176,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                     firstRent.setText(rentAmount.getText());
                 } else {
                     firstRent.setEnabled(false);
-                    firstRent.setText("0");
+                    firstRent.setText("");
                 }
             }
         });

@@ -18,19 +18,33 @@
     <EditText
         android:id="@+id/booking_first_rent"
         android:layout_width="0dp"
-        android:layout_height="47dp"
-        android:layout_marginStart="8dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="128dp"
-        android:layout_marginEnd="108dp"
         android:ems="10"
         android:enabled="false"
         android:hint="Amount for first rent"
         android:inputType="textPersonName"
         android:singleLine="true"
+        app:layout_constraintEnd_toStartOf="@+id/bookingDate"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/booking_first_rent_checkbox"
+        app:layout_constraintTop_toBottomOf="@+id/divider"/>
+
+    <EditText
+        android:id="@+id/bookingDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="128dp"
+        android:layout_marginEnd="8dp"
+        android:ems="10"
+        android:hint="Booking Date"
+        android:inputType="date"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/booking_first_rent_checkbox"
-        app:layout_constraintTop_toTopOf="@+id/divider" />
+        app:layout_constraintStart_toEndOf="@+id/booking_first_rent"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <EditText
         android:id="@+id/booking_rent"
