@@ -829,6 +829,12 @@ public class DataModule extends SQLiteOpenHelper {
 
         if(cursor.getCount() != 0) {
             while (cursor.moveToNext()) {
+                //SAHIFRE : HACK for now - fix in future release
+                ReceiptType type = receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))];
+                if(cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE)) == ReceiptType.PENALTY.getIntValue() && cursor.getInt(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF)) > 0){
+                    type = ReceiptType.WAIVEOFF;
+                }
+
                 receipts.add(new Receipt(
                         cursor.getString(cursor.getColumnIndex(RECEIPT_ID)),
                         cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
@@ -836,7 +842,7 @@ public class DataModule extends SQLiteOpenHelper {
                         cursor.getString(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT)),
                         cursor.getInt(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF)) > 0,
                         cursor.getString(cursor.getColumnIndex(RECEIPT_DATE)),
-                        receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))])
+                        type)
                 );
             }
         }
@@ -1008,7 +1014,8 @@ public class DataModule extends SQLiteOpenHelper {
         RENT,
         DEPOSIT,
         PENALTY,
-        ADVANCE;
+        ADVANCE,
+        WAIVEOFF;
 
         public int getIntValue() {
             switch(this) {
