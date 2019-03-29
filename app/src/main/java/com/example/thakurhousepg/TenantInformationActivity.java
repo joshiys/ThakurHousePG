@@ -3,6 +3,7 @@ package com.example.thakurhousepg;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,7 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class TenantInformationActivity extends AppCompatActivity {
+public class TenantInformationActivity extends AppCompatActivity implements ReceiptsListFragment.OnListFragmentInteractionListener {
     private DataModule dataModule;
     private EditText tenantName;
     private EditText tenantEmail;
@@ -22,7 +23,7 @@ public class TenantInformationActivity extends AppCompatActivity {
     private Intent returnIntent = new Intent();
 
     private String tenantId = null;
-    private DataModule.Tenant tenantInfoForModification = null;
+    public DataModule.Tenant tenantInfoForModification = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,13 @@ public class TenantInformationActivity extends AppCompatActivity {
             tenantEmail.setText(tenantInfoForModification.email);
             tenantMobile.setText(tenantInfoForModification.mobile);
             tenantAddress.setText(tenantInfoForModification.address);
+        }
+
+        if (savedInstanceState == null) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            ReceiptsListFragment fragment = new ReceiptsListFragment();
+            transaction.replace(R.id.tenant_receipts_list_container, fragment);
+            transaction.commit();
         }
 
         saveButton = findViewById(R.id.add_tenant_save);
@@ -109,5 +117,7 @@ public class TenantInformationActivity extends AppCompatActivity {
         return true;
     }
 
+    public void onListFragmentInteraction(DataModule.Receipt item) {
 
+    }
 }

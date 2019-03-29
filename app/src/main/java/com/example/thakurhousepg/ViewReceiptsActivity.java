@@ -55,7 +55,7 @@ public class ViewReceiptsActivity extends AppCompatActivity {
                 for(DataModule.Receipt receipt : receiptArray){
                     DataModule.Booking booking = datamodule.getBookingInfo(receipt.bookingId);
                     addNewTableRow(booking.bedNumber, receipt.id, receipt.onlineAmount, receipt.cashAmount,
-                            receipt.receiptType == 1 ? "Rent" : (receipt.receiptType == 2 ? "Deposit" : "Advance"));
+                            receipt.type.toString());
                 }
             }
             @Override
@@ -68,8 +68,7 @@ public class ViewReceiptsActivity extends AppCompatActivity {
         ArrayList<DataModule.Receipt> receiptArray = datamodule.getAllReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1);
         for(DataModule.Receipt receipt : receiptArray){
             DataModule.Booking booking = datamodule.getBookingInfo(receipt.bookingId);
-            addNewTableRow(booking.bedNumber, receipt.id, receipt.onlineAmount, receipt.cashAmount,
-                    receipt.receiptType == 1 ? "Rent" : (receipt.receiptType == 2 ? "Deposit" : "Advance"));
+            addNewTableRow(booking.bedNumber, receipt.id, receipt.onlineAmount, receipt.cashAmount, receipt.type.toString());
         }
 
     }

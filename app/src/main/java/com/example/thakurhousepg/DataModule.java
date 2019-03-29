@@ -67,6 +67,10 @@ public class DataModule extends SQLiteOpenHelper {
     private static DataModule _instance = null;
     private static Context _context = null;
 
+    // Use this to convert int values to actual enum values
+    private final ReceiptType[] receiptTypeValues = ReceiptType.values();
+
+
     //Callers  must make sure that context is set first using DataModule.setContext()
     public static DataModule getInstance() {
         if(_instance == null && _context != null) {
@@ -750,6 +754,31 @@ public class DataModule extends SQLiteOpenHelper {
         return pendingEntries;
     }
 
+    public ArrayList<Receipt> getReceiptsForTenant(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ArrayList<Receipt> receiptEntries = new ArrayList<Receipt>();
+        String query = "select * from " + RECEIPTS_TABLE_NAME +
+                " LEFT JOIN " + BOOKING_TABLE_NAME + " ON " +
+                BOOKING_TABLE_NAME + ".BOOKING_ID = " +  RECEIPTS_TABLE_NAME + ".BOOKING_ID" +
+                " WHERE " + BOOKING_TABLE_NAME + "." + TENANT_ID + " = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{id});
+
+        while (cursor.moveToNext()) {
+            receiptEntries.add(new Receipt(
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_ID)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)),
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT)),
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF_AMT)),
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_DATE)),
+                    receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))])
+            );
+        }
+            return receiptEntries;
+    }
+
     private int getNewReceiptId() {
         SQLiteDatabase db = this.getReadableDatabase();
         Integer highestReceiptId = 1;
@@ -765,6 +794,7 @@ public class DataModule extends SQLiteOpenHelper {
 
         return highestReceiptId;
     }
+
     //TODO: Validation
     public void createReceipt(ReceiptType type, String bookingId, String onlineAmount, String cashAmount) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -800,9 +830,10 @@ public class DataModule extends SQLiteOpenHelper {
                         cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                         cursor.getString(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)),
                         cursor.getString(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT)),
-                        "", "",
+                        cursor.getString(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF_AMT)),
                         cursor.getString(cursor.getColumnIndex(RECEIPT_DATE)),
-                        cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))));
+                        receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))])
+                );
             }
         }
         cursor.close();
@@ -903,45 +934,19 @@ public class DataModule extends SQLiteOpenHelper {
         public final String onlineAmount;
         public final String cashAmount;
         public final String date;
-        public final String penaltyAmount;
         public final String penaltyWaiveOffAmount;
-        public final Boolean isDeposit;
+        public final ReceiptType type;
         public final String bookingId;
-        public final int receiptType;
 
-        public Receipt(){
-            this.id = "";
-            this.bookingId = "";
-            this.onlineAmount = "";
-            this.cashAmount = "";
-            this.penaltyAmount = "";
-            this.penaltyWaiveOffAmount = "";
-            this.date = "";
-            this.isDeposit = false;
-            this.receiptType = -1;
-        }
-        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, String penaltyAmount,
-                       String penaltyWaiveOffAmount, String date, int receiptType) {
+
+        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, String penaltyWaiveOffAmount, String date, ReceiptType type) {
             this.id = id;
             this.bookingId = bookingId;
             this.onlineAmount = onlineAmount;
             this.cashAmount = cashAmount;
-            this.penaltyAmount = penaltyAmount;
             this.penaltyWaiveOffAmount = penaltyWaiveOffAmount;
             this.date = date;
-            this.isDeposit = false;
-            this.receiptType = receiptType;
-        }
-        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, String penaltyAmount, String penaltyWaiveOffAmount, String date, Boolean isDeposit) {
-            this.id = id;
-            this.bookingId = bookingId;
-            this.onlineAmount = onlineAmount;
-            this.cashAmount = cashAmount;
-            this.penaltyAmount = penaltyAmount;
-            this.penaltyWaiveOffAmount = penaltyWaiveOffAmount;
-            this.date = date;
-            this.isDeposit = isDeposit;
-            this.receiptType = -1;
+            this.type = type;
         }
     }
 
@@ -974,13 +979,13 @@ public class DataModule extends SQLiteOpenHelper {
         public int getIntValue() {
             switch(this) {
                 case RENT:
-                    return 1;
+                    return 0;
                 case DEPOSIT:
-                    return 2;
+                    return 1;
                 case PENALTY:
-                    return 3;
+                    return 2;
                 case ADVANCE:
-                    return 4;
+                    return 3;
                 default:
                     return 0;
             }
