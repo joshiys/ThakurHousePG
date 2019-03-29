@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final ArrayList<DataModule.Receipt> mValues;
+    public ArrayList<DataModule.Receipt> mValues;
     private final OnListFragmentInteractionListener mListener;
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
@@ -50,6 +50,9 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             holder.receiptDate.setText(holder.mItem.date);
             holder.receiptType.setText(holder.mItem.type.toString());
 
+            //TODO: Modify the mItem to point to a local struct that will contain, bed+receipt info
+            holder.roomNumber.setText(DataModule.getInstance().getBookingInfo(holder.mItem.bookingId).bedNumber);
+
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -78,6 +81,7 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
+        public final TextView roomNumber;
         public final TextView onlineRentAmount;
         public final TextView cashRentAmount;
         public final TextView receiptDate;
@@ -87,10 +91,11 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         public ItemViewHolder(View view) {
             super(view);
             mView = view;
-            onlineRentAmount = (TextView) view.findViewById(R.id.receipt_list_online_amount);
-            cashRentAmount = (TextView) view.findViewById(R.id.receipt_list_cash_amount);
-            receiptDate = (TextView) view.findViewById(R.id.receipt_list_date);
-            receiptType = (TextView) view.findViewById(R.id.receipt_list_type);
+            onlineRentAmount = view.findViewById(R.id.receipt_list_online_amount);
+            cashRentAmount = view.findViewById(R.id.receipt_list_cash_amount);
+            receiptDate = view.findViewById(R.id.receipt_list_date);
+            receiptType = view.findViewById(R.id.receipt_list_type);
+            roomNumber = view.findViewById(R.id.receipt_list_room_number);
         }
 
         @Override
@@ -101,6 +106,7 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
+        public final TextView roomNumberLabel;
         public final TextView onlineRentAmountLabel;
         public final TextView cashRentAmountLabel;
         public final TextView receiptDateLabel;
@@ -113,11 +119,13 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             cashRentAmountLabel = (TextView) view.findViewById(R.id.receipt_header_cash_amount);
             receiptDateLabel = (TextView) view.findViewById(R.id.receipt_header_date);
             receiptTypeLabel = (TextView) view.findViewById(R.id.receipt_header_type);
+            roomNumberLabel = view.findViewById(R.id.receipt_header_room_number);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + "'";
+            return super.toString() + " '" + onlineRentAmountLabel.getText() + " , " + cashRentAmountLabel.getText() +
+                    receiptDateLabel.getText() + " , " + receiptTypeLabel.getText() + " , " + "'";
         }
     }
 }

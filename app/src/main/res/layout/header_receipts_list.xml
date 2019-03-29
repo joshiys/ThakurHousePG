@@ -5,6 +5,15 @@
     android:gravity="fill_horizontal">
 
     <TextView
+        android:id="@+id/receipt_header_room_number"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@android:color/black"
+        android:text="Room No."
+        android:textColor="@android:color/white" />
+
+    <TextView
         android:id="@+id/receipt_header_online_amount"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

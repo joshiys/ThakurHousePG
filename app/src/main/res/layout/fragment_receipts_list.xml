@@ -6,6 +6,7 @@
     android:name="com.example.thakurhousepg.ReceiptsListFragment"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/border"
     app:layoutManager="LinearLayoutManager"
     tools:context=".ReceiptsListFragment"
     tools:listitem="@layout/fragment_receipts_item" />

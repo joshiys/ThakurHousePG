@@ -20,10 +20,9 @@ public class DataModule extends SQLiteOpenHelper {
     private static final String MISC_TABLE_NAME = "misc_table";
 
     public static final String TENANT_TABLE_NAME = "tenant_table";
-    public static final String PENDING_AMOUNT_TABLE_NAME = "penalty_table";
+    public static final String PENDING_AMOUNT_TABLE_NAME = "pending_table";
     public static final String BEDS_TABLE_NAME = "beds_table";
-    public static final String RECEIPTS_TABLE_NAME = "RECEIPTs_table";
-    public static final String OVERDUE_TABLE_NAME = "overdue_table";
+    public static final String RECEIPTS_TABLE_NAME = "receipts_table";
     public static final String BOOKING_TABLE_NAME = "bookings_table";
 
 
@@ -165,14 +164,12 @@ public class DataModule extends SQLiteOpenHelper {
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
         if(newTenantId != null) {
             String newBookingId = createNewBooking("101.0", newTenantId, "8000", "8000", date);
-            createPendingEntryForBooking(newBookingId, 1, "8000");
             createPendingEntryForBooking(newBookingId, 2, "8000");
         }
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
         if(newTenantId != null) {
             String newBookingId = createNewBooking("102.0", newTenantId, "9000", "9000", date);
-            createPendingEntryForBooking(newBookingId, 1, "9000");
             createPendingEntryForBooking(newBookingId, 2, "9000");
         }
 
@@ -180,7 +177,6 @@ public class DataModule extends SQLiteOpenHelper {
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
         if(newTenantId != null) {
             String newBookingId = createNewBooking("103.0", newTenantId, "9000", "9000", date);
-            createPendingEntryForBooking(newBookingId, 1, "9000");
             createPendingEntryForBooking(newBookingId, 2, "9000");
         }
     }

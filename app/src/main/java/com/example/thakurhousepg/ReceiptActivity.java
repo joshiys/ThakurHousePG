@@ -326,6 +326,12 @@ public class ReceiptActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     if(b){ //checked
                         cashAmt.setEnabled(true);
+
+                        if(onlineAmt.getText().toString().isEmpty())
+                            onlineAmt.setText("0");
+                        if(totalAmount.getText().toString().isEmpty())
+                            totalAmount.setText("0");
+
                         cashAmt.setText(String.valueOf(Integer.valueOf(totalAmount.getText().toString()) - Integer.valueOf(onlineAmt.getText().toString())));
                         cashAmt.setSelection(cashAmt.getText().length());
                         cashAmt.requestFocus();
