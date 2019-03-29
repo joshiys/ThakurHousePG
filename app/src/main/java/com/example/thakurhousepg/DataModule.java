@@ -58,7 +58,9 @@ public class DataModule extends SQLiteOpenHelper {
     private static final String RECEIPT_CASH_AMOUNT = "RECEIPT_CASH_AMOUNT";
     private static final String RECEIPT_DATE = "RECEIPT_DATE";
     private static final String RECEIPT_TYPE = "RECEIPT_TYPE";
+    //XXX : We might just need flag if the receipt is paid or waived off
     private static final String RECEIPT_PENALTY_WAIVE_OFF_AMT = "RECEIPT_PENALTY_WAIVE_OFF_AMT";
+    private static final String RECEIPT_PENALTY_WAIVE_OFF = "RECEIPT_PENALTY_WAIVE_OFF";
 
     private static final String TAG = "DataModule";
 
@@ -136,7 +138,7 @@ public class DataModule extends SQLiteOpenHelper {
                 " RECEIPT_CASH_AMOUNT INTEGER," +
                 " RECEIPT_DATE TEXT," +
                 " RECEIPT_TYPE INTEGER," +
-                " RECEIPT_PENALTY_WAIVE_OFF_AMT INTEGER," +
+                " RECEIPT_PENALTY_WAIVE_OFF BOOLEAN," +
                 " BOOKING_ID INTEGER," +
                 " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)" +
                 ")";
@@ -220,6 +222,8 @@ public class DataModule extends SQLiteOpenHelper {
 
         contentValues.put(PENDING_AMOUNT, amount);
         contentValues.put(BOOKING_ID, id);
+        //type = 2 for Deposit
+        //type = 3 for Penalty
         contentValues.put(PENDING_IS_DEPOSIT, (type == 2));
         contentValues.put(PENDING_IS_PENALTY, (type == 3));
 
@@ -771,7 +775,7 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                     cursor.getString(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)),
                     cursor.getString(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT)),
-                    cursor.getString(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF_AMT)),
+                    cursor.getInt(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF)) > 0,
                     cursor.getString(cursor.getColumnIndex(RECEIPT_DATE)),
                     receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))])
             );
@@ -796,7 +800,7 @@ public class DataModule extends SQLiteOpenHelper {
     }
 
     //TODO: Validation
-    public void createReceipt(ReceiptType type, String bookingId, String onlineAmount, String cashAmount) {
+    public void createReceipt(ReceiptType type, String bookingId, String onlineAmount, String cashAmount, boolean penaltyWaiveOff) {
         SQLiteDatabase db = this.getReadableDatabase();
         Integer highestReceiptId = getNewReceiptId();
 
@@ -811,6 +815,7 @@ public class DataModule extends SQLiteOpenHelper {
         contentValues.put(RECEIPT_ONLINE_AMOUNT, onlineAmount);
         contentValues.put(RECEIPT_DATE, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
         contentValues.put(RECEIPT_TYPE, type.getIntValue());
+        contentValues.put(RECEIPT_PENALTY_WAIVE_OFF, penaltyWaiveOff);
 
         db.insert(RECEIPTS_TABLE_NAME, null, contentValues);
     }
@@ -830,7 +835,7 @@ public class DataModule extends SQLiteOpenHelper {
                         cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                         cursor.getString(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)),
                         cursor.getString(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT)),
-                        cursor.getString(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF_AMT)),
+                        cursor.getInt(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF)) > 0,
                         cursor.getString(cursor.getColumnIndex(RECEIPT_DATE)),
                         receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))])
                 );
@@ -872,6 +877,36 @@ public class DataModule extends SQLiteOpenHelper {
 
         result.close();
         return result;
+    }
+    public void addPenaltyToOutstandingPayments() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Tenant> tenantList = new ArrayList<Tenant>();
+        Cursor cursor = db.rawQuery("select * from " + PENDING_AMOUNT_TABLE_NAME, null);
+        while (cursor.moveToNext()) {
+            if((cursor.getInt(cursor.getColumnIndex(PENDING_IS_DEPOSIT)) == 0) &&
+                    (cursor.getInt(cursor.getColumnIndex(PENDING_IS_PENALTY)) == 0)){
+                // Means Entry is for Rent
+                boolean status = createPendingEntryForBooking(cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                                                            3, "200");
+
+            }
+        }
+        cursor.close();
+    }
+
+    //SAHIRE: Need to re-write this function
+    public ArrayList<Tenant> getTenantWithOutstandingPayments(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Tenant> tenantList = new ArrayList<Tenant>();
+        Cursor cursor = db.rawQuery("select * from " + PENDING_AMOUNT_TABLE_NAME, null);
+        while (cursor.moveToNext()) {
+            Tenant tenant = getTenantInfoForBooking(cursor.getString(cursor.getColumnIndex(BOOKING_ID)));
+            if(tenant != null) {
+                tenantList.add(tenant);
+            }
+        }
+        cursor.close();
+        return tenantList;
     }
 
 //MARK: ---------------------------------- Data Class Definitions ---------------------------------
@@ -934,17 +969,17 @@ public class DataModule extends SQLiteOpenHelper {
         public final String onlineAmount;
         public final String cashAmount;
         public final String date;
-        public final String penaltyWaiveOffAmount;
+        public final boolean ispPenaltyWaiveOff;
         public final ReceiptType type;
         public final String bookingId;
 
 
-        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, String penaltyWaiveOffAmount, String date, ReceiptType type) {
+        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, boolean ispPenaltyWaiveOff, String date, ReceiptType type) {
             this.id = id;
             this.bookingId = bookingId;
             this.onlineAmount = onlineAmount;
             this.cashAmount = cashAmount;
-            this.penaltyWaiveOffAmount = penaltyWaiveOffAmount;
+            this.ispPenaltyWaiveOff = ispPenaltyWaiveOff;
             this.date = date;
             this.type = type;
         }

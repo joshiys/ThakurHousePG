@@ -142,7 +142,7 @@ public class ReceiptActivity extends AppCompatActivity {
         private Button saveButton;
         private DataModule dbHelper;
 
-        private CheckBox onlineCheckBox, cashCheckBox, advanceCheckBox;
+        private CheckBox onlineCheckBox, cashCheckBox, advanceCheckBox, waiveOffCheckBox;
 
 //        String bookingRent = "", bookingDeposit = "", bookingPenalty = "";
         String dueAmount = "0";
@@ -191,8 +191,14 @@ public class ReceiptActivity extends AppCompatActivity {
             cashAmt.setText("0");
 
             advanceCheckBox = (CheckBox) rootView.findViewById(R.id.receipt_advance_checkbox);
-            if (getArguments().getInt(ARG_SECTION_NUMBER) == 2 || getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
+            waiveOffCheckBox = (CheckBox) rootView.findViewById(R.id.waiveOffCheckBox);
+            waiveOffCheckBox.setVisibility(View.GONE);
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 2 ){
                 advanceCheckBox.setVisibility(View.INVISIBLE);
+            }
+            if(getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
+                advanceCheckBox.setVisibility(View.GONE);
+                waiveOffCheckBox.setVisibility(View.VISIBLE);
             }
 
             if(bundle.getString("ROOM_NUMBER") != null) {
@@ -284,7 +290,8 @@ public class ReceiptActivity extends AppCompatActivity {
                         }
 
                         //TODO: Check if the cash+online amount exceeds total amount, and ask user if they want to create and advance payment entry
-                        dbHelper.createReceipt(type, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString());
+                        dbHelper.createReceipt(type, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString(),
+                                (type == DataModule.ReceiptType.PENALTY ? waiveOffCheckBox.isChecked() : false));
                         if(type != DataModule.ReceiptType.ADVANCE) {
                             dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, type,
                                     String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())));

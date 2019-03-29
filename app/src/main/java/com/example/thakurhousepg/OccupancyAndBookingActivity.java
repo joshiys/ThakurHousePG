@@ -97,10 +97,17 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         //noinspection SimplifiableIfStatement
         switch(id) {
             case R.id.menu_actionAddPenalty:
+                datamodule.addPenaltyToOutstandingPayments();
+                BedsListContent.refresh();
+                BedsListFragment bedsFrag = (BedsListFragment) getSupportFragmentManager().findFragmentById(R.id.beds_fragment);
+                bedsFrag.reloadData();
+                //SAHIRE : Send SMS to All
                 break;
             case R.id.menu_actionShowOutstandings:
                 break;
             case R.id.menu_actionShowReceipts:
+                Intent receivedIntent = new Intent(OccupancyAndBookingActivity.this, ViewReceiptsActivity.class);
+                startActivity(receivedIntent);
                 break;
         }
 
