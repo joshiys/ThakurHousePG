@@ -56,11 +56,13 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                 tenantAddress.setText(tenantInfoForModification.address);
             }
 
-            if("VIEW_TENANT".equals(bundle.getString("ACTION"))) {
-                addTenantMode = false;
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(tenantName.getWindowToken(), 0);
-            }
+            //XXX : Not sure about this condition or why do we need VIEW_TENANT
+            //XXX : ACTION should be eight ADD_TENANT or MODIFY_TENANT only
+//            if("VIEW_TENANT".equals(bundle.getString("ACTION"))) {
+//                addTenantMode = false;
+//                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+//                imm.hideSoftInputFromWindow(tenantName.getWindowToken(), 0);
+//            }
         }
 
         if (savedInstanceState == null) {
@@ -73,7 +75,10 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
             transaction.commit();
         }
         if(bundle != null && ("MODIFY_TENANT".equals(bundle.getString("ACTION")))) {
+            addTenantMode = false;
             setTitle("Modify Tenant");
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(tenantName.getWindowToken(), 0);
         }else {
             setTitle("Add Tenant");
         }

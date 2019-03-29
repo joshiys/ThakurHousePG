@@ -133,7 +133,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
 
             Intent modifyTenantIntent = new Intent(OccupancyAndBookingActivity.this, TenantInformationActivity.class);
             modifyTenantIntent.putExtra("BED_NUMBER", item.bedNumber);
-            modifyTenantIntent.putExtra("ACTION", "VIEW_TENANT");
+            modifyTenantIntent.putExtra("ACTION", "MODIFY_TENANT");
             startActivity(modifyTenantIntent);
         } else {
             toast = Toast.makeText(OccupancyAndBookingActivity.this, "Empty Tenant: "+ item.bedNumber, Toast.LENGTH_SHORT);

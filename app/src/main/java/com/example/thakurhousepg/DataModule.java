@@ -163,14 +163,14 @@ public class DataModule extends SQLiteOpenHelper {
 
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
         if(newTenantId != null) {
-            String newBookingId = createNewBooking("101.0", newTenantId, "8000", "8000", date);
+            String newBookingId = createNewBooking("111.0", newTenantId, "8000", "8000", date);
             createPendingEntryForBooking(newBookingId, 1, "8000");
             createPendingEntryForBooking(newBookingId, 2, "8000");
         }
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
         if(newTenantId != null) {
-            String newBookingId = createNewBooking("102.0", newTenantId, "9000", "9000", date);
+            String newBookingId = createNewBooking("112.0", newTenantId, "9000", "9000", date);
             createPendingEntryForBooking(newBookingId, 1, "9000");
             createPendingEntryForBooking(newBookingId, 2, "9000");
         }
@@ -178,9 +178,9 @@ public class DataModule extends SQLiteOpenHelper {
 
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
         if(newTenantId != null) {
-            String newBookingId = createNewBooking("103.0", newTenantId, "9000", "9000", date);
-            createPendingEntryForBooking(newBookingId, 1, "9000");
-            createPendingEntryForBooking(newBookingId, 2, "9000");
+            String newBookingId = createNewBooking("113.0", newTenantId, "10500", "10500", date);
+            createPendingEntryForBooking(newBookingId, 1, "10500");
+            createPendingEntryForBooking(newBookingId, 2, "10500");
         }
     }
 
@@ -462,6 +462,12 @@ public class DataModule extends SQLiteOpenHelper {
             addNewBed("000.4", "4250", "4250");
             addNewBed("000.5", "4250", "4250");
             addNewBed("000.6", "4250", "4250");
+
+            //For Testing Only
+            addNewBed("111.0", "8000", "8000");
+            addNewBed("112.0", "9000", "9000");
+            addNewBed("113.0", "10500", "10500");
+
 
             for (int floorNo = 100; floorNo <= 600; floorNo += 100) {
                 int numOfRooms = 7;
@@ -768,7 +774,18 @@ public class DataModule extends SQLiteOpenHelper {
 
         Cursor cursor = db.rawQuery(query, new String[]{id});
 
-        while (cursor.moveToNext()) {
+        //SAHIRE : need to find right way to get latest receipt on top
+        if(cursor.moveToLast()){
+            receiptEntries.add(new Receipt(
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_ID)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)),
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT)),
+                    cursor.getInt(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF)) > 0,
+                    cursor.getString(cursor.getColumnIndex(RECEIPT_DATE)),
+                    receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))]));
+        }
+        while (cursor.moveToPrevious()) {
             receiptEntries.add(new Receipt(
                     cursor.getString(cursor.getColumnIndex(RECEIPT_ID)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
