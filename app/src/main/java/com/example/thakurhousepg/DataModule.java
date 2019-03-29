@@ -164,12 +164,14 @@ public class DataModule extends SQLiteOpenHelper {
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
         if(newTenantId != null) {
             String newBookingId = createNewBooking("101.0", newTenantId, "8000", "8000", date);
+            createPendingEntryForBooking(newBookingId, 1, "8000");
             createPendingEntryForBooking(newBookingId, 2, "8000");
         }
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
         if(newTenantId != null) {
             String newBookingId = createNewBooking("102.0", newTenantId, "9000", "9000", date);
+            createPendingEntryForBooking(newBookingId, 1, "9000");
             createPendingEntryForBooking(newBookingId, 2, "9000");
         }
 
@@ -177,6 +179,7 @@ public class DataModule extends SQLiteOpenHelper {
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
         if(newTenantId != null) {
             String newBookingId = createNewBooking("103.0", newTenantId, "9000", "9000", date);
+            createPendingEntryForBooking(newBookingId, 1, "9000");
             createPendingEntryForBooking(newBookingId, 2, "9000");
         }
     }

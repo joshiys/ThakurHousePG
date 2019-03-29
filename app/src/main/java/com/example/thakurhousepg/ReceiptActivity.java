@@ -193,6 +193,9 @@ public class ReceiptActivity extends AppCompatActivity {
             advanceCheckBox = (CheckBox) rootView.findViewById(R.id.receipt_advance_checkbox);
             waiveOffCheckBox = (CheckBox) rootView.findViewById(R.id.waiveOffCheckBox);
             waiveOffCheckBox.setVisibility(View.GONE);
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1 ){
+                advanceCheckBox.setVisibility(View.VISIBLE);
+            }
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 2 ){
                 advanceCheckBox.setVisibility(View.INVISIBLE);
             }
@@ -297,6 +300,7 @@ public class ReceiptActivity extends AppCompatActivity {
                                     String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())));
                         }
 
+                        Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
                         BedsListContent.refresh();
                         getActivity().finish();
                     } else {
