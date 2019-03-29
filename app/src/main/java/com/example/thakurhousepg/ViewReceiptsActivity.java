@@ -34,6 +34,7 @@ public class ViewReceiptsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_receipts);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("View Receipts");
 
         datamodule = DataModule.getInstance();
 

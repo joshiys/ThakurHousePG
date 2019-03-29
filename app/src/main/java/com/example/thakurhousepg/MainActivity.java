@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 Intent receiptIntent = new Intent(MainActivity.this, ReceiptActivity.class);
                 receiptIntent.putExtra("SECTION", "Rent");
+                receiptIntent.putExtra("RENT_AMOUNT", "");
+                receiptIntent.putExtra("DEPOSIT_AMOUNT", "");
 
                 startActivity(receiptIntent);
                 break;

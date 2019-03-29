@@ -2,6 +2,7 @@ package com.example.thakurhousepg;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -32,9 +33,13 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
 
         setContentView(R.layout.activity_occupancy_and_booking);
 
+        setTitle("Occupancy");
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         tabLayout = (TabLayout) findViewById(R.id.floor_tabs_id);
+
+        tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
     }
 
     @Override

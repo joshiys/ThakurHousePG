@@ -56,6 +56,12 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
             transaction.replace(R.id.tenant_receipts_list_container, fragment);
             transaction.commit();
         }
+        if(bundle != null && ("MODIFY_TENANT".equals(bundle.getString("ACTION")))) {
+            setTitle("Modify Tenant");
+        }else {
+            setTitle("Add Tenant");
+        }
+
 
         saveButton = findViewById(R.id.add_tenant_save);
         saveButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {

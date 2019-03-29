@@ -1,6 +1,7 @@
 package com.example.thakurhousepg;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -61,6 +62,8 @@ public class ReceiptActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        setTitle("Receipt");
+
         Bundle bundle = getIntent().getExtras();
 
         // Create the adapter that will return a fragment for each of the three
@@ -73,12 +76,16 @@ public class ReceiptActivity extends AppCompatActivity {
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
+        tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
         String selectedSection = bundle.getString("SECTION");
+
         if(selectedSection != null) {
             if (selectedSection.equals("Rent")) {
-                mViewPager.setCurrentItem(0);
-            } else if (selectedSection.equals("Deposit")) {
-                mViewPager.setCurrentItem(1);
+                if (bundle.getString("RENT_AMOUNT").isEmpty() && bundle.getString("DEPOSIT_AMOUNT").isEmpty() == false) {
+                    mViewPager.setCurrentItem(1);
+                } else {
+                    mViewPager.setCurrentItem(0);
+                }
             }
         }
 

@@ -50,6 +50,7 @@ public class BookingScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_booking_screen);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("Booking");
 
         Bundle bundle = getIntent().getExtras();
 

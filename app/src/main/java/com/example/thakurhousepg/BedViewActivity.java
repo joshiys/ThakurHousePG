@@ -36,6 +36,7 @@ public class BedViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bed_view);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("Bed View");
 
         bedNumber = findViewById(R.id.bedview_bed_number);
         bookButton = findViewById(R.id.bedview_button_book);
