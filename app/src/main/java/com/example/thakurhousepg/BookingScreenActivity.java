@@ -59,8 +59,8 @@ public class BookingScreenActivity extends AppCompatActivity {
 
         dataModule = new DataModule(this);
 
-        rentAmount = findViewById(R.id.booking_deposit);
-        depositAmount = findViewById(R.id.booking_rent);
+        rentAmount = findViewById(R.id.booking_rent);
+        depositAmount = findViewById(R.id.booking_deposit);
         bedNumber = findViewById(R.id.booking_bed_number);
         bookingDate = findViewById(R.id.bookingDate);
 
@@ -140,7 +140,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                                         Intent receiptIntent = new Intent(BookingScreenActivity.this, ReceiptActivity.class);
                                         receiptIntent.putExtra("SECTION", "Deposit");
                                         receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
-                                        receiptIntent.putExtra("AMOUNT", depositAmount .getText().toString());
+                                        receiptIntent.putExtra("DEPOSIT_AMOUNT", depositAmount .getText().toString());
 
                                         startActivity(receiptIntent);
                                         finish();

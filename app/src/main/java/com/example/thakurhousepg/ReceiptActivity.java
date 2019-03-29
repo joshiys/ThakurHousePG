@@ -86,6 +86,8 @@ public class ReceiptActivity extends AppCompatActivity {
                 } else {
                     mViewPager.setCurrentItem(0);
                 }
+            } else if(bundle.getString("DEPOSIT_AMOUNT").isEmpty() == false) {
+                mViewPager.setCurrentItem(1);
             }
         }
 

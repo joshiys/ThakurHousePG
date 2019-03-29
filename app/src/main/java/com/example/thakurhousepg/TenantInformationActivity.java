@@ -69,7 +69,9 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             ReceiptsListFragment fragment = new ReceiptsListFragment();
             Bundle fragmentBundle = new Bundle();
-            fragmentBundle.putString("TENANT_ID", tenantInfoForModification.id);
+            if(tenantInfoForModification != null) {
+                fragmentBundle.putString("TENANT_ID", tenantInfoForModification.id);
+            }
             fragment.setArguments(fragmentBundle);
             transaction.replace(R.id.tenant_receipts_list_container, fragment);
             transaction.commit();
