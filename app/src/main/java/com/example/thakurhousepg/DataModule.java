@@ -184,7 +184,6 @@ public class DataModule extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TENANT_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + PENDING_AMOUNT_TABLE_NAME);
         onCreate(db);
-
     }
 
     /* Should ONLY be called on the first launch of the app every month.
@@ -403,6 +402,20 @@ public class DataModule extends SQLiteOpenHelper {
         checkRecord.close();
 
         return bookingId.toString();
+    }
+
+    public boolean updateBooking(String id, String newRent, String newDeposit) {
+        Boolean opSuccess = false;
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(BOOKING_ID, id);
+        if (!newRent.isEmpty()) contentValues.put(BOOKING_RENT_AMT, newRent);
+        if (!newDeposit.isEmpty()) contentValues.put(BOOKING_DEPOSIT_AMT, newDeposit);
+
+        db.update(BOOKING_TABLE_NAME, contentValues, BOOKING_ID + " = ?", new String[]{id});
+
+        return opSuccess;
     }
 
     public boolean closeBooking(String id, String closeingDate) {

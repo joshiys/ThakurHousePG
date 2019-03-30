@@ -8,6 +8,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +30,7 @@ public class BedViewActivity extends AppCompatActivity {
     private Button bookButton;
 
     private DataModule dataModule;
+    private boolean viewBookingMode = false;
 
     private static final String TAG = "BedViewActivity";
     @Override
@@ -60,6 +63,7 @@ public class BedViewActivity extends AppCompatActivity {
 
         final DataModule.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
         if(bedInfo.isOccupied == true) {
+            viewBookingMode = true;
             bookButton.setText("Close Booking");
             bedNumber.setBackgroundColor(Color.BLACK);
 
@@ -84,6 +88,9 @@ public class BedViewActivity extends AppCompatActivity {
                 }
             });
 
+            depositAmount.addTextChangedListener(amountWatcher);
+            rentAmount.addTextChangedListener(amountWatcher);
+
         } else {
             tenantName.setVisibility(View.INVISIBLE);
             bookingDate.setVisibility(View.GONE);
@@ -102,9 +109,15 @@ public class BedViewActivity extends AppCompatActivity {
                     Toast.makeText(BedViewActivity.this, "Create new Booking", Toast.LENGTH_SHORT).show();
                     Intent bookingIntent = new Intent(BedViewActivity.this, BookingScreenActivity.class);
                     bookingIntent.putExtra("BED_NUMBER", bedNumber.getText().toString());
-                    bookingIntent.putExtra("RENT", bedInfo.rentAmount);
-                    bookingIntent.putExtra("DEPOSIT", bedInfo.rentAmount);
+                    bookingIntent.putExtra("RENT", rentAmount.getText().toString());
+                    bookingIntent.putExtra("DEPOSIT", depositAmount.getText().toString());
                     startActivityForResult(bookingIntent, 0);
+                } else if(bookingButton.getText().toString().equals("Update Booking")) {
+                    if(dataModule.updateBooking(bedInfo.bookingId, rentAmount.getText().toString(), depositAmount.getText().toString())) {
+                        //Update any Pending entries, now that the rent is update?
+                    }
+                    BedsListContent.refresh();
+                    finish();
                 } else {
                     Toast.makeText(BedViewActivity.this, "Closing the Booking", Toast.LENGTH_SHORT).show();
                     final int pendingAmount = dataModule.getPendingAmountForBooking(bedInfo.bookingId);
@@ -148,6 +161,25 @@ public class BedViewActivity extends AppCompatActivity {
         }
         finish();
     }
+
+    private TextWatcher amountWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if(viewBookingMode) {
+                bookButton.setText("Update Booking");
+            }
+        }
+    };
 
     @Override
     public boolean onSupportNavigateUp(){

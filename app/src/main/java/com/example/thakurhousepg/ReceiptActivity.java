@@ -274,8 +274,6 @@ public class ReceiptActivity extends AppCompatActivity {
                         Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
                         BedsListContent.refresh();
                         getActivity().finish();
-                    } else {
-                        Toast.makeText(getActivity(), "Please Enter the Amounts Correctly", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -333,10 +331,12 @@ public class ReceiptActivity extends AppCompatActivity {
             boolean isValid = true;
 
             if(!onlineCheckBox.isChecked() && !cashCheckBox.isChecked()) {
+                Toast.makeText(getActivity(), "Please select either online or cash amount check box", Toast.LENGTH_SHORT).show();
                 isValid = false;
             }
 
             if(onlineAmt.getText().toString().isEmpty() && cashAmt.getText().toString().isEmpty()) {
+                Toast.makeText(getActivity(), "Please enter a amount greater than 0", Toast.LENGTH_SHORT).show();
                 isValid = false;
             }
 
@@ -345,8 +345,18 @@ public class ReceiptActivity extends AppCompatActivity {
                 if(totalAmount.getText().toString().equals("0") && advanceCheckBox.isChecked()){
                     isValid = true;
                 } else {
+                    Toast.makeText(getActivity(), "Please enter correct amount. If your total is more cash + online please select the Advance payment checkbox", Toast.LENGTH_SHORT).show();
                     isValid = false;
                 }
+            }
+
+            DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+            if(bedInfo == null) {
+                Toast.makeText(getActivity(), "Please enter a correct bed number", Toast.LENGTH_SHORT).show();
+                isValid = false;
+            } else if(bedInfo.bookingId == null) {
+                Toast.makeText(getActivity(), "No booking exists for this Room number", Toast.LENGTH_SHORT).show();
+                isValid = false;
             }
 
             return isValid;

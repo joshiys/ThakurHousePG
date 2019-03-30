@@ -65,7 +65,7 @@ public class BookingScreenActivity extends AppCompatActivity {
         bedNumber = findViewById(R.id.booking_bed_number);
         bookingDate = findViewById(R.id.bookingDate);
 
-        saveButton = findViewById(R.id.saveTenanButton);
+//        saveButton = findViewById(R.id.saveTenanButton);
 
         reduceFirstRentCheckbox = findViewById(R.id.booking_first_rent_checkbox);
         firstRent = findViewById(R.id.booking_first_rent);
@@ -114,15 +114,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                     String newBookingId = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), bookingDate.getText().toString());
                     Log.i(TAG, "result is " + newBookingId);
 
-//                    SimpleDateFormat sdf  =   new SimpleDateFormat("yyyy-MM-dd");
-//                    Date date = sdf.parse(bookingDate.getText().toString());
-//                    Calendar cal = Calendar.getInstance();
-//                    cal.setTime(date);
-//                    int month = cal.get(Calendar.MONTH);
-//                    int currentMonth = Calendar.getInstance().get(Calendar.MONTH);
-
                     if(!newBookingId.equals("-1")) {
-//                        if(month == currentMonth) {
                         String pendingRent = reduceFirstRentCheckbox.isChecked() ? firstRent.getText().toString():rentAmount.getText().toString();
 
                         //XXX : Do not create pending entry if Booking date is advance because penalty will be added automatically if month changes

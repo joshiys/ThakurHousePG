@@ -12,7 +12,9 @@
         <activity android:name=".ViewOutstandingActivity"></activity>
         <activity android:name=".ViewReceiptsActivity" />
         <activity android:name=".TenantInformationActivity" />
-        <activity android:name=".BookingScreenActivity" />
+        <activity
+            android:name=".BookingScreenActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize|stateHidden" />
         <activity android:name=".BedViewActivity" />
         <activity android:name=".OccupancyAndBookingActivity" />
         <activity
