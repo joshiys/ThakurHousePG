@@ -16,9 +16,6 @@ public class DataModule extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "ThakurHouse.db";
 
-    private static final String MASTER_TABLE_NAME = "master_table";
-    private static final String MISC_TABLE_NAME = "misc_table";
-
     public static final String TENANT_TABLE_NAME = "tenant_table";
     public static final String PENDING_AMOUNT_TABLE_NAME = "pending_table";
     public static final String BEDS_TABLE_NAME = "beds_table";
@@ -41,24 +38,22 @@ public class DataModule extends SQLiteOpenHelper {
     private static final String BOOKING_IS_WHOLE_ROOM = "BOOKING_IS_WHOLE_ROOM";
     private static final String BOOKING_CLOSE_DATE = "BOOKING_CLOSE_DATE";
 
-    private static final String PENALTY_ID = "PENALTY_ID";
-    private static final String PENALTY_AMOUNT = "PENALTY_AMOUNT";//Month number 1..12
+    private static final String PENDING_TYPE = "PENDING_TYPE";
+    private static final String PENDING_MONTH = "PENDING_MONTH";//Month number 1..12
+    private static final String PENDING_AMOUNT = "PENDING_AMOUNT";
 
     private static final String BED_NUMBER = "BED_NUMBER";
     private static final String BED_DEPOSIT = "BED_DEPOSIT";
     private static final String BED_RENT = "BED_RENT";
     private static final String BED_IS_OCCUPIED = "BED_IS_OCCUPIED";
-    private static final String PENDING_AMOUNT = "PENDING_AMOUNT";
-    private static final String PENDING_IS_DEPOSIT = "PENDING_IS_DEPOSIT";
-    private static final String PENDING_IS_PENALTY = "PENDING_IS_PENALTY";
 
     private static final String RECEIPT_ID = "RECEIPT_ID";
     private static final String RECEIPT_ONLINE_AMOUNT = "RECEIPT_ONLINE_AMOUNT";
     private static final String RECEIPT_CASH_AMOUNT = "RECEIPT_CASH_AMOUNT";
     private static final String RECEIPT_DATE = "RECEIPT_DATE";
     private static final String RECEIPT_TYPE = "RECEIPT_TYPE";
+
     //XXX : We might just need flag if the receipt is paid or waived off
-    private static final String RECEIPT_PENALTY_WAIVE_OFF_AMT = "RECEIPT_PENALTY_WAIVE_OFF_AMT";
     private static final String RECEIPT_PENALTY_WAIVE_OFF = "RECEIPT_PENALTY_WAIVE_OFF";
 
     private static final String TAG = "DataModule";
@@ -70,6 +65,7 @@ public class DataModule extends SQLiteOpenHelper {
 
     // Use this to convert int values to actual enum values
     private final ReceiptType[] receiptTypeValues = ReceiptType.values();
+    private final PendingType[] pendingTypeValues = PendingType.values();
 
 
     //Callers  must make sure that context is set first using DataModule.setContext()
@@ -148,8 +144,8 @@ public class DataModule extends SQLiteOpenHelper {
         //Create Penalty table
         query = "create table IF NOT EXISTS " + PENDING_AMOUNT_TABLE_NAME +
                 "(PENDING_AMOUNT INTEGER," +
-                " PENDING_IS_PENALTY BOOLEAN," +
-                " PENDING_IS_DEPOSIT BOOLEAN," +
+                " PENDING_TYPE INTEGER," +
+                " PENDING_MONTH INTEGER," +
                 " BOOKING_ID INTEGER," +
                 " TENANT_ID INTEGER," +
                 " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)," +
@@ -164,31 +160,28 @@ public class DataModule extends SQLiteOpenHelper {
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
         if(newTenantId != null) {
             String newBookingId = createNewBooking("111.0", newTenantId, "8000", "8000", date);
-            createPendingEntryForBooking(newBookingId, 1, "8000");
-            createPendingEntryForBooking(newBookingId, 2, "8000");
+            createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "8000", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
         if(newTenantId != null) {
             String newBookingId = createNewBooking("112.0", newTenantId, "9000", "9000", date);
-            createPendingEntryForBooking(newBookingId, 1, "9000");
-            createPendingEntryForBooking(newBookingId, 2, "9000");
+            createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "9000", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
 
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
         if(newTenantId != null) {
-            String newBookingId = createNewBooking("113.0", newTenantId, "10500", "10500", date);
-            createPendingEntryForBooking(newBookingId, 1, "10500");
-            createPendingEntryForBooking(newBookingId, 2, "10500");
+            String newBookingId = createNewBooking("113.0", newTenantId, "9000", "9000", date);
+            createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "9000", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
+
+        Log.i(TAG, "Experimental check: " + String.valueOf(PendingType.RENT.getIntValue()) + " AND " + PendingType.RENT.toString());
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + MASTER_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + TENANT_TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + MISC_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + PENDING_AMOUNT_TABLE_NAME);
         onCreate(db);
 
@@ -208,25 +201,32 @@ public class DataModule extends SQLiteOpenHelper {
                     " and strftime('%m',date('now', '-1 month')) = strftime('%m', RECEIPT_DATE)",
                     new String[]{booking.id, String.valueOf(ReceiptType.ADVANCE.getIntValue())});
 
-            opSuccess = createPendingEntryForBooking(booking.id, 1, booking.rentAmount);
+            opSuccess = createPendingEntryForBooking(booking.id, PendingType.RENT, booking.rentAmount, Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
         return opSuccess;
     }
 
-    public boolean createPendingEntryForBooking(String id, int type, String amount) {
+    public boolean createPendingEntryForBooking(String id, PendingType type, String amount, int month) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         boolean opSuccess = false;
 
         contentValues.put(PENDING_AMOUNT, amount);
         contentValues.put(BOOKING_ID, id);
-        //type = 2 for Deposit
-        //type = 3 for Penalty
-        contentValues.put(PENDING_IS_DEPOSIT, (type == 2));
-        contentValues.put(PENDING_IS_PENALTY, (type == 3));
+        contentValues.put(PENDING_TYPE, type.getIntValue());
+        contentValues.put(PENDING_MONTH, month);
 
-        if(db.insert(PENDING_AMOUNT_TABLE_NAME, null, contentValues) != -1) {
+        String query = "select * from " + PENDING_AMOUNT_TABLE_NAME + " where BOOKING_ID = ? AND PENDING_TYPE = ?";
+        Cursor checkRecord = db.rawQuery(query, new String[]{id, String.valueOf(type.getIntValue())});
+        if(checkRecord.moveToNext()) {
+            int totalPendingAmount = checkRecord.getInt(checkRecord.getColumnIndex("PENDING_AMOUNT"));
+            totalPendingAmount += Integer.parseInt(amount);
+
+            contentValues.put(PENDING_AMOUNT, totalPendingAmount);
+
+            db.update(PENDING_AMOUNT_TABLE_NAME, contentValues, BOOKING_ID + " = ? AND PENDING_TYPE = ?" , new String[]{id, String.valueOf(type.getIntValue())});
+        } else if(db.insert(PENDING_AMOUNT_TABLE_NAME, null, contentValues) != -1) {
             opSuccess = true;
         }
 
@@ -238,30 +238,19 @@ public class DataModule extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
 
         contentValues.put(BOOKING_ID, id);
-        String appendWhereClause = " and ";
 
-        switch(type) {
-            case RENT:
-                appendWhereClause += "PENDING_IS_DEPOSIT = 0 and PENDING_IS_PENALTY = 0";
-                break;
-            case DEPOSIT:
-                appendWhereClause += "PENDING_IS_DEPOSIT = 1 and PENDING_IS_PENALTY = 0";
-                break;
-            case PENALTY:
-                appendWhereClause += "PENDING_IS_PENALTY = 1 and PENDING_IS_DEPOSIT = 0";
-        }
-
-        String query = "select * from " + PENDING_AMOUNT_TABLE_NAME + " where BOOKING_ID = " + id + appendWhereClause;
-        Cursor cursor = db.rawQuery(query, null);
+        String query = "select * from " + PENDING_AMOUNT_TABLE_NAME + " where BOOKING_ID = ? AND PENDING_TYPE = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{id, String.valueOf(type.getIntValue())});
         if (cursor.moveToNext()) {
             int totalPendingAmount = cursor.getInt(cursor.getColumnIndex("PENDING_AMOUNT"));
             totalPendingAmount -= Integer.parseInt(amount);
 
             if (totalPendingAmount <= 0) {
-                db.delete(PENDING_AMOUNT_TABLE_NAME, BOOKING_ID + " = ?" + appendWhereClause, new String[]{id});
+                db.delete(PENDING_AMOUNT_TABLE_NAME, BOOKING_ID + " = ? AND PENDING_TYPE = ?" , new String[]{id, String.valueOf(type.getIntValue())});
             } else {
                 contentValues.put(PENDING_AMOUNT, totalPendingAmount);
-                db.update(PENDING_AMOUNT_TABLE_NAME, contentValues, BOOKING_ID + " = ?" + appendWhereClause, new String[]{id});
+                int numRowsUpdated = db.update(PENDING_AMOUNT_TABLE_NAME, contentValues, BOOKING_ID + " = ? AND PENDING_TYPE = ?", new String[]{id, String.valueOf(type.getIntValue())});
+                Log.d(TAG, "Updated " + String.valueOf(numRowsUpdated) + "pending table rows");
             }
         }
 
@@ -734,8 +723,7 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndex(PENDING_AMOUNT)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                     cursor.getString(cursor.getColumnIndex(TENANT_ID)),
-                    cursor.getInt(cursor.getColumnIndex(PENDING_IS_DEPOSIT)) > 0,
-                    cursor.getInt(cursor.getColumnIndex(PENDING_IS_PENALTY)) > 0
+                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))]
             ));
         }
 
@@ -754,8 +742,7 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndex(PENDING_AMOUNT)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                     cursor.getString(cursor.getColumnIndex(TENANT_ID)),
-                    cursor.getInt(cursor.getColumnIndex(PENDING_IS_DEPOSIT)) > 0,
-                    cursor.getInt(cursor.getColumnIndex(PENDING_IS_PENALTY)) > 0
+                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))]
             ));
         }
 
@@ -770,22 +757,11 @@ public class DataModule extends SQLiteOpenHelper {
         String query = "select * from " + RECEIPTS_TABLE_NAME +
                 " LEFT JOIN " + BOOKING_TABLE_NAME + " ON " +
                 BOOKING_TABLE_NAME + ".BOOKING_ID = " +  RECEIPTS_TABLE_NAME + ".BOOKING_ID" +
-                " WHERE " + BOOKING_TABLE_NAME + "." + TENANT_ID + " = ?";
+                " WHERE " + BOOKING_TABLE_NAME + "." + TENANT_ID + " = ? ORDER BY RECEIPT_ID DESC";
 
         Cursor cursor = db.rawQuery(query, new String[]{id});
 
-        //SAHIRE : need to find right way to get latest receipt on top
-        if(cursor.moveToLast()){
-            receiptEntries.add(new Receipt(
-                    cursor.getString(cursor.getColumnIndex(RECEIPT_ID)),
-                    cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
-                    cursor.getString(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)),
-                    cursor.getString(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT)),
-                    cursor.getInt(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF)) > 0,
-                    cursor.getString(cursor.getColumnIndex(RECEIPT_DATE)),
-                    receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))]));
-        }
-        while (cursor.moveToPrevious()) {
+        while (cursor.moveToNext()) {
             receiptEntries.add(new Receipt(
                     cursor.getString(cursor.getColumnIndex(RECEIPT_ID)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
@@ -841,7 +817,7 @@ public class DataModule extends SQLiteOpenHelper {
 
         ArrayList<Receipt> receipts = new ArrayList<Receipt>();
         String query = "select * from " + RECEIPTS_TABLE_NAME + " WHERE strftime('%m', RECEIPT_DATE) = " +
-                "'0" + String.valueOf(month) + "' ORDER BY BOOKING_ID ASC"; //sorting on Booking Id to get sorted list of room nos.
+                "'0" + String.valueOf(month) + "' ORDER BY RECEIPT_ID DESC"; //sorting on Booking Id to get sorted list of room nos.
         Cursor cursor = db.rawQuery(query, null);
 
         if(cursor.getCount() != 0) {
@@ -900,18 +876,14 @@ public class DataModule extends SQLiteOpenHelper {
         result.close();
         return result;
     }
+
     public void addPenaltyToOutstandingPayments() {
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<Tenant> tenantList = new ArrayList<Tenant>();
-        Cursor cursor = db.rawQuery("select * from " + PENDING_AMOUNT_TABLE_NAME, null);
+        Cursor cursor = db.rawQuery("select * from " + PENDING_AMOUNT_TABLE_NAME + " where PENDING_TYPE = ?", new String[]{String.valueOf(PendingType.RENT.getIntValue())});
         while (cursor.moveToNext()) {
-            if((cursor.getInt(cursor.getColumnIndex(PENDING_IS_DEPOSIT)) == 0) &&
-                    (cursor.getInt(cursor.getColumnIndex(PENDING_IS_PENALTY)) == 0)){
-                // Means Entry is for Rent
-                boolean status = createPendingEntryForBooking(cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
-                                                            3, "200");
-
-            }
+            boolean status = createPendingEntryForBooking(cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                                                        PendingType.PENALTY, "200", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
         cursor.close();
     }
@@ -1015,15 +987,32 @@ public class DataModule extends SQLiteOpenHelper {
         public final int pendingAmt;
         public final String bookingId;
         public final String tenantId;
-        public final boolean isPenalty;
-        public final boolean isDeposit;
+        public final PendingType type;
 
-        public Pending(int pendingAmt, String bookingId, String tenantId, boolean isDeposit, boolean isPenalty) {
+        public Pending(int pendingAmt, String bookingId, String tenantId, PendingType type) {
             this.pendingAmt = pendingAmt;
             this.bookingId = bookingId;
             this.tenantId = tenantId;
-            this.isPenalty = isPenalty;
-            this.isDeposit = isDeposit;
+            this.type = type;
+        }
+    }
+
+    public enum PendingType {
+        RENT,
+        DEPOSIT,
+        PENALTY;
+
+        public int getIntValue() {
+            switch(this) {
+                case RENT:
+                    return 0;
+                case DEPOSIT:
+                    return 1;
+                case PENALTY:
+                    return 2;
+                default:
+                    return 0;
+            }
         }
     }
 

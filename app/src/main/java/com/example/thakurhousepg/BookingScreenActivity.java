@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -122,11 +123,22 @@ public class BookingScreenActivity extends AppCompatActivity {
 
                     if(!newBookingId.equals("-1")) {
 //                        if(month == currentMonth) {
-                        //TODO: Add Deposit and Rent entries to Pending table
                         String pendingRent = reduceFirstRentCheckbox.isChecked() ? firstRent.getText().toString():rentAmount.getText().toString();
+
                         //XXX : Do not create pending entry if Booking date is advance because penalty will be added automatically if month changes
-                        dataModule.createPendingEntryForBooking(newBookingId, 1, pendingRent);
-                        dataModule.createPendingEntryForBooking(newBookingId, 2, depositAmount.getText().toString());
+                        try {
+                            // काय बकवास API design केली आहे ... All of this just to get the month out of a date?
+                            // अजुन काहीतरी चांगला मार्ग असणार
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                            Calendar c = Calendar.getInstance();
+                            c.setTime(dateFormat.parse(bookingDate.getText().toString()));
+                            if(c.get(Calendar.MONTH) != (Calendar.getInstance().get(Calendar.MONTH) + 2)) {
+                                dataModule.createPendingEntryForBooking(newBookingId, DataModule.PendingType.RENT, pendingRent, Calendar.getInstance().get(Calendar.MONTH) + 1);
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        dataModule.createPendingEntryForBooking(newBookingId, DataModule.PendingType.DEPOSIT, depositAmount.getText().toString(), Calendar.getInstance().get(Calendar.MONTH) + 1);
 
                         BedsListContent.refresh();
                         new AlertDialog.Builder(BookingScreenActivity.this)

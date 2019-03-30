@@ -89,7 +89,7 @@ public class ReceiptsListFragment extends Fragment {
         Bundle bundle = getArguments();
         ArrayList<DataModule.Receipt> receiptList = null;
 
-        if(forMonth >= 0) {
+        if(forMonth > 0) {
             receiptList = dataModule.getAllReceipts(forMonth);
         } else if(bundle != null) {
             if(bundle.getString("TENANT_ID") != null) {

@@ -58,7 +58,7 @@ public class ReceiptActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receipt);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -79,16 +79,16 @@ public class ReceiptActivity extends AppCompatActivity {
         tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
         String selectedSection = bundle.getString("SECTION");
 
-        if(selectedSection != null) {
-            if (selectedSection.equals("Rent")) {
+        if("Rent".equals(selectedSection)) {
                 if (bundle.getString("RENT_AMOUNT").isEmpty() && bundle.getString("DEPOSIT_AMOUNT").isEmpty() == false) {
                     mViewPager.setCurrentItem(1);
                 } else {
                     mViewPager.setCurrentItem(0);
                 }
-            } else if(bundle.getString("DEPOSIT_AMOUNT").isEmpty() == false) {
-                mViewPager.setCurrentItem(1);
-            }
+        } else if(bundle.getString("DEPOSIT_AMOUNT").isEmpty() == false) {
+            mViewPager.setCurrentItem(1);
+        } else {
+            mViewPager.setCurrentItem(2);
         }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -109,28 +109,6 @@ public class ReceiptActivity extends AppCompatActivity {
     }
 
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_payment, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
-
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -146,7 +124,6 @@ public class ReceiptActivity extends AppCompatActivity {
 
         private CheckBox onlineCheckBox, cashCheckBox, advanceCheckBox, waiveOffCheckBox;
 
-//        String bookingRent = "", bookingDeposit = "", bookingPenalty = "";
         String dueAmount = "0";
 
         public ReceiptFragment() {
@@ -159,9 +136,6 @@ public class ReceiptActivity extends AppCompatActivity {
         public static ReceiptFragment newInstance(int sectionNumber) {
             ReceiptFragment fragment = new ReceiptFragment();
             Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
             return fragment;
@@ -176,24 +150,24 @@ public class ReceiptActivity extends AppCompatActivity {
 
             dbHelper = DataModule.getInstance();
 
-            roomNumber = (EditText) rootView.findViewById(R.id.receipt_bed_number);
-            onlineAmt = (EditText) rootView.findViewById(R.id.receipt_online_amt);
-            cashAmt = (EditText) rootView.findViewById(R.id.receipt_cash_amt);
-            totalAmount = (EditText) rootView.findViewById(R.id.receipt_total_amount);
+            roomNumber = rootView.findViewById(R.id.receipt_bed_number);
+            onlineAmt = rootView.findViewById(R.id.receipt_online_amt);
+            cashAmt = rootView.findViewById(R.id.receipt_cash_amt);
+            totalAmount = rootView.findViewById(R.id.receipt_total_amount);
 
             roomNumber.addTextChangedListener(fieldWatcher);
             onlineAmt.addTextChangedListener(fieldWatcher);
             cashAmt.addTextChangedListener(fieldWatcher);
             totalAmount.addTextChangedListener(fieldWatcher);
 
-            onlineCheckBox = (CheckBox) rootView.findViewById(R.id.onlineCheckBox);
-            cashCheckBox = (CheckBox) rootView.findViewById(R.id.cashCheckBox);
+            onlineCheckBox = rootView.findViewById(R.id.onlineCheckBox);
+            cashCheckBox = rootView.findViewById(R.id.cashCheckBox);
             onlineAmt.setEnabled(false);
             cashAmt.setEnabled(false);
             cashAmt.setText("0");
 
-            advanceCheckBox = (CheckBox) rootView.findViewById(R.id.receipt_advance_checkbox);
-            waiveOffCheckBox = (CheckBox) rootView.findViewById(R.id.waiveOffCheckBox);
+            advanceCheckBox = rootView.findViewById(R.id.receipt_advance_checkbox);
+            waiveOffCheckBox = rootView.findViewById(R.id.waiveOffCheckBox);
             waiveOffCheckBox.setVisibility(View.GONE);
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1 ){
                 advanceCheckBox.setVisibility(View.VISIBLE);
@@ -212,13 +186,6 @@ public class ReceiptActivity extends AppCompatActivity {
 
             reloadDueAmount();
 
-            roomNumber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                public void onFocusChange(View v, boolean hasFocus) {
-                    Log.v(TAG, roomNumber.getText().toString());
-                }
-            });
-
-
             cashAmt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -234,7 +201,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
             roomNumber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange(View v, boolean hasFocus) {
-                    Log.v(TAG, roomNumber.getText().toString());
+                    Log.v(TAG, "Section Number: " + getArguments().getInt(ARG_SECTION_NUMBER) + " and room number: " + roomNumber.getText().toString());
 
                     /* SAHIRE Fetch Rent for room number from Booking Table */
                     if(roomNumber.getText().toString().isEmpty() == false){
@@ -261,7 +228,7 @@ public class ReceiptActivity extends AppCompatActivity {
                 }
             });
 
-            saveButton = (Button) rootView.findViewById(R.id.receipt_button_save);
+            saveButton = rootView.findViewById(R.id.receipt_button_save);
             saveButton.setEnabled(false);
             saveButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 public void onFocusChange (View v, boolean hasFocus) {
@@ -294,9 +261,10 @@ public class ReceiptActivity extends AppCompatActivity {
                             type = DataModule.ReceiptType.ADVANCE;
                         }
 
-                        //TODO: Check if the cash+online amount exceeds total amount, and ask user if they want to create and advance payment entry
+                        //TODO: Check if the cash+online amount exceeds total amount, and ask user if they want to create an advance payment entry
                         dbHelper.createReceipt(type, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString(),
                                 (type == DataModule.ReceiptType.PENALTY ? waiveOffCheckBox.isChecked() : false));
+
                         if(type != DataModule.ReceiptType.ADVANCE) {
                             dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, type,
                                     String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())));
@@ -351,11 +319,11 @@ public class ReceiptActivity extends AppCompatActivity {
             });
 
 
-            /*if(bundle.getString("RENT_AMOUNT") != null) */{
+            /*if(bundle.getString("RENT_AMOUNT") != null) */
 //                totalAmount.setText(bundle.getString("RENT_AMOUNT"));
-                totalAmount.setText(dueAmount);
-                onlineCheckBox.setChecked(true);
-            }
+            totalAmount.setText(dueAmount);
+            onlineCheckBox.setChecked(true);
+
 
             return rootView;
         }
@@ -410,14 +378,14 @@ public class ReceiptActivity extends AppCompatActivity {
 
                     ArrayList<DataModule.Pending> entry = dbHelper.getPendingEntriesForBooking(bed.bookingId);
                     for (DataModule.Pending pendingEntry : entry) {
-                        if (pendingEntry.isDeposit) {
+                        if (pendingEntry.type == DataModule.PendingType.DEPOSIT) {
                             bookingDeposit = String.valueOf(pendingEntry.pendingAmt);
 
                         }
-                        if (pendingEntry.isPenalty) {
+                        if (pendingEntry.type == DataModule.PendingType.PENALTY) {
                             bookingPenalty = String.valueOf(pendingEntry.pendingAmt);
                         }
-                        if (!pendingEntry.isDeposit && !pendingEntry.isPenalty) {
+                        if (pendingEntry.type == DataModule.PendingType.RENT) {
                             bookingRent = String.valueOf(pendingEntry.pendingAmt);
                         }
                     }

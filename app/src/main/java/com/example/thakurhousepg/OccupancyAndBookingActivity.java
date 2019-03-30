@@ -154,10 +154,9 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
             ArrayList<DataModule.Pending> pendingEntries = datamodule.getPendingEntriesForBooking(bed.bookingId);
             String rent = "", deposit = "";
             for (DataModule.Pending pendingEntry : pendingEntries) {
-                if(pendingEntry.isDeposit){
+                if(pendingEntry.type == DataModule.PendingType.DEPOSIT){
                     deposit = String.valueOf(pendingEntry.pendingAmt);
-                }
-                if(!pendingEntry.isDeposit && !pendingEntry.isPenalty){
+                } else if(pendingEntry.type == DataModule.PendingType.RENT){
                     rent = String.valueOf(pendingEntry.pendingAmt);
                 }
             }

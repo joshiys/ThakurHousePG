@@ -56,26 +56,25 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                 tenantAddress.setText(tenantInfoForModification.address);
             }
 
-            //XXX : Not sure about this condition or why do we need VIEW_TENANT
-            //XXX : ACTION should be eight ADD_TENANT or MODIFY_TENANT only
-//            if("VIEW_TENANT".equals(bundle.getString("ACTION"))) {
-//                addTenantMode = false;
-//                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-//                imm.hideSoftInputFromWindow(tenantName.getWindowToken(), 0);
-//            }
+            if("MODIFY_TENANT".equals(bundle.getString("ACTION"))) {
+                addTenantMode = false;
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(tenantName.getWindowToken(), 0);
+            }
         }
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && tenantInfoForModification != null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             ReceiptsListFragment fragment = new ReceiptsListFragment();
             Bundle fragmentBundle = new Bundle();
-            if(tenantInfoForModification != null) {
-                fragmentBundle.putString("TENANT_ID", tenantInfoForModification.id);
-            }
+            fragmentBundle.putString("TENANT_ID", tenantInfoForModification.id);
             fragment.setArguments(fragmentBundle);
             transaction.replace(R.id.tenant_receipts_list_container, fragment);
             transaction.commit();
+        } else {
+            findViewById(R.id.tenant_receipts_label).setVisibility(View.INVISIBLE);
         }
+
         if(bundle != null && ("MODIFY_TENANT".equals(bundle.getString("ACTION")))) {
             addTenantMode = false;
             setTitle("Modify Tenant");
