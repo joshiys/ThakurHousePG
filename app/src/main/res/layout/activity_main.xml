@@ -12,8 +12,8 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/main_month"
+    <Button
+        android:id="@+id/main_monthButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/design_default_color_primary"
@@ -45,45 +45,16 @@
             android:text="Pending"
             android:textColor="@android:color/holo_red_dark" />
 
-        <Button
-            android:id="@+id/totalRent"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Total" />
+        <!--<Button-->
+            <!--android:id="@+id/totalRent"-->
+            <!--style="@style/Widget.AppCompat.Button.Borderless"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="Total" />-->
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
-    <Button
-            android:id="@+id/receivedDeposit"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Received"
-            android:textColor="@android:color/holo_green_dark" />
-
-        <Button
-            android:id="@+id/outstandingDeposit"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Pending"
-            android:textColor="@android:color/holo_red_dark" />
-
-        <Button
-            android:id="@+id/totalDeposit"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Total" />
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

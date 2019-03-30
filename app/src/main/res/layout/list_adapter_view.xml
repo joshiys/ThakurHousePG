@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--android:weightSum="1">-->
+
+    <TextView
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_weight="33"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/roomNumberText"/>
+
+    <TextView
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_weight="33"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/outstandingRentText"/>
+
+    <TextView
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_weight="33"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/outstandingDepositText"/>
+
+    <TextView
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:layout_weight="33"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/outstandingPenaltyText"/>
+
+</LinearLayout>

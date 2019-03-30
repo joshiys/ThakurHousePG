@@ -104,6 +104,8 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
                 //SAHIRE : Send SMS to All
                 break;
             case R.id.menu_actionShowOutstandings:
+                Intent pendingIntent = new Intent(OccupancyAndBookingActivity.this, ViewOutstandingActivity.class);
+                startActivity(pendingIntent);
                 break;
             case R.id.menu_actionShowReceipts:
                 Intent receivedIntent = new Intent(OccupancyAndBookingActivity.this, ViewReceiptsActivity.class);

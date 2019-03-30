@@ -3,15 +3,19 @@ package com.example.thakurhousepg;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -22,7 +26,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button btn_receipt, btn_occupancy, btn_payment;
     EditText roomNumber;
     Button receivedRentValue, outstandingRentValue, totalExpectedRentValue;
-    Button receivedDepositValue, outstandingDepositValue, totalExpectedDepositValue;
     TextView headerView;
 
     private static final String TAG = "MainActivity";
@@ -45,9 +48,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         receivedRentValue = (Button) findViewById(R.id.receivedRent);
         outstandingRentValue = (Button) findViewById(R.id.outstandingRent);
-        totalExpectedRentValue = (Button) findViewById(R.id.totalRent);
+//        totalExpectedRentValue = (Button) findViewById(R.id.totalRent);
 
-        headerView = findViewById(R.id.main_month);
+        headerView = findViewById(R.id.main_monthButton);
 
         btn_receipt.setOnClickListener(this);
         btn_occupancy.setOnClickListener(this);
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setPendingAmountEntries();
         headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
+        headerView.setOnClickListener(this);
     }
 
     @Override
@@ -79,6 +83,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String outstandingRent = "", outstandingDeposit = "", outstandingPenalty = "";
 
         switch(view.getId()){
+            case R.id.outstandingRent:
+                Intent pendingIntent = new Intent(MainActivity.this, ViewOutstandingActivity.class);
+                startActivity(pendingIntent);
+                break;
+            case R.id.main_monthButton:
+
+                break;
             case R.id.receivedRent:
                 Intent receivedIntent = new Intent(MainActivity.this, ViewReceiptsActivity.class);
                 startActivity(receivedIntent);
@@ -122,8 +133,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     void setTotalOutstandingRent(){
         receivedRentValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModule.ReceiptType.RENT));
-        outstandingRentValue.setText(String.valueOf(dbHelper.getTotalPendingAmount()));
-        totalExpectedRentValue.setText(dbHelper.getTotalExpectedRent());
+//        outstandingRentValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
+//                DataModule.ReceiptType.DEPOSIT));
+        outstandingRentValue.setText(String.valueOf(dbHelper.getTotalPendingAmount(DataModule.PendingType.RENT)));
+//        totalExpectedRentValue.setText(dbHelper.getTotalExpectedRent());
     }
 
     private void setPendingAmountEntries() {

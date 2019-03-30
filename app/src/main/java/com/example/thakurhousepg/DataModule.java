@@ -159,20 +159,20 @@ public class DataModule extends SQLiteOpenHelper {
 
         String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
         if(newTenantId != null) {
-            String newBookingId = createNewBooking("111.0", newTenantId, "8000", "8000", date);
+            String newBookingId = createNewBooking("111.0", newTenantId, "7000", "8000", date);
             createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "8000", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
         newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
         if(newTenantId != null) {
-            String newBookingId = createNewBooking("112.0", newTenantId, "9000", "9000", date);
+            String newBookingId = createNewBooking("112.0", newTenantId, "8000", "9000", date);
             createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "9000", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
 
         newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
         if(newTenantId != null) {
-            String newBookingId = createNewBooking("113.0", newTenantId, "9000", "9000", date);
+            String newBookingId = createNewBooking("113.0", newTenantId, "8000", "9000", date);
             createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "9000", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
@@ -587,6 +587,27 @@ public class DataModule extends SQLiteOpenHelper {
         return booking;
     }
 
+    public ArrayList<Booking> getAllBookingInfo() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Booking> bookingList = new ArrayList<>();
+        Cursor bookingCursor = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " ORDER BY BED_NUMBER ASC", null);
+        while (bookingCursor.moveToNext()) {
+            bookingList.add(new Booking(
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_ID)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BED_NUMBER)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_RENT_AMT)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_DATE)),
+                    bookingCursor.getInt(bookingCursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
+                    bookingCursor.getString(bookingCursor.getColumnIndex(TENANT_ID)))
+            );
+        }
+
+        bookingCursor.close();
+        return bookingList;
+    }
+
+
     public Tenant getTenantInfoForBooking(String id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Tenant t = null;
@@ -669,7 +690,7 @@ public class DataModule extends SQLiteOpenHelper {
         return String.valueOf(outstandingRent);
     }
 
-    public String getTotalReceivedAmountForMonth(int month, ReceiptType type) {
+    public String  getTotalReceivedAmountForMonth(int month, ReceiptType type) {
 //        ReceiptType type = ReceiptType.RENT;
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "select RECEIPT_CASH_AMOUNT + RECEIPT_ONLINE_AMOUNT from " + RECEIPTS_TABLE_NAME + " WHERE strftime('%m', RECEIPT_DATE) = " +
@@ -691,10 +712,10 @@ public class DataModule extends SQLiteOpenHelper {
     }
 
 
-    public int getTotalPendingAmount() {
+    public int getTotalPendingAmount(PendingType type) {
         SQLiteDatabase db = this.getReadableDatabase();
         int pendingAmount = 0;
-        Cursor cursor = db.rawQuery("select PENDING_AMOUNT from " + PENDING_AMOUNT_TABLE_NAME, null);
+        Cursor cursor = db.rawQuery("select PENDING_AMOUNT from " + PENDING_AMOUNT_TABLE_NAME + " where PENDING_TYPE = " + type.getIntValue(), null);
         while (cursor.moveToNext()) {
             pendingAmount += cursor.getInt(0);
         }
@@ -889,18 +910,21 @@ public class DataModule extends SQLiteOpenHelper {
     }
 
     //SAHIRE: Need to re-write this function
-    public ArrayList<Tenant> getTenantWithOutstandingPayments(){
+    public ArrayList<Pending> getAllPendingPayments(int month){
         SQLiteDatabase db = this.getReadableDatabase();
-        ArrayList<Tenant> tenantList = new ArrayList<Tenant>();
-        Cursor cursor = db.rawQuery("select * from " + PENDING_AMOUNT_TABLE_NAME, null);
+        ArrayList<Pending> pendingEntries = new ArrayList<Pending>();
+        String query = "select * from " + PENDING_AMOUNT_TABLE_NAME + " where PENDING_MONTH = " + month + "";
+        Cursor cursor = db.rawQuery(query, null);
         while (cursor.moveToNext()) {
-            Tenant tenant = getTenantInfoForBooking(cursor.getString(cursor.getColumnIndex(BOOKING_ID)));
-            if(tenant != null) {
-                tenantList.add(tenant);
-            }
+            pendingEntries.add(new Pending(
+                    cursor.getInt(cursor.getColumnIndex(PENDING_AMOUNT)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_ID)),
+                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))]
+            ));
         }
         cursor.close();
-        return tenantList;
+        return pendingEntries;
     }
 
 //MARK: ---------------------------------- Data Class Definitions ---------------------------------
