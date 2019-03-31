@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class BedViewActivity extends AppCompatActivity {
@@ -72,8 +73,16 @@ public class BedViewActivity extends AppCompatActivity {
 
             DataModule.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
             tenantName.setVisibility(View.VISIBLE);
-            tenantName.setText(tenant.name);
             Log.i(TAG, "Found Tenat with Id " + tenant.id + " Name: " + tenant.name);
+
+            // Add Dependents Names
+            String tempNameHolder = tenant.name;
+            ArrayList<DataModule.Tenant> dependentsList = dataModule.getDependents(tenant.id);
+            for (DataModule.Tenant dependent: dependentsList) {
+                Log.i(TAG, "Found Dependent with Id " + dependent.id + " Name: " + dependent.name);
+                tempNameHolder += " , " + dependent.name;
+            }
+            tenantName.setText(tempNameHolder);
 
             rentAmount.setText(booking.rentAmount);
             depositAmount.setText(booking.depositAmount);

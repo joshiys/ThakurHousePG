@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,6 +32,7 @@ public class DataModule extends SQLiteOpenHelper {
     private static final String TENANT_MOBILE_2 = "TENANT_MOBILE_2";
     private static final String TENANT_ADDRESS = "TENANT_ADDRESS";
     private static final String TENANT_IS_CURRENT = "TENANT_IS_CURRENT";
+    private static final String PARENT_TENANT_ID = "PARENT_TENANT_ID";
 
     private static final String BOOKING_ID = "BOOKING_ID";
     private static final String BOOKING_RENT_AMT = "BOOKING_RENT_AMT";
@@ -109,9 +112,11 @@ public class DataModule extends SQLiteOpenHelper {
                 " TENANT_MOBILE_2 TEXT," +
                 " TENANT_ADDRESS TEXT," +
                 " TENANT_IS_CURRENT BOOLEAN," +
+                " PARENT_TENANT_ID INTEGER," +
                 " UNIQUE (TENANT_NAME, TENANT_MOBILE) ON CONFLICT ABORT" +
                 ")";
         db.execSQL(query);
+
 
         query = "create table IF NOT EXISTS " + BOOKING_TABLE_NAME +
                 " (BOOKING_ID INTEGER PRIMARY KEY," +
@@ -157,20 +162,20 @@ public class DataModule extends SQLiteOpenHelper {
     public void insertSampleData() {
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString();
 
-        String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null);
+        String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null, "0");
         if(newTenantId != null) {
             String newBookingId = createNewBooking("111.0", newTenantId, "7000", "8000", date);
             createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "8000", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
-        newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null);
+        newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null, "0");
         if(newTenantId != null) {
             String newBookingId = createNewBooking("112.0", newTenantId, "8000", "9000", date);
             createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "9000", Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
 
-        newTenantId = addNewTenant("Suyog J", "214365879", null, null, null);
+        newTenantId = addNewTenant("Suyog J", "214365879", null, null, null, "0");
         if(newTenantId != null) {
             String newBookingId = createNewBooking("113.0", newTenantId, "8000", "9000", date);
             createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "9000", Calendar.getInstance().get(Calendar.MONTH) + 1);
@@ -283,7 +288,7 @@ public class DataModule extends SQLiteOpenHelper {
         return opSuccess;
     }
 
-    public String addNewTenant(String name, String mobile, String mobile2, String email, String address) {
+    public String addNewTenant(String name, String mobile, String mobile2, String email, String address, String parentId) {
         Boolean opSuccess = false;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -297,6 +302,7 @@ public class DataModule extends SQLiteOpenHelper {
         contentValues.put(TENANT_MOBILE_2, mobile2);
         contentValues.put(TENANT_ADDRESS, address);
         contentValues.put(TENANT_IS_CURRENT, false);
+        contentValues.put(PARENT_TENANT_ID, parentId);
 
 
         String query = "select * from " + TENANT_TABLE_NAME + " where TENANT_ID = " + highestTenantId;
@@ -318,7 +324,7 @@ public class DataModule extends SQLiteOpenHelper {
         return opSuccess ? highestTenantId.toString() : null;
     }
 
-    public boolean updateTenant(String id, String name, String mobile, String mobile2, String email, String address, Boolean isCurrent) {
+    public boolean updateTenant(String id, String name, String mobile, String mobile2, String email, String address, Boolean isCurrent, @NotNull String parentId) {
         Boolean opSuccess = false;
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -330,6 +336,7 @@ public class DataModule extends SQLiteOpenHelper {
         if(!mobile2.isEmpty()) contentValues.put(TENANT_MOBILE_2, mobile2);
         if(!address.isEmpty()) contentValues.put(TENANT_ADDRESS, address);
         if(isCurrent != null) contentValues.put(TENANT_IS_CURRENT, false);
+        if(!parentId.isEmpty()) contentValues.put(PARENT_TENANT_ID, parentId);
 
 
         String query = "select * from " + TENANT_TABLE_NAME + " where TENANT_ID = " + id;
@@ -433,6 +440,10 @@ public class DataModule extends SQLiteOpenHelper {
             contentValues.clear();
             contentValues.put("TENANT_IS_CURRENT", false);
             db.update(TENANT_TABLE_NAME, contentValues, "TENANT_ID = ?", new String[]{tenantId});
+
+            //If there are any dependents on this Tenant Id, Remove their Parent Id
+            contentValues.put(PARENT_TENANT_ID, "0");
+            db.update(TENANT_TABLE_NAME, contentValues, "PARENT_TENANT_ID = ?", new String[]{tenantId});
 
             contentValues.clear();
             contentValues.putNull(BOOKING_ID);
@@ -624,7 +635,7 @@ public class DataModule extends SQLiteOpenHelper {
     public Tenant getTenantInfoForBooking(String id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Tenant t = null;
-        Cursor cursor = db.rawQuery("select * from " + TENANT_TABLE_NAME + // " where TENANT_ID = ?", new String[]{id});
+        Cursor cursor = db.rawQuery("select * from " + TENANT_TABLE_NAME +
                         " LEFT JOIN " + BOOKING_TABLE_NAME + " ON " + BOOKING_TABLE_NAME + ".TENANT_ID = " + TENANT_TABLE_NAME + ".TENANT_ID" +
                         " where BOOKING_ID = ?", new String[]{id});
 
@@ -635,12 +646,33 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(TENANT_MOBILE)),
                     cursor.getString(cursor.getColumnIndex(TENANT_EMAIL)),
                     cursor.getString(cursor.getColumnIndex(TENANT_ADDRESS)),
-                    cursor.getInt(cursor.getColumnIndex(TENANT_IS_CURRENT)) > 0
+                    cursor.getInt(cursor.getColumnIndex(TENANT_IS_CURRENT)) > 0,
+                    cursor.getString(cursor.getColumnIndex(PARENT_TENANT_ID))
                     );
         }
 
         cursor.close();
         return t;
+    }
+
+    public Booking getBookingInfoForTenant(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+//        ArrayList<Booking> bookingList = new ArrayList<>();
+        Booking booking = null;
+        Cursor bookingCursor = db.rawQuery("select * from " + BOOKING_TABLE_NAME + " where TENANT_ID = ?" + " ORDER BY " + BOOKING_ID + " ASC", new String[]{id});
+        if (bookingCursor.moveToNext()) {
+            booking = new Booking(
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_ID)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BED_NUMBER)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_RENT_AMT)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_DATE)),
+                    bookingCursor.getInt(bookingCursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
+                    bookingCursor.getString(bookingCursor.getColumnIndex(TENANT_ID)));
+        }
+
+        bookingCursor.close();
+        return booking;
     }
 
     public Tenant getTenantInfo(String id) {
@@ -654,12 +686,57 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(TENANT_MOBILE)),
                     cursor.getString(cursor.getColumnIndex(TENANT_EMAIL)),
                     cursor.getString(cursor.getColumnIndex(TENANT_ADDRESS)),
-                    cursor.getInt(cursor.getColumnIndex(TENANT_IS_CURRENT)) > 0
+                    cursor.getInt(cursor.getColumnIndex(TENANT_IS_CURRENT)) > 0,
+                    cursor.getString(cursor.getColumnIndex(PARENT_TENANT_ID))
             );
         }
 
         cursor.close();
         return t;
+    }
+
+    public ArrayList<Tenant> getAllTenants(boolean onlyCurrent) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Tenant> tenantList = new ArrayList<Tenant>();
+
+        String query = "select * from " + TENANT_TABLE_NAME + (onlyCurrent? " WHERE " + TENANT_IS_CURRENT + " = 1" : "") + " ORDER BY TENANT_ID Desc";
+        Cursor cursor = db.rawQuery(query, null);
+        while (cursor.moveToNext()) {
+            tenantList.add(new Tenant(
+                    cursor.getString(cursor.getColumnIndex(TENANT_ID)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_NAME)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_MOBILE)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_EMAIL)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_ADDRESS)),
+                    cursor.getInt(cursor.getColumnIndex(TENANT_IS_CURRENT)) > 0,
+                    cursor.getString(cursor.getColumnIndex(PARENT_TENANT_ID))
+            ));
+        }
+
+        cursor.close();
+        return tenantList;
+    }
+
+    public ArrayList<Tenant> getDependents(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Tenant> tenantList = new ArrayList<Tenant>();
+
+        String query = "select * from " + TENANT_TABLE_NAME + " WHERE " + PARENT_TENANT_ID + " = ?" + " ORDER BY TENANT_ID Desc";
+        Cursor cursor = db.rawQuery(query, new String[]{id});
+        while (cursor.moveToNext()) {
+            tenantList.add(new Tenant(
+                    cursor.getString(cursor.getColumnIndex(TENANT_ID)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_NAME)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_MOBILE)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_EMAIL)),
+                    cursor.getString(cursor.getColumnIndex(TENANT_ADDRESS)),
+                    cursor.getInt(cursor.getColumnIndex(TENANT_IS_CURRENT)) > 0,
+                    cursor.getString(cursor.getColumnIndex(PARENT_TENANT_ID))
+            ));
+        }
+
+        cursor.close();
+        return tenantList;
     }
 
     /* Total Expected rent for current month */
@@ -889,28 +966,6 @@ public class DataModule extends SQLiteOpenHelper {
         }
     }
 
-    //TODO: Check and remove this function
-    public Cursor getTenantTableData(String key) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result;
-        String query;
-
-
-        if (key == KEY_ALL) {
-            query = "select * from " + TENANT_TABLE_NAME +" ORDER BY TENANT_ID ASC";
-            Log.d("TAG", "QUERY: " + query);
-            result = db.rawQuery(query, null);
-        } else {
-            key = Integer.valueOf(key).toString();
-            query = "select * from " + TENANT_TABLE_NAME +" where ROOM_NUMBER = " + "'"+ key + "'";
-            Log.d("TAG", "QUERY: " + query);
-            result = db.rawQuery(query, null);
-        }
-
-        result.close();
-        return result;
-    }
-
     public void addPenaltyToOutstandingPayments() {
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<Tenant> tenantList = new ArrayList<Tenant>();
@@ -984,14 +1039,16 @@ public class DataModule extends SQLiteOpenHelper {
         public final String email;
         public final String address;
         public final Boolean isCurrent;
+        public final String parentId;
 
-        public Tenant(String id, String name, String mobile, String email, String address, Boolean isCurrent) {
+        public Tenant(String id, String name, String mobile, String email, String address, Boolean isCurrent, String parentId) {
             this.id = id;
             this.name = name;
             this.mobile = mobile;
             this.isCurrent = isCurrent;
             this.email = email;
             this.address = address;
+            this.parentId = parentId;
         }
     }
 
