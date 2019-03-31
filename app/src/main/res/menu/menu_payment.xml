@@ -13,6 +13,11 @@
         android:title="Show Receipts"
         app:showAsAction="never" />
     <item
+        android:id="@+id/menu_actionShowMonthly"
+        android:orderInCategory="100"
+        android:title="Show Monthly Data"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/menu_actionAddPenalty"
         android:orderInCategory="100"
         android:title="Add Penalty"

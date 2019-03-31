@@ -107,6 +107,10 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
                 Intent pendingIntent = new Intent(OccupancyAndBookingActivity.this, ViewOutstandingActivity.class);
                 startActivity(pendingIntent);
                 break;
+            case R.id.menu_actionShowMonthly:
+                Intent monthIntent = new Intent(OccupancyAndBookingActivity.this, MonthlyDataActivity.class);
+                startActivity(monthIntent);
+                break;
             case R.id.menu_actionShowReceipts:
                 Intent receivedIntent = new Intent(OccupancyAndBookingActivity.this, ViewReceiptsActivity.class);
                 startActivity(receivedIntent);

@@ -856,7 +856,7 @@ public class DataModule extends SQLiteOpenHelper {
 
         if(cursor.getCount() != 0) {
             while (cursor.moveToNext()) {
-                //SAHIFRE : HACK for now - fix in future release
+                //SAHIFRE : HACK for now - fix in future release to support ReceiptType.WAIVEOFF
                 ReceiptType type = receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))];
                 if(cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE)) == ReceiptType.PENALTY.getIntValue() && cursor.getInt(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF)) > 0){
                     type = ReceiptType.WAIVEOFF;
@@ -876,6 +876,33 @@ public class DataModule extends SQLiteOpenHelper {
         cursor.close();
         return receipts;
     }
+
+
+    public String getTotalCashReceipts(int month, ReceiptType receiptType){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+
+        String query = "select * from " + RECEIPTS_TABLE_NAME + " WHERE strftime('%m', RECEIPT_DATE) = " +
+                "'0" + String.valueOf(month) + "' and RECEIPT_TYPE = " + String.valueOf(receiptType.getIntValue());
+        Cursor cursor = db.rawQuery(query, null);
+        int totalCash = 0;
+
+        while (cursor.moveToNext()) {
+            //SAHIFRE : HACK for now - fix in future release to support ReceiptType.WAIVEOFF
+            ReceiptType type = receiptTypeValues[cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE))];
+            if(cursor.getInt(cursor.getColumnIndex(RECEIPT_TYPE)) == ReceiptType.PENALTY.getIntValue() && cursor.getInt(cursor.getColumnIndex(RECEIPT_PENALTY_WAIVE_OFF)) > 0){
+                type = ReceiptType.WAIVEOFF;
+                // Do not consider this CASH in calculation - Never received this payment in any mode
+                continue;
+            }
+
+            totalCash += cursor.getInt(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT));
+        }
+
+        cursor.close();
+        return String.valueOf(totalCash);
+    }
+
 
 
     public void splitRoom(String roomNumber, int numRooms, String rent, String deposit) {

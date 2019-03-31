@@ -88,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(pendingIntent);
                 break;
             case R.id.main_monthButton:
+                Intent monthIntent = new Intent(MainActivity.this, MonthlyDataActivity.class);
+                startActivity(monthIntent);
 
                 break;
             case R.id.receivedRent:
@@ -113,13 +115,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.payments_button:
-
-                Toast.makeText(MainActivity.this, "Launching Payments", Toast.LENGTH_SHORT).show();
-
-                Intent paymentIntent = new Intent(MainActivity.this, ReceiptActivity.class);
-                paymentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
-                paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
-                startActivity(paymentIntent);
+                Toast.makeText(MainActivity.this, "This functionality is not implemented yet", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Launching Payments", Toast.LENGTH_SHORT).show();
+//
+//                Intent paymentIntent = new Intent(MainActivity.this, ReceiptActivity.class);
+//                paymentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
+//                paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
+//                startActivity(paymentIntent);
                 break;
             case R.id.viewRoomButton:
             case R.id.adminScreen:
