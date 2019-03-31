@@ -1,7 +1,9 @@
 package com.example.thakurhousepg;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
@@ -20,11 +22,15 @@ import android.widget.Toast;
 import com.example.thakurhousepg.BedViewActivity;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class OccupancyAndBookingActivity extends AppCompatActivity implements BedsListFragment.OnBedsListInteractionListener {
     public DataModule datamodule;
     public TabLayout tabLayout;
     public static int currentSelectedTab = 0;
+
+    private static final String TAG = "OccupancyAndBookingActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +103,24 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         //noinspection SimplifiableIfStatement
         switch(id) {
             case R.id.menu_actionAddPenalty:
-                datamodule.addPenaltyToOutstandingPayments();
-                BedsListContent.refresh();
-                BedsListFragment bedsFrag = (BedsListFragment) getSupportFragmentManager().findFragmentById(R.id.beds_fragment);
-                bedsFrag.reloadData();
+                Calendar rightNow = Calendar.getInstance();
+
+                SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
+                int monthUpdated = settings.getInt("penaltyAddedForMonth", 0);
+                if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
+                    Log.i(TAG, "Adding Penalties for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
+                    datamodule.addPenaltyToOutstandingPayments();
+
+                    SharedPreferences.Editor settingsEditor = settings.edit();
+                    settingsEditor.putInt("penaltyAddedForMonth", (rightNow.get(Calendar.MONTH) + 1));
+                    settingsEditor.commit();
+
+                    BedsListContent.refresh();
+                    BedsListFragment bedsFrag = (BedsListFragment) getSupportFragmentManager().findFragmentById(R.id.beds_fragment);
+                    bedsFrag.reloadData();
+                } else {
+                    Toast.makeText(OccupancyAndBookingActivity.this, "Penalty has already been added for this Month.", Toast.LENGTH_SHORT).show();
+                }
                 //SAHIRE : Send SMS to All
                 break;
             case R.id.menu_actionShowOutstandings:
