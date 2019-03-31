@@ -103,7 +103,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                             tenantMobile.getText().toString(),
                             "",
                             tenantEmail.getText().toString(),
-                            tenantAddress.getText().toString());
+                            tenantAddress.getText().toString(), "0");
 
                     if(tenantId != null) {
                         returnIntent.putExtra("TENANT_ID", tenantId);
@@ -116,7 +116,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                     boolean status = false;
                     if(tenantInfoForModification != null) {
                         status = dataModule.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
-                                "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), false);
+                                "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), false, "0");
                     }
 
                     if (status == true) {

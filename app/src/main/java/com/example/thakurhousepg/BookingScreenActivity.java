@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -44,6 +45,7 @@ public class BookingScreenActivity extends AppCompatActivity {
 
     private String tenantId = null;
     private ArrayList<String> tenantNamesList = new ArrayList<String>();
+    ArrayList<String> dependentsIdList = new ArrayList<String>();
     private ArrayAdapter tenantListAdapter = null;
     private ListView tenantsListView;
 
@@ -103,14 +105,12 @@ public class BookingScreenActivity extends AppCompatActivity {
         bookButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int numRooms = roomSplitSeeker.getProgress();
-                if(numRooms > 1) {
-                    dataModule.splitRoom(bedNumber.getText().toString(), numRooms, rentAmount.getText().toString(), depositAmount.getText().toString());
-                }
+                if(validate()) {
+                    int numRooms = roomSplitSeeker.getProgress();
+                    if(numRooms > 1) {
+                        dataModule.splitRoom(bedNumber.getText().toString(), numRooms, rentAmount.getText().toString(), depositAmount.getText().toString());
+                    }
 
-                //dataModule.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(), "", tenantEmail.getText().toString(), tenantAddress.getText().toString());
-
-                if(tenantId != null) {
                     String newBookingId = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), bookingDate.getText().toString());
                     Log.i(TAG, "result is " + newBookingId);
 
@@ -131,6 +131,10 @@ public class BookingScreenActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                         dataModule.createPendingEntryForBooking(newBookingId, DataModule.PendingType.DEPOSIT, depositAmount.getText().toString(), Calendar.getInstance().get(Calendar.MONTH) + 1);
+
+                        for(String id: dependentsIdList) {
+                            dataModule.updateTenant(id, "", "", "", "", "", true, tenantId);
+                        }
 
                         BedsListContent.refresh();
                         new AlertDialog.Builder(BookingScreenActivity.this)
@@ -166,7 +170,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                         //TODO: Remove the new Tenant if the Booking Creation fails?
                     }
                 } else {
-                    Toast.makeText(BookingScreenActivity.this, "Can not create a new Tenant", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BookingScreenActivity.this, "Can not create a new Booking, Validation Failed", Toast.LENGTH_SHORT).show();
                     Log.i(TAG, "Tenant creation failed");
                 }
             }
@@ -188,9 +192,31 @@ public class BookingScreenActivity extends AppCompatActivity {
         addTenantButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent addTenantIntent = new Intent(BookingScreenActivity.this, TenantInformationActivity.class);
-                addTenantIntent.putExtra("ACTION", "ADD_TENANT");
-                startActivityForResult(addTenantIntent, 0);
+
+                new AlertDialog.Builder(BookingScreenActivity.this)
+                        .setTitle("")
+                        .setMessage("Do you want to Add a new Tenant or select from the existing?")
+
+                        // Specifying a listener allows you to take an action before dismissing the dialog.
+                        // The dialog is automatically dismissed when a dialog button is clicked.
+                        .setPositiveButton("Add New Tenant", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent addTenantIntent = new Intent(BookingScreenActivity.this, TenantInformationActivity.class);
+                                addTenantIntent.putExtra("ACTION", "ADD_TENANT");
+                                startActivityForResult(addTenantIntent, 0);
+                            }
+                        })
+
+                        // A null listener allows the button to dismiss the dialog and take no further action.
+                        .setNegativeButton("Select", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent selectTenantIntent = new Intent(BookingScreenActivity.this, SelectTenantActivity.class);
+                                startActivityForResult(selectTenantIntent, 1);
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .show();
             }
         });
 
@@ -210,13 +236,65 @@ public class BookingScreenActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            String newTenanId = data.getStringExtra("TENANT_ID");
-            if (tenantId == null) {
-                tenantId = newTenanId;
+            if (requestCode == 0) {
+                String newTenanId = data.getStringExtra("TENANT_ID");
+                if (tenantId == null) {
+                    tenantId = newTenanId;
+                }
+                tenantNamesList.add(dataModule.getTenantInfo(newTenanId).name);
+                tenantListAdapter.notifyDataSetChanged();
             }
-            tenantNamesList.add(dataModule.getTenantInfo(newTenanId).name);
-            tenantListAdapter.notifyDataSetChanged();
+            else {
+                ArrayList<String> selectedTenants = (ArrayList<String>) data.getSerializableExtra("SELECTED_TENANT_IDS");
+                if (selectedTenants.size() > 0) {
+                    tenantId = selectedTenants.get(0);
+                    tenantNamesList.clear();
+                    dependentsIdList.clear();
+                    for (String id : selectedTenants) {
+                        DataModule.Tenant newTenant = dataModule.getTenantInfo(id);
+                        if(newTenant.isCurrent) {
+                            new AlertDialog.Builder(BookingScreenActivity.this)
+                                    .setTitle("Tenat Already has a booking")
+                                    .setMessage("Tenant " + newTenant.name + "Already had a booking. Please make sure that booking is closed, otherwise this booking operation will not succed")
+
+                                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            // DO Nothing for now
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .show();
+                        }
+                        if(!id.equals(tenantId)) {
+                            dependentsIdList.add(id);
+                        }
+                        tenantNamesList.add(newTenant.name);
+                        tenantListAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean validate() {
+        boolean validationSuccessful = true;
+
+        if (tenantId != null) {
+            if(dataModule.getBookingInfoForTenant(tenantId) != null) {
+                // The main tenant already has a booking
+                validationSuccessful = false;
+            }
+            for(String id: dependentsIdList) {
+                if(dataModule.getBookingInfoForTenant(tenantId) != null) {
+                    // The main tenant already has a booking
+                    validationSuccessful = false;
+                    break;
+                }
+            }
+        } else {
+            validationSuccessful = false;
         }
 
+        return validationSuccessful;
     }
 }

@@ -12,6 +12,7 @@
         <activity android:name=".MonthlyDataActivity"></activity>
         <activity android:name=".ViewOutstandingActivity" />
         <activity android:name=".ViewReceiptsActivity" />
+        <activity android:name=".SelectTenantActivity"></activity>
         <activity android:name=".TenantInformationActivity" />
         <activity
             android:name=".BookingScreenActivity"

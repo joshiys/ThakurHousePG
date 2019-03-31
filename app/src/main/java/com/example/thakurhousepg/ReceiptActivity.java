@@ -80,13 +80,16 @@ public class ReceiptActivity extends AppCompatActivity {
         tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
         String selectedSection = bundle.getString("SECTION");
 
+        String bundleArgument_Rent = bundle.getString("RENT_AMOUNT");
+        String bundleArgument_Deposit = bundle.getString("DEPOSIT_AMOUNT");
+
         if("Rent".equals(selectedSection)) {
-                if (bundle.getString("RENT_AMOUNT").isEmpty() && bundle.getString("DEPOSIT_AMOUNT").isEmpty() == false) {
+                if ((bundleArgument_Rent != null && bundleArgument_Rent.isEmpty()) && (bundleArgument_Deposit != null && !bundleArgument_Deposit.isEmpty())) {
                     mViewPager.setCurrentItem(1);
                 } else {
                     mViewPager.setCurrentItem(0);
                 }
-        } else if(bundle.getString("DEPOSIT_AMOUNT").isEmpty() == false) {
+        } else if(bundleArgument_Deposit != null && !bundleArgument_Deposit.isEmpty()) {
             mViewPager.setCurrentItem(1);
         } else {
             mViewPager.setCurrentItem(2);
