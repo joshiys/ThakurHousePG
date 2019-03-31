@@ -359,13 +359,18 @@ public class ReceiptActivity extends AppCompatActivity {
 
             if(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())
                     > Integer.parseInt(totalAmount.getText().toString())) {
-                if(totalAmount.getText().toString().equals("0") && advanceCheckBox.isChecked()){
+                if(!advanceCheckBox.isChecked() && totalAmount.getText().toString().equals("0")){
                     isValid = true;
                 } else {
-                    Toast.makeText(getActivity(), "Please enter correct amount. If your total is more cash + online please select the Advance payment checkbox", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Please enter correct amount. If your total is more cash + online please select the Advance payment checkbox", Toast.LENGTH_LONG).show();
                     isValid = false;
                     return isValid;
                 }
+            }
+
+            if (Integer.parseInt(onlineAmt.getText().toString()) == 0 && Integer.parseInt(cashAmt.getText().toString()) == 0) {
+                Toast.makeText(getActivity(), "Please Make sure that either Online or Cash text box has Non-zero amount. ", Toast.LENGTH_LONG).show();
+                isValid = false;
             }
 
             return isValid;
