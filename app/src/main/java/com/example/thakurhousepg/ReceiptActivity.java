@@ -330,14 +330,28 @@ public class ReceiptActivity extends AppCompatActivity {
         private boolean validate() {
             boolean isValid = true;
 
+            DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+            if(bedInfo == null) {
+                Toast.makeText(getActivity(), "Please enter a correct bed number", Toast.LENGTH_SHORT).show();
+                isValid = false;
+                return isValid;
+            } else if(bedInfo.bookingId == null) {
+                Toast.makeText(getActivity(), "No booking exists for this Room number", Toast.LENGTH_SHORT).show();
+                isValid = false;
+                return isValid;
+            }
+
             if(!onlineCheckBox.isChecked() && !cashCheckBox.isChecked()) {
                 Toast.makeText(getActivity(), "Please select either online or cash amount check box", Toast.LENGTH_SHORT).show();
                 isValid = false;
+                return isValid;
             }
 
-            if(onlineAmt.getText().toString().isEmpty() && cashAmt.getText().toString().isEmpty()) {
+            if((onlineCheckBox.isChecked() && onlineAmt.getText().toString().isEmpty()) ||
+                    (cashCheckBox.isChecked() && cashAmt.getText().toString().isEmpty())) {
                 Toast.makeText(getActivity(), "Please enter a amount greater than 0", Toast.LENGTH_SHORT).show();
                 isValid = false;
+                return isValid;
             }
 
             if(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())
@@ -347,16 +361,8 @@ public class ReceiptActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(getActivity(), "Please enter correct amount. If your total is more cash + online please select the Advance payment checkbox", Toast.LENGTH_SHORT).show();
                     isValid = false;
+                    return isValid;
                 }
-            }
-
-            DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
-            if(bedInfo == null) {
-                Toast.makeText(getActivity(), "Please enter a correct bed number", Toast.LENGTH_SHORT).show();
-                isValid = false;
-            } else if(bedInfo.bookingId == null) {
-                Toast.makeText(getActivity(), "No booking exists for this Room number", Toast.LENGTH_SHORT).show();
-                isValid = false;
             }
 
             return isValid;
