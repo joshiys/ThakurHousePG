@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -124,9 +125,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                startActivity(paymentIntent);
                 break;
             case R.id.viewRoomButton:
-            case R.id.adminScreen:
                 //TODO: Decide if we need this feature
                 Toast.makeText(MainActivity.this, "This functionality is not implemented yet", Toast.LENGTH_SHORT).show();
+
+            case R.id.adminScreen:
+
+                try {
+                    dbHelper.copyDatabaseToExternalStorage();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 break;
         }

@@ -145,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:text="Admin"
+                android:text="Backup Database"
                 android:textStyle="bold"
                 android:tooltipText="Access Admin screen" />
 

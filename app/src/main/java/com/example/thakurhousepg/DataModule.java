@@ -6,10 +6,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
 public class DataModule extends SQLiteOpenHelper {
 
@@ -218,6 +224,26 @@ public class DataModule extends SQLiteOpenHelper {
         //Close the streams
         dbOutputStream.flush();
         dbOutputStream.close();
+        dbInputStream.close();
+    }
+
+    public void copyDatabaseToExternalStorage() throws IOException {
+        InputStream dbInputStream = _context.getAssets().open(DATABASE_NAME);
+
+        String outFileName = Environment.getExternalStorageDirectory() + "/"+ DIRECTORY_DOWNLOADS + "/thakurhouse_backup.db";
+
+        OutputStream output = new FileOutputStream(outFileName);
+
+        // Transfer bytes from the inputfile to the outputfile
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = dbInputStream.read(buffer))>0){
+            output.write(buffer, 0, length);
+        }
+
+        // Close the streams
+        output.flush();
+        output.close();
         dbInputStream.close();
     }
 
