@@ -86,7 +86,9 @@ public class BedViewActivity extends AppCompatActivity {
 
             rentAmount.setText(booking.rentAmount);
             depositAmount.setText(booking.depositAmount);
+            bookingDate.setVisibility(View.VISIBLE);
             bookingDate.setText(booking.bookingDate);
+
 
             smsButton.show();
             smsButton.setOnClickListener(new View.OnClickListener() {
