@@ -27,6 +27,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     DataModule dbHelper;
+    SMSManagement smsHandle;
     Button sendSMS, adminScreen, viewTenant;
     Button btn_receipt, btn_occupancy, btn_payment;
     EditText roomNumber;
@@ -35,7 +36,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
 
-    private static final int MY_PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    int PERMISSION_ALL = 1;
+    String[] PERMISSIONS = {
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            android.Manifest.permission.SEND_SMS,
+//            Manifest.permission.INTERNET,
+//            android.Manifest.permission.READ_CONTACTS,
+//            android.Manifest.permission.WRITE_CONTACTS,
+//            android.Manifest.permission.READ_SMS,
+//            android.Manifest.permission.CAMERA
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,30 +84,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         DataModule.setContext(this);
         dbHelper = DataModule.getInstance();
 
+        SMSManagement.setContext(this);
+        smsHandle = SMSManagement.getInstance();
+
         setPendingAmountEntries();
         headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
         headerView.setOnClickListener(this);
-
-        checkForPermissions();
     }
 
-    private void checkForPermissions(){
-        String[] ss = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                PackageManager.PERMISSION_GRANTED){
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
-        } else{
-            adminScreen.setVisibility(View.VISIBLE);
+    private void checkForPermissions() {
+        for (String permission : PERMISSIONS) {
+            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{permission},
+                        PERMISSION_ALL);
+            }
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        checkForPermissions();
         setTotalOutstandingRent();
     }
 
@@ -192,5 +199,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
 }

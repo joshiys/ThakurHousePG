@@ -765,6 +765,7 @@ public class DataModule extends SQLiteOpenHelper {
     }
 
     /* Total Expected rent for current month */
+    // XXX : Do we need to calclulate this expected rent from all the rooms available i.e. Rent for all Beds?
     public String getTotalExpectedRent() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("select * from "+ BOOKING_TABLE_NAME + " where BOOKING_CLOSE_DATE is null or date(BOOKING_CLOSE_DATE) >= date('now', 'start of month')" , null);
