@@ -1,9 +1,13 @@
 package com.example.thakurhousepg;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
 
+    private static final int MY_PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,8 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         roomNumber = findViewById(R.id.roomNumberText);
         sendSMS = findViewById(R.id.sendSMSButton);
 
-        receivedRentValue = (Button) findViewById(R.id.receivedRent);
-        outstandingRentValue = (Button) findViewById(R.id.outstandingRent);
+        receivedRentValue = findViewById(R.id.receivedRent);
+        outstandingRentValue = findViewById(R.id.outstandingRent);
 //        totalExpectedRentValue = (Button) findViewById(R.id.totalRent);
 
         headerView = findViewById(R.id.main_monthButton);
@@ -71,6 +77,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setPendingAmountEntries();
         headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
         headerView.setOnClickListener(this);
+
+        checkForPermissions();
+    }
+
+    private void checkForPermissions(){
+        String[] ss = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                PackageManager.PERMISSION_GRANTED){
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+        } else{
+            adminScreen.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -132,8 +154,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 try {
                     dbHelper.copyDatabaseToExternalStorage();
+                    Toast.makeText(MainActivity.this, "Database Backup Complete.", Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    Toast.makeText(MainActivity.this, "Database Backup Failed: "+ e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
 
                 break;
