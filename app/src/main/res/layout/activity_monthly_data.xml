@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".MonthlyDataActivity">
 
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="202dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="32dp"
+        android:text="Total Deposit Outstanding"
+        android:textSize="17sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
     <Button
         android:id="@+id/showMonth"
         android:layout_width="match_parent"
@@ -19,58 +30,64 @@
 
     <TextView
         android:id="@+id/textView11"
-        android:layout_width="151dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="56dp"
+        android:layout_width="186dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="28dp"
-        android:text="Total Outstanding"
+        android:text="Total Rent Outstanding"
         android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView10" />
 
     <TextView
-        android:id="@+id/totalOutstanding"
+        android:id="@+id/totalRentOutstanding"
         android:layout_width="140dp"
         android:layout_height="30dp"
         android:layout_marginStart="36dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="20dp"
         android:text="TextView"
-        android:textSize="17sp"
         android:textColor="@android:color/holo_red_dark"
+        android:textSize="17sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/textView11"
-        app:layout_constraintTop_toBottomOf="@+id/receiptsPayment" />
+        app:layout_constraintTop_toBottomOf="@+id/rentReceipts" />
 
     <TextView
         android:id="@+id/textView10"
         android:layout_width="151dp"
         android:layout_height="32dp"
-        android:layout_marginStart="56dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="28dp"
-        android:text="Total Receipts"
+        android:text="Total Rent Receipts"
         android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
     <TextView
-        android:id="@+id/receiptsPayment"
+        android:id="@+id/rentReceipts"
         android:layout_width="140dp"
         android:layout_height="30dp"
         android:layout_marginStart="36dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="20dp"
         android:text="TextView"
-        android:textSize="17sp"
         android:textColor="@android:color/holo_green_dark"
+        android:textSize="17sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.795"
         app:layout_constraintStart_toEndOf="@+id/textView10"
         app:layout_constraintTop_toBottomOf="@+id/depositCash" />
 
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
-        android:textSize="17sp"
         android:layout_height="27dp"
-        android:layout_marginStart="56dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="104dp"
         android:text="Total Expected Rent"
+        android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -80,12 +97,12 @@
         android:layout_height="27dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="104dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="20dp"
         android:text="TextView"
-        android:textSize="17sp"
         android:textColor="@android:color/black"
+        android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.083"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/textView4"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -93,7 +110,7 @@
         android:id="@+id/textView6"
         android:layout_width="153dp"
         android:layout_height="24dp"
-        android:layout_marginStart="56dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="32dp"
         android:text="Total Rent Cash"
         android:textSize="17sp"
@@ -102,16 +119,16 @@
 
     <TextView
         android:id="@+id/rentCash"
-        android:layout_width="147dp"
-        android:layout_height="26dp"
+        android:layout_width="143dp"
+        android:layout_height="31dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="20dp"
         android:text="TextView"
-        android:textSize="17sp"
         android:textColor="@android:color/black"
+        android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.09"
+        app:layout_constraintHorizontal_bias="0.86"
         app:layout_constraintStart_toEndOf="@+id/textView6"
         app:layout_constraintTop_toBottomOf="@+id/expectedRent" />
 
@@ -119,7 +136,7 @@
         android:id="@+id/textView8"
         android:layout_width="154dp"
         android:layout_height="25dp"
-        android:layout_marginStart="56dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="32dp"
         android:text="Total Deposit Cash"
         android:textSize="17sp"
@@ -131,10 +148,49 @@
         android:layout_width="140dp"
         android:layout_height="30dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="20dp"
         android:text="TextView"
-        android:textSize="17sp"
         android:textColor="@android:color/black"
+        android:textSize="17sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.8"
         app:layout_constraintStart_toEndOf="@+id/textView8"
         app:layout_constraintTop_toBottomOf="@+id/rentCash" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="183dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="28dp"
+        android:textSize="17sp"
+        android:text="Total Deposit Receipts"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView11" />
+
+    <TextView
+        android:id="@+id/depositReceipts"
+        android:layout_width="139dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="32dp"
+        android:text="TextView"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="17sp"
+        app:layout_constraintStart_toEndOf="@+id/textView5"
+        app:layout_constraintTop_toBottomOf="@+id/totalRentOutstanding" />
+
+    <TextView
+        android:id="@+id/totalDepositOutstanding"
+        android:layout_width="137dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:text="TextView"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="17sp"
+        app:layout_constraintStart_toEndOf="@+id/textView9"
+        app:layout_constraintTop_toBottomOf="@+id/depositReceipts" />
+
 </android.support.constraint.ConstraintLayout>

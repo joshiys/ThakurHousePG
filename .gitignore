@@ -11,3 +11,6 @@
 /build
 /captures
 .externalNativeBuild
+app/thakurpg/release/app-release-thakurhouse.apk
+app/thakurpg/release/app-release.apk
+app/thakurpg/release/output.json
