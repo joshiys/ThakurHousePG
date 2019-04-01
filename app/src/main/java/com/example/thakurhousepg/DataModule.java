@@ -4,11 +4,17 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,10 +67,9 @@ public class DataModule extends SQLiteOpenHelper {
 
     private static final String TAG = "DataModule";
 
-    public static final String KEY_ALL = "KEY_ALL";
-
     private static DataModule _instance = null;
     private static Context _context = null;
+    private SQLiteDatabase theDatabase;
 
     // Use this to convert int values to actual enum values
     private final ReceiptType[] receiptTypeValues = ReceiptType.values();
@@ -74,7 +79,13 @@ public class DataModule extends SQLiteOpenHelper {
     //Callers  must make sure that context is set first using DataModule.setContext()
     public static DataModule getInstance() {
         if(_instance == null && _context != null) {
-            _instance = new DataModule(_context);
+            //TODO: remove this try/catch, and make this method throw an IOException.
+            //All the calling code should then be modified to handle that exception.
+            try {
+                _instance = new DataModule(_context);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         return _instance;
@@ -84,14 +95,19 @@ public class DataModule extends SQLiteOpenHelper {
         _context = context;
     }
 
-    public DataModule(Context context) {
+    public DataModule(Context context) throws IOException {
         super(context, DATABASE_NAME, null, 1);
-        createDefaultBeds();
-        insertSampleData();
+
+        createDataBase();
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.i(TAG, "In Database onCreate. What to do here ???");
+    }
+
+    // Keeping this here so that we have the DB structure handy whenever needed
+    public void OldonCreate(SQLiteDatabase db) {
         String query;
 
         query = "create table IF NOT EXISTS " + BEDS_TABLE_NAME +
@@ -146,49 +162,67 @@ public class DataModule extends SQLiteOpenHelper {
 
 
 
-        //Create Penalty table
+        //Create Pending table
         query = "create table IF NOT EXISTS " + PENDING_AMOUNT_TABLE_NAME +
                 "(PENDING_AMOUNT INTEGER," +
                 " PENDING_TYPE INTEGER," +
                 " PENDING_MONTH INTEGER," +
                 " BOOKING_ID INTEGER," +
                 " TENANT_ID INTEGER," +
-                " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)," +
-                " FOREIGN KEY (TENANT_ID) REFERENCES " + TENANT_TABLE_NAME + "(BOOKING_ID)" +
+                " FOREIGN KEY (BOOKING_ID) REFERENCES " + BOOKING_TABLE_NAME + "(BOOKING_ID)" +
                 ")";
         db.execSQL(query);
     }
 
-    public void insertSampleData() {
-        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString();
+    public void createDataBase() throws IOException{
 
-        String newTenantId = addNewTenant("Yogesh Joshi", "123456789", null, null, null, "0");
-        if(newTenantId != null) {
-            String newBookingId = createNewBooking("111.0", newTenantId, "7000", "8000", date);
-            createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "8000", Calendar.getInstance().get(Calendar.MONTH) + 1);
+        SQLiteDatabase checkDB = null;
+
+        try{
+            String fullDBName = _context.getDatabasePath(DATABASE_NAME).toString();
+            checkDB = SQLiteDatabase.openDatabase(fullDBName, null, SQLiteDatabase.OPEN_READONLY);
+
+        }catch(SQLiteException e){
+            //database does't exist yet. By calling this method, an empty database will be created into the default system path
+            // And then we will copy our Asset database onto this database
+            this.getReadableDatabase();
+
+            try {
+
+                copyDataBase();
+
+            } catch (IOException copyException) {
+                throw new Error("Error copying database");
+            }
         }
 
-        newTenantId = addNewTenant("Sachin Ahire", "987654321", null, null, null, "0");
-        if(newTenantId != null) {
-            String newBookingId = createNewBooking("112.0", newTenantId, "8000", "9000", date);
-            createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "9000", Calendar.getInstance().get(Calendar.MONTH) + 1);
+    }
+
+    private void copyDataBase() throws IOException {
+        //Open your local db as the input stream
+        InputStream dbInputStream = _context.getAssets().open(DATABASE_NAME);
+
+        // Path to the just created empty db
+        String outFileName = _context.getDatabasePath(DATABASE_NAME).toString();
+
+        //Open the empty db as the output stream
+        OutputStream dbOutputStream = new FileOutputStream(outFileName);
+
+        //transfer bytes from the inputfile to the outputfile
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = dbInputStream.read(buffer))>0){
+            dbOutputStream.write(buffer, 0, length);
         }
 
-
-        newTenantId = addNewTenant("Suyog J", "214365879", null, null, null, "0");
-        if(newTenantId != null) {
-            String newBookingId = createNewBooking("113.0", newTenantId, "8000", "9000", date);
-            createPendingEntryForBooking(newBookingId, PendingType.DEPOSIT, "9000", Calendar.getInstance().get(Calendar.MONTH) + 1);
-        }
-
-        Log.i(TAG, "Experimental check: " + String.valueOf(PendingType.RENT.getIntValue()) + " AND " + PendingType.RENT.toString());
+        //Close the streams
+        dbOutputStream.flush();
+        dbOutputStream.close();
+        dbInputStream.close();
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TENANT_TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + PENDING_AMOUNT_TABLE_NAME);
-        onCreate(db);
     }
 
     /* Should ONLY be called on the first launch of the app every month.
@@ -461,42 +495,6 @@ public class DataModule extends SQLiteOpenHelper {
         checkRecord.close();
 
         return opSuccess;
-    }
-
-    /// Helper Functions
-    private void createDefaultBeds() {
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("select BED_NUMBER from " + BEDS_TABLE_NAME + " LIMIT 1", null);
-        if (c.getCount() == 0) {
-            /* For Ground Floor */
-            addNewBed("000.1", "4250", "4250");
-            addNewBed("000.2", "4250", "4250");
-            addNewBed("000.3", "4250", "4250");
-            addNewBed("000.4", "4250", "4250");
-            addNewBed("000.5", "4250", "4250");
-            addNewBed("000.6", "4250", "4250");
-
-            //For Testing Only
-            addNewBed("111.0", "8000", "8000");
-            addNewBed("112.0", "9000", "9000");
-            addNewBed("113.0", "10500", "10500");
-
-
-            for (int floorNo = 100; floorNo <= 600; floorNo += 100) {
-                int numOfRooms = 7;
-
-                if(floorNo >= 200) {
-                    numOfRooms = 8;
-                }
-                for (int roomNo = 1; roomNo <= numOfRooms; roomNo += 1) {
-                    Double bedNumber = Double.valueOf(floorNo + roomNo);
-                    addNewBed(bedNumber.toString(), "8000", "8000");
-                }
-            }
-        }
-
-        c.close();
     }
 
     private Integer createNewTenantId() {

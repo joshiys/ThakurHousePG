@@ -60,7 +60,7 @@ public class BookingScreenActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
 
-        dataModule = new DataModule(this);
+        dataModule = DataModule.getInstance();
 
         rentAmount = findViewById(R.id.booking_rent);
         depositAmount = findViewById(R.id.booking_deposit);
