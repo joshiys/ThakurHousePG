@@ -335,7 +335,7 @@ public class DataModule extends SQLiteOpenHelper {
         if(!mobile.isEmpty()) contentValues.put(TENANT_MOBILE, mobile);
         if(!mobile2.isEmpty()) contentValues.put(TENANT_MOBILE_2, mobile2);
         if(!address.isEmpty()) contentValues.put(TENANT_ADDRESS, address);
-        if(isCurrent != null) contentValues.put(TENANT_IS_CURRENT, false);
+        contentValues.put(TENANT_IS_CURRENT, isCurrent != null ? isCurrent : false);
         if(!parentId.isEmpty()) contentValues.put(PARENT_TENANT_ID, parentId);
 
 
@@ -374,10 +374,11 @@ public class DataModule extends SQLiteOpenHelper {
         checkRecord = db.rawQuery("select * from " + BEDS_TABLE_NAME + " where BED_IS_OCCUPIED = ? AND BED_NUMBER = ?", new String[]{"1", bedNumber});
 
         if (checkRecord.getCount() != 0) {
-            Log.i(TAG, "CreateNewBooking: Can not book the whole room");
+            Log.i(TAG, "CreateNewBooking: Can not book, the room is already booked");
             checkRecord.close();
             return bookingId.toString();
         }
+
         // Check if there is already a Booking for this TENANT_ID
         checkRecord.close();
         checkRecord = db.rawQuery("select BOOKING_ID from " + BOOKING_TABLE_NAME + " where TENANT_ID = ? AND BOOKING_CLOSE_DATE is null", new String[]{tenantId});

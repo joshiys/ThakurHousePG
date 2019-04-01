@@ -169,9 +169,6 @@ public class BookingScreenActivity extends AppCompatActivity {
                         Log.i(TAG, "Booking creation failed");
                         //TODO: Remove the new Tenant if the Booking Creation fails?
                     }
-                } else {
-                    Toast.makeText(BookingScreenActivity.this, "Can not create a new Booking, Validation Failed", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "Tenant creation failed");
                 }
             }
         });
@@ -219,7 +216,6 @@ public class BookingScreenActivity extends AppCompatActivity {
                         .show();
             }
         });
-
     }
 
     @Override
@@ -255,7 +251,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                         if(newTenant.isCurrent) {
                             new AlertDialog.Builder(BookingScreenActivity.this)
                                     .setTitle("Tenat Already has a booking")
-                                    .setMessage("Tenant " + newTenant.name + "Already had a booking. Please make sure that booking is closed, otherwise this booking operation will not succed")
+                                    .setMessage("Tenant, " + newTenant.name + ", already had a booking. Please make sure that booking is closed, otherwise this booking operation will not succed")
 
                                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
@@ -280,14 +276,18 @@ public class BookingScreenActivity extends AppCompatActivity {
         boolean validationSuccessful = true;
 
         if (tenantId != null) {
-            if(dataModule.getBookingInfoForTenant(tenantId) != null) {
+            DataModule.Tenant tenant = dataModule.getTenantInfo(tenantId);
+            if(tenant .isCurrent || !tenant.parentId.equals("0")) {
                 // The main tenant already has a booking
                 validationSuccessful = false;
+                Toast.makeText(BookingScreenActivity.this, "The main tenant, " + tenant.name + ", already has a booking", Toast.LENGTH_SHORT).show();
             }
             for(String id: dependentsIdList) {
-                if(dataModule.getBookingInfoForTenant(tenantId) != null) {
-                    // The main tenant already has a booking
+                tenant = dataModule.getTenantInfo(id);
+                if(tenant.isCurrent || !tenant.parentId.equals("0")) {
+                    // Pne of the dependents already has a booking
                     validationSuccessful = false;
+                    Toast.makeText(BookingScreenActivity.this, "The dependent, " + tenant.name + ", already has a booking", Toast.LENGTH_SHORT).show();
                     break;
                 }
             }
