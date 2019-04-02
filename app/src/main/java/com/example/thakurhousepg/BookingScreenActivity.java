@@ -209,6 +209,17 @@ public class BookingScreenActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent selectTenantIntent = new Intent(BookingScreenActivity.this, SelectTenantActivity.class);
+                                if (!dependentsIdList.isEmpty()) {
+                                    selectTenantIntent.putExtra("LIST_MODE", "MODIFY_PARTIALLY_SELECTED_LIST");
+                                    // When the Mode is "MODIFY_PARTIALLY_SELECTED_LIST" we send only the Id's.
+                                    // But Main tenant Id is not in the dependentsIdList. So we add it first.
+                                    ArrayList<String> temp = new ArrayList<String>();
+                                    temp.add(tenantId);
+                                    temp.addAll(dependentsIdList);
+                                    selectTenantIntent.putExtra("TENANT_LIST", temp);
+                                } else {
+                                    selectTenantIntent.putExtra("LIST_MODE", "SELECT_FROM_BLANK_LIST");
+                                }
                                 startActivityForResult(selectTenantIntent, 1);
                             }
                         })

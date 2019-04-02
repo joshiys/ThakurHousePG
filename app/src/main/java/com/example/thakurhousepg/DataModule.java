@@ -1085,7 +1085,7 @@ public class DataModule extends SQLiteOpenHelper {
         }
     }
 
-    public static class Tenant {
+    public static class Tenant implements java.io.Serializable {
         public final String id;
         public final String name;
         public final String mobile;

@@ -32,10 +32,14 @@ public class SelectTenantActivity extends AppCompatActivity {
 
         final ListView tenantsListView = findViewById(R.id.tenant_selection_list);
         selectButton = findViewById(R.id.tenant_selection_complete);
+        Bundle bundle = getIntent().getExtras();
 
-//        tenantNameList.setAdapter(new TenantListAdapter());
+        if("MODIFY_FULLY_SELECTED_LIST".equals(bundle.getString("LIST_MODE"))) {
+            tenants = (ArrayList<DataModule.Tenant>) bundle.getSerializable("TENANT_LIST");
+        } else {
+            tenants = dataModule.getAllTenants(false);
+        }
 
-        tenants = dataModule.getAllTenants(false);
 
         final ArrayList<String> tenantNamesList = new ArrayList<String>();
 
@@ -50,13 +54,20 @@ public class SelectTenantActivity extends AppCompatActivity {
         tenantsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         tenantsListView.setItemsCanFocus(false);
 
-        tenantsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.i(TAG, "Item selected " + String.valueOf(position));
+        //When the Mode is "MODIFY_PARTIALLY_SELECTED_LIST" we receive the Id's which have been selected.
+        if("MODIFY_PARTIALLY_SELECTED_LIST".equals(bundle.getString("LIST_MODE"))) {
+            ArrayList<String> tenantIds = (ArrayList<String>) bundle.getSerializable("TENANT_LIST");
+            for (String id : tenantIds) {
+                for (DataModule.Tenant t: tenants) {
+                    if(t.id.equals(id))
+                        tenantsListView.setItemChecked(tenants.indexOf(t), true);
+                }
             }
-
-        });
+        } else if("MODIFY_FULLY_SELECTED_LIST".equals(bundle.getString("LIST_MODE"))) {
+            for (int i = 0; i < tenants.size(); i++) {
+                tenantsListView.setItemChecked(i, true);
+            }
+        }
 
         selectButton.setOnClickListener(new View.OnClickListener() {
             @Override

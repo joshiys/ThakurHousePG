@@ -28,11 +28,11 @@ public class BedViewActivity extends AppCompatActivity {
     private EditText depositAmount;
     private EditText bookingDate;
     private FloatingActionButton smsButton;
-    private Button bookButton;
+    private Button bookButton, modifyButton;
 
     private DataModule dataModule;
     private boolean viewBookingMode = false;
-
+    private ArrayList<DataModule.Tenant> dependentsList = new ArrayList<DataModule.Tenant>();
     private static final String TAG = "BedViewActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +44,7 @@ public class BedViewActivity extends AppCompatActivity {
 
         bedNumber = findViewById(R.id.bedview_bed_number);
         bookButton = findViewById(R.id.bedview_button_book);
+        modifyButton = findViewById(R.id.bedview_button_modify);
         tenantName = findViewById(R.id.bedview_tenant_name);
         rentAmount = findViewById(R.id.bedview_rent);
         depositAmount = findViewById(R.id.bedview_deposit);
@@ -76,11 +77,14 @@ public class BedViewActivity extends AppCompatActivity {
             Log.i(TAG, "Found Tenat with Id " + tenant.id + " Name: " + tenant.name);
 
             // Add Dependents Names
+            dependentsList = dataModule.getDependents(tenant.id);
+
             String tempNameHolder = tenant.name;
-            ArrayList<DataModule.Tenant> dependentsList = dataModule.getDependents(tenant.id);
+            dependentsList = dataModule.getDependents(tenant.id);
             for (DataModule.Tenant dependent: dependentsList) {
                 Log.i(TAG, "Found Dependent with Id " + dependent.id + " Name: " + dependent.name);
                 tempNameHolder += " , " + dependent.name;
+                modifyButton.setVisibility(View.VISIBLE);
             }
             tenantName.setText(tempNameHolder);
 
@@ -160,17 +164,39 @@ public class BedViewActivity extends AppCompatActivity {
                 }
             }
         });
+
+        modifyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!dependentsList.isEmpty()) {
+                    Intent selectTenantIntent = new Intent(BedViewActivity.this, SelectTenantActivity.class);
+                    selectTenantIntent.putExtra("LIST_MODE", "MODIFY_FULLY_SELECTED_LIST");
+                    selectTenantIntent.putExtra("TENANT_LIST", dependentsList);
+                    startActivityForResult(selectTenantIntent, 2);
+                }
+            }
+        });
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.i(TAG, "Back from the Booking activity");
         if(requestCode == 1) {
             DataModule.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
             closeBooking(bedInfo.bookingId);
+            finish();
+        } else if(requestCode == 2 && resultCode == RESULT_OK) {
+            modifyButton.setVisibility(View.INVISIBLE);
+            ArrayList<String> selectedTenants = (ArrayList<String>) data.getSerializableExtra("SELECTED_TENANT_IDS");
+            for (DataModule.Tenant t : dependentsList) {
+                if(!selectedTenants.contains(t.id)) {
+                    dataModule.updateTenant(t.id, "", "", "", "", "", false, "0");
+                }
+            }
         }
-        finish();
+        depositAmount.removeTextChangedListener(amountWatcher);
+        rentAmount.removeTextChangedListener(amountWatcher);
     }
 
     private TextWatcher amountWatcher = new TextWatcher() {
