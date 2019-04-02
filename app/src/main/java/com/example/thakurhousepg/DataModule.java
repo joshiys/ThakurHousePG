@@ -276,13 +276,17 @@ public class DataModule extends SQLiteOpenHelper {
         ArrayList<Booking> bookings = getCurrentBookings();
 
         for (Booking booking: bookings) {
+            int rentAmount = Integer.parseInt(booking.rentAmount);
             // First check, if last month, there has been an advance Receipt for this Booking
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor cursor = db.rawQuery("select * from " + RECEIPTS_TABLE_NAME + " WHERE BOOKING_ID = ?" + " and RECEIPT_TYPE = ?" +
                     " and strftime('%m',date('now', '-1 month')) = strftime('%m', RECEIPT_DATE)",
                     new String[]{booking.id, String.valueOf(ReceiptType.ADVANCE.getIntValue())});
 
-            opSuccess = createPendingEntryForBooking(booking.id, PendingType.RENT, booking.rentAmount, Calendar.getInstance().get(Calendar.MONTH) + 1);
+            while (cursor.moveToNext())
+                rentAmount -= cursor.getInt(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)) + cursor.getInt(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT));
+
+            opSuccess = createPendingEntryForBooking(booking.id, PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1);
         }
 
         return opSuccess;
