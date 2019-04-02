@@ -46,9 +46,9 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
         tenantAddress = findViewById(R.id.add_tenant_address);
 
         if(bundle != null) {
-            if(bundle.getString("BED_NUMBER") != null) {
-                String bedNumber = bundle.getString("BED_NUMBER");
-                tenantInfoForModification = dataModule.getTenantInfoForBooking(dataModule.getBedInfo(bedNumber).bookingId);
+            if(bundle.getString("TENANT_ID") != null) {
+                String tenantId = bundle.getString("TENANT_ID");
+                tenantInfoForModification = dataModule.getTenantInfo(tenantId);
 
                 tenantName.setText(tenantInfoForModification.name);
                 tenantEmail.setText(tenantInfoForModification.email);

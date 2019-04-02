@@ -2,11 +2,14 @@ package com.example.thakurhousepg;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -153,18 +156,50 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         Toast toast;
 
         DataModule.Bed bedInfo = datamodule.getBedInfo(item.bedNumber);
+        final DataModule.Tenant mainTenant = datamodule.getTenantInfoForBooking(bedInfo.bookingId);
         if(bedInfo.bookingId != null) {
-            toast = Toast.makeText(OccupancyAndBookingActivity.this, "Modify Tenant "+ item.tenantName, Toast.LENGTH_SHORT);
-            toast.show();
+            final ArrayList<DataModule.Tenant> dependentsList = datamodule.getDependents(mainTenant.id);
+            if(!dependentsList.isEmpty()) {
+                final ArrayList<String> tenants = new ArrayList<String>();
+                tenants.add(mainTenant.name);
+                for(DataModule.Tenant t: dependentsList) {
+                    tenants.add(t.name);
+                }
 
-            Intent modifyTenantIntent = new Intent(OccupancyAndBookingActivity.this, TenantInformationActivity.class);
-            modifyTenantIntent.putExtra("BED_NUMBER", item.bedNumber);
-            modifyTenantIntent.putExtra("ACTION", "MODIFY_TENANT");
-            startActivity(modifyTenantIntent);
+                AlertDialog.Builder builder =
+                        new AlertDialog.Builder(this);
+
+                builder.setTitle("Select Tenant to view/modify")
+                        .setSingleChoiceItems(tenants.toArray(new String[0]), -1, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int item) {
+                                DataModule.Tenant temp;
+                                if(item == 0) {
+                                    temp = mainTenant;
+                                } else {
+                                    temp = dependentsList.get(item - 1);
+                                }
+                                showTenantActivity(temp);
+                                dialog.dismiss();
+                            }
+                        });
+                builder.show();
+            } else {
+
+                toast = Toast.makeText(OccupancyAndBookingActivity.this, "Modify Tenant " + item.tenantName, Toast.LENGTH_SHORT);
+                toast.show();
+                showTenantActivity(mainTenant);
+            }
         } else {
             toast = Toast.makeText(OccupancyAndBookingActivity.this, "Empty Tenant: "+ item.bedNumber, Toast.LENGTH_SHORT);
             toast.show();
         }
+    }
+
+    private void showTenantActivity(DataModule.Tenant t) {
+        Intent modifyTenantIntent = new Intent(OccupancyAndBookingActivity.this, TenantInformationActivity.class);
+        modifyTenantIntent.putExtra("TENANT_ID", t.id);
+        modifyTenantIntent.putExtra("ACTION", "MODIFY_TENANT");
+        startActivity(modifyTenantIntent);
     }
 
     public void onRentClick(BedsListContent.BedsListItem item){

@@ -124,7 +124,8 @@ public class BookingScreenActivity extends AppCompatActivity {
                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                             Calendar c = Calendar.getInstance();
                             c.setTime(dateFormat.parse(bookingDate.getText().toString()));
-                            if(c.get(Calendar.MONTH) != (Calendar.getInstance().get(Calendar.MONTH) + 2)) {
+                            Log.i(TAG, "Booking Month: " + c.get(Calendar.MONTH) + " , And currentMonth: " + Calendar.getInstance().get(Calendar.MONTH));
+                            if(c.get(Calendar.MONTH) != (Calendar.getInstance().get(Calendar.MONTH) + 1)) {
                                 dataModule.createPendingEntryForBooking(newBookingId, DataModule.PendingType.RENT, pendingRent, Calendar.getInstance().get(Calendar.MONTH) + 1);
                             }
                         } catch (ParseException e) {
@@ -247,6 +248,8 @@ public class BookingScreenActivity extends AppCompatActivity {
                 String newTenanId = data.getStringExtra("TENANT_ID");
                 if (tenantId == null) {
                     tenantId = newTenanId;
+                } else {
+                    dependentsIdList.add(newTenanId);
                 }
                 tenantNamesList.add(dataModule.getTenantInfo(newTenanId).name);
                 tenantListAdapter.notifyDataSetChanged();
