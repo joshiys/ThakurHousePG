@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_payment = findViewById(R.id.payments_button);
 
         adminScreen = findViewById(R.id.adminScreen);
-        viewTenant = findViewById(R.id.viewRoomButton);
+        viewTenant = findViewById(R.id.load_database_button);
 
         roomNumber = findViewById(R.id.roomNumberText);
         sendSMS = findViewById(R.id.sendSMSButton);
@@ -153,9 +153,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
 //                startActivity(paymentIntent);
                 break;
-            case R.id.viewRoomButton:
+            case R.id.load_database_button:
                 //TODO: Decide if we need this feature
-                Toast.makeText(MainActivity.this, "This functionality is not implemented yet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Loading Database from External Storage", Toast.LENGTH_SHORT).show();
+                try {
+                    dbHelper.loadDatabaseFromExternalStorage();
+                    Toast.makeText(MainActivity.this, "Load Database Complete", Toast.LENGTH_SHORT).show();
+                    onResume();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(MainActivity.this, "Load Database Failed: "+ e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                break;
 
             case R.id.adminScreen:
 

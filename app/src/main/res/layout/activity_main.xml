@@ -130,12 +130,12 @@
             android:background="@android:color/holo_blue_light">
 
             <Button
-                android:id="@+id/viewRoomButton"
+                android:id="@+id/load_database_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
                 android:layout_weight="1"
-                android:text="View Room"
+                android:text="Load Database"
                 android:textStyle="bold"
                 android:tooltipText="Access Admin screen" />
 

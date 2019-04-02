@@ -228,11 +228,28 @@ public class DataModule extends SQLiteOpenHelper {
     }
 
     public void copyDatabaseToExternalStorage() throws IOException {
-        InputStream dbInputStream = _context.getAssets().open(DATABASE_NAME);
+        this.close();
+        InputStream dbInputStream = new FileInputStream(_context.getDatabasePath(DATABASE_NAME).toString());
+        OutputStream output = new FileOutputStream(Environment.getExternalStorageDirectory() + "/"+ DIRECTORY_DOWNLOADS + "/thakurhouse_backup.db");
 
-        String outFileName = Environment.getExternalStorageDirectory() + "/"+ DIRECTORY_DOWNLOADS + "/thakurhouse_backup.db";
+        // Transfer bytes from the inputfile to the outputfile
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = dbInputStream.read(buffer))>0){
+            output.write(buffer, 0, length);
+        }
 
-        OutputStream output = new FileOutputStream(outFileName);
+        // Close the streams
+        output.flush();
+        output.close();
+        dbInputStream.close();
+    }
+
+    public void loadDatabaseFromExternalStorage() throws IOException {
+        this.close();
+
+        InputStream dbInputStream = new FileInputStream(Environment.getExternalStorageDirectory() + "/"+ DIRECTORY_DOWNLOADS + "/thakurhouse.db");
+        OutputStream output = new FileOutputStream(_context.getDatabasePath(DATABASE_NAME).toString());
 
         // Transfer bytes from the inputfile to the outputfile
         byte[] buffer = new byte[1024];
