@@ -35,7 +35,7 @@ public class SMSManagement {
     public static void sendSMS(String sendToMobile, SMS_TYPE type){
         String scAddr = null;
         PendingIntent sentIntent = null, deliveryIntent = null;
-        String msg = "";
+        String msg = "Test Message";
 //        if(type == SMS_TYPE.RENT) {
 //            msg = "Room#" + roomNo + ", Your total outstanding Amount is: " + outstanding + ".\r\n"
 //                    + "Rent: " + rent + ", Deposit: " + Deposit + ", Penalty: " + penalty + ".\r\n"

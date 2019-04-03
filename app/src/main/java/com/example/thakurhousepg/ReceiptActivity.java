@@ -1,10 +1,12 @@
 package com.example.thakurhousepg;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -113,9 +115,6 @@ public class ReceiptActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
     public static class ReceiptFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
@@ -249,7 +248,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
                     //SAHIRE: Do we need AlterDialog to confirm Room Payment
                     if(validate()) {
-                        DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+                        final DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
 
                         DataModule.ReceiptType type = DataModule.ReceiptType.RENT;
                         switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
@@ -273,10 +272,30 @@ public class ReceiptActivity extends AppCompatActivity {
                             dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, type,
                                     String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())));
                         }
-
-                        Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
-                        BedsListContent.refresh();
-                        getActivity().finish();
+                        new AlertDialog.Builder(getActivity())
+                                .setTitle("Send SMS to Tenant?")
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        SMSManagement smsManagement = SMSManagement.getInstance();
+                                        DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
+                                        smsManagement.sendSMS(tenant.mobile, SMSManagement.SMS_TYPE.RENT);
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                    }
+                                })
+                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialog) {
+                                        BedsListContent.refresh();
+                                        getActivity().finish();
+                                    }
+                                })
+                                .show();
                     }
                 }
             });
