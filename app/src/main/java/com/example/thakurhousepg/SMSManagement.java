@@ -12,10 +12,13 @@ public class SMSManagement {
     private static Context _context = null;
 
     enum SMS_TYPE {
-        RENT,
+        BOOKING,
+        CLOSE_BOOKING,
+        DUE_RENT,
         RECEIPT,
-        PENALTY,
-        DEFAULT
+        PENALTY_GENERATED,
+        DUE_REMINDER,
+        DEFAULT //Mostly same as REMINDER unless find another purpose
     };
 
     public SMSManagement(Context context) {
@@ -32,10 +35,9 @@ public class SMSManagement {
     public static void setContext(Context context) {
         _context = context;
     }
-    public static void sendSMS(String sendToMobile, SMS_TYPE type){
+    public static void sendSMS(String sendToMobile, String msg){
         String scAddr = null;
         PendingIntent sentIntent = null, deliveryIntent = null;
-        String msg = "Test Message";
 //        if(type == SMS_TYPE.RENT) {
 //            msg = "Room#" + roomNo + ", Your total outstanding Amount is: " + outstanding + ".\r\n"
 //                    + "Rent: " + rent + ", Deposit: " + Deposit + ", Penalty: " + penalty + ".\r\n"

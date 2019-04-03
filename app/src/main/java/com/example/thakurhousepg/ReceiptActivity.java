@@ -2,6 +2,7 @@ package com.example.thakurhousepg;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -115,6 +116,9 @@ public class ReceiptActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * A placeholder fragment containing a simple view.
+     */
     public static class ReceiptFragment extends Fragment {
         /**
          * The fragment argument representing the section number for this
@@ -190,14 +194,14 @@ public class ReceiptActivity extends AppCompatActivity {
             reloadDueAmount();
 
             cashAmt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (event != null || actionId == EditorInfo.IME_NULL) {
-                    Log.v(TAG, v.getText().toString());
-                } else {
-                    Log.v(TAG, "performed some other action. ID = " + String.valueOf(actionId));
-                }
-                return true;
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if (event != null || actionId == EditorInfo.IME_NULL) {
+                        Log.v(TAG, v.getText().toString());
+                    } else {
+                        Log.v(TAG, "performed some other action. ID = " + String.valueOf(actionId));
+                    }
+                    return true;
                 }
             });
 
@@ -246,17 +250,21 @@ public class ReceiptActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Log.i(TAG, "Save Button Tapped");
 
+                    SMSManagement.SMS_TYPE smsType = SMSManagement.SMS_TYPE.DEFAULT;
                     //SAHIRE: Do we need AlterDialog to confirm Room Payment
                     if(validate()) {
                         final DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
 
                         DataModule.ReceiptType type = DataModule.ReceiptType.RENT;
+
                         switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
                             case 2:
                                 type = DataModule.ReceiptType.DEPOSIT;
+                                smsType = SMSManagement.SMS_TYPE.DEFAULT;
                                 break;
                             case 3:
                                 type = DataModule.ReceiptType.PENALTY;
+                                smsType = SMSManagement.SMS_TYPE.PENALTY_GENERATED;
                                 break;
                         }
 
@@ -272,20 +280,35 @@ public class ReceiptActivity extends AppCompatActivity {
                             dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, type,
                                     String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())));
                         }
+
+                        Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
+                        BedsListContent.refresh();
                         new AlertDialog.Builder(getActivity())
-                                .setTitle("Send SMS to Tenant?")
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    @Override
+                                .setTitle("SMS")
+                                .setMessage("Do you want to send SMS?")
+
+                                // Specifying a listener allows you to take an action before dismissing the dialog.
+                                // The dialog is automatically dismissed when a dialog button is clicked.
+                                .setPositiveButton("SMS", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         SMSManagement smsManagement = SMSManagement.getInstance();
                                         DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
-                                        smsManagement.sendSMS(tenant.mobile, SMSManagement.SMS_TYPE.RENT);
+
+                                        smsManagement.sendSMS(tenant.mobile,
+                                                dbHelper.getSMSMessage(bedInfo.bookingId,
+                                                        tenant,
+                                                        Integer.valueOf(onlineAmt.getText().toString()) + Integer.valueOf(cashAmt.getText().toString()),
+                                                        SMSManagement.SMS_TYPE.RECEIPT)
+                                        );
                                         dialog.dismiss();
+//                                        getActivity().finish();
                                     }
                                 })
-                                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                                // A null listener allows the button to dismiss the dialog and take no further action.
+                                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+                                        getActivity().finish();
                                     }
                                 })
                                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -296,6 +319,7 @@ public class ReceiptActivity extends AppCompatActivity {
                                     }
                                 })
                                 .show();
+//                        getActivity().finish();
                     }
                 }
             });

@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
 
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 
@@ -1069,7 +1071,53 @@ public class DataModule extends SQLiteOpenHelper {
         return pendingEntries;
     }
 
-//MARK: ---------------------------------- Data Class Definitions ---------------------------------
+    public String getSMSMessage(String bookingID, Tenant tenant, int amount, SMSManagement.SMS_TYPE smsType){
+        String msg = "";
+        int deposit = 0, rent = 0, penalty = 0, outstanding = 0;
+//        HashMap<PendingType, String> pendingsHash;
+        ArrayList<Pending> pendingList = getPendingEntriesForBooking(bookingID);
+        for (DataModule.Pending pendingEntry : pendingList) {
+            if(pendingEntry.type == DataModule.PendingType.DEPOSIT){
+                deposit = pendingEntry.pendingAmt;
+            } else if(pendingEntry.type == DataModule.PendingType.RENT){
+                rent = pendingEntry.pendingAmt;
+            } else if(pendingEntry.type == PendingType.PENALTY){
+                penalty = pendingEntry.pendingAmt;
+            }
+        }
+        outstanding += rent + deposit + penalty;
+
+        if(smsType == SMSManagement.SMS_TYPE.BOOKING) {
+            //XXX : For Booking add Tenant Name and Booking Month
+            msg = "Dear, "+ tenant.name + "Your Booking is confirmed for Room#" + getBookingInfo(bookingID).bedNumber + "Your total outstanding Amount is: " + outstanding + ".\r\n"
+                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
+                    + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
+                    + "Thanks - THAKUR HOUSE PG";
+        } if(smsType == SMSManagement.SMS_TYPE.DUE_RENT) {
+            msg = "Room#" + getBookingInfo(bookingID).bedNumber + ", Your total outstanding Amount is: " + outstanding + ".\r\n"
+                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
+                    + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
+                    + "Thanks - THAKUR HOUSE PG";
+        } if(smsType == SMSManagement.SMS_TYPE.RECEIPT) {
+            msg = "Room#" + getBookingInfo(bookingID).bedNumber + ", Payment received of Rs. "+ amount + "Your total outstanding Amount is: " + outstanding + ".\r\n"
+                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
+                    + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
+                    + "Thanks - THAKUR HOUSE PG";
+        } else if(smsType == SMSManagement.SMS_TYPE.PENALTY_GENERATED){
+            msg = "Room#" + getBookingInfo(bookingID).bedNumber + ", You haven't paid your rent on time. Late payment fine is charged for you. Your total outstanding Amount is: " + outstanding + ".\r\n"
+                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
+                    + "Please pay your outstanding immediately\r\n"
+                    + "Thanks - THAKUR HOUSE PG";
+        } else {
+            msg = "Room#" + getBookingInfo(bookingID).bedNumber + ", Your total outstanding Amount is: " + outstanding + ".\r\n"
+                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
+                    + "Please pay your outstanding immediately\r\n"
+                    + "Thanks - THAKUR HOUSE PG";
+        }
+        return msg;
+    }
+
+    //MARK: ---------------------------------- Data Class Definitions ---------------------------------
     public static class Bed {
         public final String bedNumber;
         public final String bookingId;
