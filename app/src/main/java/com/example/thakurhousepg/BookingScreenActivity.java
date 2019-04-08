@@ -265,7 +265,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                         if(newTenant.isCurrent) {
                             new AlertDialog.Builder(BookingScreenActivity.this)
                                     .setTitle("Tenat Already has a booking")
-                                    .setMessage("Tenant, " + newTenant.name + ", already had a booking. Please make sure that booking is closed, otherwise this booking operation will not succed")
+                                    .setMessage("Tenant, " + newTenant.name + ", already had a booking. Please make sure that booking is closed, otherwise this booking operation will not succeed")
 
                                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {

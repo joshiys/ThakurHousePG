@@ -226,7 +226,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
             Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
 
-            if(dbHelper.createMonthlyPendingEntries()) {
+
+            if(dbHelper.createMonthlyPendingEntries((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED))) {
                 SharedPreferences.Editor settingsEditor = settings.edit();
                     /* Calendar object in Java starts the month entries from 0, (as in 0 for Jauary to 11 for December)
                         But SQlite starts them from 1, so make calculation in DataModule easier, add 1 here

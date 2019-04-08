@@ -2,12 +2,14 @@ package com.example.thakurhousepg;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
@@ -273,7 +275,7 @@ public class DataModule extends SQLiteOpenHelper {
 
     /* Should ONLY be called on the first launch of the app every month.
      * This function DOES NOT make date validations. MUST be done by the caller. */
-    public boolean createMonthlyPendingEntries() {
+    public boolean createMonthlyPendingEntries(boolean smsPermission) {
         boolean opSuccess = false;
 
         ArrayList<Booking> bookings = getCurrentBookings();
@@ -291,17 +293,18 @@ public class DataModule extends SQLiteOpenHelper {
 
             opSuccess = createPendingEntryForBooking(booking.id, PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1);
 
+            if(smsPermission) {
+                DataModule.Tenant tenant = DataModule.getInstance().getTenantInfoForBooking(booking.id);
+                if (tenant.mobile.isEmpty() == false) {
+                    SMSManagement smsManagement = SMSManagement.getInstance();
 
-            DataModule.Tenant tenant = DataModule.getInstance().getTenantInfoForBooking(booking.id);
-            if(tenant.mobile.isEmpty() == false) {
-                SMSManagement smsManagement = SMSManagement.getInstance();
-
-                smsManagement.sendSMS(tenant.mobile,
-                        DataModule.getInstance().getSMSMessage(booking.id,
-                                tenant,
-                                0,
-                                SMSManagement.SMS_TYPE.MONTHLY_RENT)
-                );
+                    smsManagement.sendSMS(tenant.mobile,
+                            DataModule.getInstance().getSMSMessage(booking.id,
+                                    tenant,
+                                    0,
+                                    SMSManagement.SMS_TYPE.MONTHLY_RENT)
+                    );
+                }
             }
         }
 

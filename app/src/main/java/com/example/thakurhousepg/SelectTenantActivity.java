@@ -30,6 +30,10 @@ public class SelectTenantActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_tenant);
 
+        setTitle("Tenant Selection");
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         final ListView tenantsListView = findViewById(R.id.tenant_selection_list);
         selectButton = findViewById(R.id.tenant_selection_complete);
         Bundle bundle = getIntent().getExtras();
