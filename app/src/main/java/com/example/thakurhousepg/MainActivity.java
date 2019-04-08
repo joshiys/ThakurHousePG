@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         roomNumber.setSelection(roomNumber.getText().length());
 
-        sendSMS.setEnabled(false);
+        //sendSMS.setEnabled(false);
         DataModule.setContext(this);
         dbHelper = DataModule.getInstance();
 
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setPendingAmountEntries();
         headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
         headerView.setOnClickListener(this);
+        sendSMS.setOnClickListener(this);
     }
 
     private void checkForPermissions() {
@@ -113,6 +115,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String outstandingRent = "", outstandingDeposit = "", outstandingPenalty = "";
 
         switch(view.getId()){
+            case R.id.sendSMSButton:
+                if(!roomNumber.getText().toString().isEmpty()) {
+                    DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+                    if (bedInfo.bookingId == null) {
+                        Snackbar.make(view, "Room has not been Booked yet.", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                        break;
+                    }
+                    DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
+                    if(!tenant.mobile.isEmpty()) {
+                        Snackbar.make(view, "Sending SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                        SMSManagement smsManagement = SMSManagement.getInstance();
+
+                        smsManagement.sendSMS(tenant.mobile,
+                                dbHelper.getSMSMessage(bedInfo.bookingId,
+                                        tenant,
+                                        0,
+                                        SMSManagement.SMS_TYPE.DEFAULT)
+                        );
+                    } else {
+                        Snackbar.make(view, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                }
+                break;
             case R.id.outstandingRent:
                 Intent pendingIntent = new Intent(MainActivity.this, ViewOutstandingActivity.class);
                 startActivity(pendingIntent);

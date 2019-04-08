@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
@@ -289,6 +290,19 @@ public class DataModule extends SQLiteOpenHelper {
                 rentAmount -= cursor.getInt(cursor.getColumnIndex(RECEIPT_ONLINE_AMOUNT)) + cursor.getInt(cursor.getColumnIndex(RECEIPT_CASH_AMOUNT));
 
             opSuccess = createPendingEntryForBooking(booking.id, PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1);
+
+
+            DataModule.Tenant tenant = DataModule.getInstance().getTenantInfoForBooking(booking.id);
+            if(tenant.mobile.isEmpty() == false) {
+                SMSManagement smsManagement = SMSManagement.getInstance();
+
+                smsManagement.sendSMS(tenant.mobile,
+                        DataModule.getInstance().getSMSMessage(booking.id,
+                                tenant,
+                                0,
+                                SMSManagement.SMS_TYPE.MONTHLY_RENT)
+                );
+            }
         }
 
         return opSuccess;
@@ -1049,6 +1063,18 @@ public class DataModule extends SQLiteOpenHelper {
         while (cursor.moveToNext()) {
             boolean status = createPendingEntryForBooking(cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                                                         PendingType.PENALTY, "200", Calendar.getInstance().get(Calendar.MONTH) + 1);
+
+            DataModule.Tenant tenant = DataModule.getInstance().getTenantInfoForBooking(cursor.getString(cursor.getColumnIndex(BOOKING_ID)));
+            if(tenant.mobile.isEmpty() == false) {
+                SMSManagement smsManagement = SMSManagement.getInstance();
+
+                smsManagement.sendSMS(tenant.mobile,
+                        DataModule.getInstance().getSMSMessage(cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
+                                tenant,
+                                0,
+                                SMSManagement.SMS_TYPE.PENALTY_GENERATED)
+                );
+            }
         }
         cursor.close();
     }
@@ -1071,7 +1097,7 @@ public class DataModule extends SQLiteOpenHelper {
         return pendingEntries;
     }
 
-    public String getSMSMessage(String bookingID, Tenant tenant, int amount, SMSManagement.SMS_TYPE smsType){
+    public String getSMSMessage(String bookingID, Tenant tenant, int amount/* only for receipts*/, SMSManagement.SMS_TYPE smsType){
         String msg = "";
         int deposit = 0, rent = 0, penalty = 0, outstanding = 0;
 //        HashMap<PendingType, String> pendingsHash;
@@ -1087,32 +1113,62 @@ public class DataModule extends SQLiteOpenHelper {
         }
         outstanding += rent + deposit + penalty;
 
+
         if(smsType == SMSManagement.SMS_TYPE.BOOKING) {
+            /* From bed View screen from Floating Button */
             //XXX : For Booking add Tenant Name and Booking Month
-            msg = "Dear, "+ tenant.name + "Your Booking is confirmed for Room#" + getBookingInfo(bookingID).bedNumber + "Your total outstanding Amount is: " + outstanding + ".\r\n"
-                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
+            Booking booking = getBookingInfo(bookingID);
+            msg = "Dear "+ tenant.name + ", Your Booking is confirmed for Room#" + getBookingInfo(bookingID).bedNumber + " from Date: " + booking.bookingDate + "(yyyy-mm-dd).\r\n" +
+                    "Your Monthly rent amount is: Rs." + booking.rentAmount + " And Deposit Amount is: Rs." + booking.depositAmount + ".\r\n"
+                    + "Please make sure that you pay your monthly rent before 5th of every month to avoid Rs.200 penalty.\r\n"
+//                    + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
+                    + "Thanks - THAKUR HOUSE PG";
+            Log.d("SMS", msg);
+        } if(smsType == SMSManagement.SMS_TYPE.MONTHLY_RENT) {
+            /* will be sent automatically once at the start of every month*/
+            msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", Your monthly rent is generated for Month: "
+                    + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + "\r\n"
+                    + "Your total outstanding Amount is: Rs." + outstanding + ".\r\n"
+                    + "Rent: Rs." + rent + ", Deposit: Rs." + deposit + ", Penalty: Rs." + penalty + ".\r\n"
                     + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
                     + "Thanks - THAKUR HOUSE PG";
-        } if(smsType == SMSManagement.SMS_TYPE.DUE_RENT) {
-            msg = "Room#" + getBookingInfo(bookingID).bedNumber + ", Your total outstanding Amount is: " + outstanding + ".\r\n"
-                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
-                    + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
-                    + "Thanks - THAKUR HOUSE PG";
+            Log.d("SMS", msg);
         } if(smsType == SMSManagement.SMS_TYPE.RECEIPT) {
-            msg = "Room#" + getBookingInfo(bookingID).bedNumber + ", Payment received of Rs. "+ amount + "Your total outstanding Amount is: " + outstanding + ".\r\n"
-                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
-                    + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
+            /* From Receipt Screen when payment is received */
+            msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", Payment received of Rs."+ amount + ".\r\n"
+                    + "Your total outstanding Amount is: Rs." + outstanding + ".\r\n"
+                    + "Rent: Rs." + rent + ", Deposit: Rs." + deposit + ", Penalty: Rs." + penalty + ".\r\n"
+                    + "In case there is outstanding, please pay immediately.\r\n"
                     + "Thanks - THAKUR HOUSE PG";
+            Log.d("SMS", msg);
         } else if(smsType == SMSManagement.SMS_TYPE.PENALTY_GENERATED){
-            msg = "Room#" + getBookingInfo(bookingID).bedNumber + ", You haven't paid your rent on time. Late payment fine is charged for you. Your total outstanding Amount is: " + outstanding + ".\r\n"
-                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
-                    + "Please pay your outstanding immediately\r\n"
+            /* Send SMS Automatically when penalty is generated */
+            msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", You haven't paid your rent on time. Late payment fine is charged to you.\r\n"
+                    + "Your total outstanding Amount is: Rs." + outstanding + ".\r\n"
+                    + "Rent: Rs." + rent + ", Deposit: Rs." + deposit + ", Penalty: Rs." + penalty + ".\r\n"
+                    + "Please pay your outstanding immediately.\r\n"
                     + "Thanks - THAKUR HOUSE PG";
+            Log.d("SMS", msg);
+        } else if(smsType == SMSManagement.SMS_TYPE.DUE_REMINDER) {
+            /* From Recepit screen using Floating Button*/
+            msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", This is a reminder to pay your monthly rent immediately.\r\n"
+                    + "Your total outstanding Amount is: Rs." + outstanding + ".\r\n"
+                    + "Rent: Rs." + rent + ", Deposit: Rs." + deposit + ", Penalty: Rs." + penalty + ".\r\n"
+                    + "Please ignore if already paid.\r\n"
+                    + "Thanks - THAKUR HOUSE PG";
+            Log.d("SMS", msg);
         } else {
-            msg = "Room#" + getBookingInfo(bookingID).bedNumber + ", Your total outstanding Amount is: " + outstanding + ".\r\n"
-                    + "Rent: " + rent + ", Deposit: " + deposit + ", Penalty: " + penalty + ".\r\n"
-                    + "Please pay your outstanding immediately\r\n"
+            /* From Main screen */
+            /* SMS_TYPE == DEFAULT
+                send general sms even if there is no pending, penalty or month change.
+                this can be done from main "send SMS"
+            */
+            msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", Your total outstanding Amount is: Rs." + outstanding + ".\r\n"
+                    + "Rent: Rs." + rent + ", Deposit: Rs." + deposit + ", Penalty: Rs." + penalty + ".\r\n"
+                    + "Please pay your outstanding immediately.\r\n"
+                    + "Please ignore if already paid.\r\n"
                     + "Thanks - THAKUR HOUSE PG";
+            Log.d("SMS", msg);
         }
         return msg;
     }

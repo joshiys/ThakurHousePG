@@ -72,7 +72,7 @@ public class BedViewActivity extends AppCompatActivity {
             DataModule.Booking booking = dataModule.getBookingInfo(bedInfo.bookingId);
             Log.i(TAG, "Found Booking with Id " + bedInfo.bookingId);
 
-            DataModule.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
+            final DataModule.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
             tenantName.setVisibility(View.VISIBLE);
             Log.i(TAG, "Found Tenat with Id " + tenant.id + " Name: " + tenant.name);
 
@@ -98,8 +98,22 @@ public class BedViewActivity extends AppCompatActivity {
             smsButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Snackbar.make(view, "Send SMS to the Tenant", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    DataModule.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
+                    if(!tenant.mobile.isEmpty()) {
+                        Snackbar.make(view, "Sending SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                        SMSManagement smsManagement = SMSManagement.getInstance();
+
+                        smsManagement.sendSMS(tenant.mobile,
+                                dataModule.getSMSMessage(bedInfo.bookingId,
+                                        tenant,
+                                        0,
+                                        SMSManagement.SMS_TYPE.BOOKING)
+                        );
+                    } else {
+                        Snackbar.make(view, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
                 }
             });
 

@@ -3,6 +3,7 @@ package com.example.thakurhousepg;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.telephony.SmsManager;
+import android.view.Gravity;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -14,12 +15,12 @@ public class SMSManagement {
     enum SMS_TYPE {
         BOOKING,
         CLOSE_BOOKING,
-        DUE_RENT,
+        MONTHLY_RENT,
         RECEIPT,
         PENALTY_GENERATED,
         DUE_REMINDER,
         DEFAULT //Mostly same as REMINDER unless find another purpose
-    };
+    }
 
     public SMSManagement(Context context) {
         _context = context;
@@ -35,7 +36,7 @@ public class SMSManagement {
     public static void setContext(Context context) {
         _context = context;
     }
-    public static void sendSMS(String sendToMobile, String msg){
+    public void sendSMS(String sendToMobile, String msg){
         String scAddr = null;
         PendingIntent sentIntent = null, deliveryIntent = null;
 //        if(type == SMS_TYPE.RENT) {
@@ -53,6 +54,7 @@ public class SMSManagement {
         SmsManager smsManager = SmsManager.getDefault();
         smsManager.sendTextMessage(sendToMobile, scAddr, msg, sentIntent, deliveryIntent);
 
-        Toast.makeText(_context, "Sending SMS To "+ sendToMobile, Toast.LENGTH_SHORT).show();
+        Toast toast = Toast.makeText(_context, "Sending SMS To "+ sendToMobile, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
     }
 }

@@ -103,7 +103,7 @@
                 android:layout_marginLeft="5dp"
                 android:background="@android:color/holo_blue_light"
                 android:hint="Enter Room Number"
-                android:inputType="number"
+                android:inputType="numberDecimal"
 
                 android:maxLines="1"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"

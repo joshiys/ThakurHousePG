@@ -97,16 +97,6 @@ public class ReceiptActivity extends AppCompatActivity {
         } else {
             mViewPager.setCurrentItem(2);
         }
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
     }
 
     @Override
@@ -130,6 +120,7 @@ public class ReceiptActivity extends AppCompatActivity {
         private DataModule dbHelper;
 
         private CheckBox onlineCheckBox, cashCheckBox, advanceCheckBox, waiveOffCheckBox;
+        private FloatingActionButton fab;
 
         String dueAmount = "0";
 
@@ -169,6 +160,8 @@ public class ReceiptActivity extends AppCompatActivity {
 
             onlineCheckBox = rootView.findViewById(R.id.onlineCheckBox);
             cashCheckBox = rootView.findViewById(R.id.cashCheckBox);
+            fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+
             onlineAmt.setEnabled(false);
             cashAmt.setEnabled(false);
             cashAmt.setText("0");
@@ -235,6 +228,37 @@ public class ReceiptActivity extends AppCompatActivity {
                 }
             });
 
+
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+//                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                            .setAction("Action", null).show();
+                    DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+                    if (bedInfo.bookingId == null) {
+                        Snackbar.make(view, "Room has not been Booked yet.", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    } else {
+                        DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
+                        if (tenant.mobile.isEmpty() == false) {
+                            Snackbar.make(view, "Sending SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                            SMSManagement smsManagement = SMSManagement.getInstance();
+
+                            smsManagement.sendSMS(tenant.mobile,
+                                    dbHelper.getSMSMessage(bedInfo.bookingId,
+                                            tenant,
+                                            0,
+                                            SMSManagement.SMS_TYPE.DUE_REMINDER)
+                            );
+                        } else {
+                            Snackbar.make(view, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    }
+                }
+            });
+
             saveButton = rootView.findViewById(R.id.receipt_button_save);
             saveButton.setEnabled(false);
             saveButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -293,13 +317,16 @@ public class ReceiptActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int which) {
                                         SMSManagement smsManagement = SMSManagement.getInstance();
                                         DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
-
-                                        smsManagement.sendSMS(tenant.mobile,
-                                                dbHelper.getSMSMessage(bedInfo.bookingId,
-                                                        tenant,
-                                                        Integer.valueOf(onlineAmt.getText().toString()) + Integer.valueOf(cashAmt.getText().toString()),
-                                                        SMSManagement.SMS_TYPE.RECEIPT)
-                                        );
+                                        /* mobile Number should be mandatory */
+                                        if(tenant.mobile.isEmpty() == false) {
+                                            //SAHIRE : Handle waive-off payments.
+                                            smsManagement.sendSMS(tenant.mobile,
+                                                    dbHelper.getSMSMessage(bedInfo.bookingId,
+                                                            tenant,
+                                                            Integer.valueOf(onlineAmt.getText().toString()) + Integer.valueOf(cashAmt.getText().toString()),
+                                                            SMSManagement.SMS_TYPE.RECEIPT)
+                                            );
+                                        }
                                         dialog.dismiss();
 //                                        getActivity().finish();
                                     }
