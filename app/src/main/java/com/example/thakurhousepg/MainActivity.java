@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void checkForPermissions() {
         for (String permission : PERMISSIONS) {
-            if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{permission},
                         PERMISSION_ALL);
             }
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
                     if(!tenant.mobile.isEmpty()) {
-                        Snackbar.make(view, "Sending SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                        Snackbar.make(view, "Sending DEFAULT SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                         SMSManagement smsManagement = SMSManagement.getInstance();
 

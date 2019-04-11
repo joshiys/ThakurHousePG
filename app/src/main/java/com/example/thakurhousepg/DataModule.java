@@ -235,7 +235,7 @@ public class DataModule extends SQLiteOpenHelper {
     public void copyDatabaseToExternalStorage() throws IOException {
         this.close();
         InputStream dbInputStream = new FileInputStream(_context.getDatabasePath(DATABASE_NAME).toString());
-        OutputStream output = new FileOutputStream(Environment.getExternalStorageDirectory() + "/"+ DIRECTORY_DOWNLOADS + "/thakurhouse_backup.db");
+        OutputStream output = new FileOutputStream(Environment.getExternalStorageDirectory() + "/"+ DIRECTORY_DOWNLOADS + "/thakurhouse.db");
 
         // Transfer bytes from the inputfile to the outputfile
         byte[] buffer = new byte[1024];
@@ -1127,7 +1127,7 @@ public class DataModule extends SQLiteOpenHelper {
 //                    + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
                     + "Thanks - THAKUR HOUSE PG";
             Log.d("SMS", msg);
-        } if(smsType == SMSManagement.SMS_TYPE.MONTHLY_RENT) {
+        } else if(smsType == SMSManagement.SMS_TYPE.MONTHLY_RENT) {
             /* will be sent automatically once at the start of every month*/
             msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", Your monthly rent is generated for Month: "
                     + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + "\r\n"
@@ -1136,7 +1136,7 @@ public class DataModule extends SQLiteOpenHelper {
                     + "Please pay your rent before 5th of " + Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " to avoid Rs.200 penalty.\r\n"
                     + "Thanks - THAKUR HOUSE PG";
             Log.d("SMS", msg);
-        } if(smsType == SMSManagement.SMS_TYPE.RECEIPT) {
+        } else if(smsType == SMSManagement.SMS_TYPE.RECEIPT) {
             /* From Receipt Screen when payment is received */
             msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", Payment received of Rs."+ amount + ".\r\n"
                     + "Your total outstanding Amount is: Rs." + outstanding + ".\r\n"
@@ -1146,7 +1146,7 @@ public class DataModule extends SQLiteOpenHelper {
             Log.d("SMS", msg);
         } else if(smsType == SMSManagement.SMS_TYPE.PENALTY_GENERATED){
             /* Send SMS Automatically when penalty is generated */
-            msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", You haven't paid your rent on time. Late payment fine is charged to you.\r\n"
+            msg = "Dear Room#" + getBookingInfo(bookingID).bedNumber + "/" + tenant.name + ", Penalty of Rs.200 is applicable to you due to non payment of Rent on time.\r\n"
                     + "Your total outstanding Amount is: Rs." + outstanding + ".\r\n"
                     + "Rent: Rs." + rent + ", Deposit: Rs." + deposit + ", Penalty: Rs." + penalty + ".\r\n"
                     + "Please pay your outstanding immediately.\r\n"

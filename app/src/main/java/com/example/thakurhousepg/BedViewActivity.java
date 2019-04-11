@@ -1,5 +1,6 @@
 package com.example.thakurhousepg;
 
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -100,8 +101,9 @@ public class BedViewActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     DataModule.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
                     if(!tenant.mobile.isEmpty()) {
-                        Snackbar.make(view, "Sending SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                        Snackbar.make(view, "Sending BOOKING SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
+
                         SMSManagement smsManagement = SMSManagement.getInstance();
 
                         smsManagement.sendSMS(tenant.mobile,

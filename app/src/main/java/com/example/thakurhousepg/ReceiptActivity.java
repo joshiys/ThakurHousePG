@@ -241,7 +241,7 @@ public class ReceiptActivity extends AppCompatActivity {
                     } else {
                         DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
                         if (tenant.mobile.isEmpty() == false) {
-                            Snackbar.make(view, "Sending SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                            Snackbar.make(view, "Sending REMINDER SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                             SMSManagement smsManagement = SMSManagement.getInstance();
 
