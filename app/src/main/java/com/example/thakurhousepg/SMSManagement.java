@@ -3,14 +3,14 @@ package com.example.thakurhousepg;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
-
-import java.io.IOException;
 
 public class SMSManagement {
     private static SMSManagement _instance = null;
     private static Context _context = null;
+    private static final String TAG = "SMSManagement";
 
     enum SMS_TYPE {
         BOOKING,
@@ -39,6 +39,7 @@ public class SMSManagement {
     public void sendSMS(String sendToMobile, String msg){
         String scAddr = null;
         PendingIntent sentIntent = null, deliveryIntent = null;
+        Log.v(TAG, "Sending SMS to: " + sendToMobile);
 //        if(type == SMS_TYPE.RENT) {
 //            msg = "Room#" + roomNo + ", Your total outstanding Amount is: " + outstanding + ".\r\n"
 //                    + "Rent: " + rent + ", Deposit: " + Deposit + ", Penalty: " + penalty + ".\r\n"
@@ -52,7 +53,7 @@ public class SMSManagement {
 //        }
 
         SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(sendToMobile, scAddr, msg, sentIntent, deliveryIntent);
+        smsManager.sendMultipartTextMessage(sendToMobile, null, smsManager.divideMessage(msg), null, null);
 
         Toast toast = Toast.makeText(_context, "Sending SMS To "+ sendToMobile, Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0); toast.show();

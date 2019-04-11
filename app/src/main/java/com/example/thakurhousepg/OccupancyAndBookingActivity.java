@@ -156,8 +156,8 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         Toast toast;
 
         DataModule.Bed bedInfo = datamodule.getBedInfo(item.bedNumber);
-        final DataModule.Tenant mainTenant = datamodule.getTenantInfoForBooking(bedInfo.bookingId);
         if(bedInfo.bookingId != null) {
+            final DataModule.Tenant mainTenant = datamodule.getTenantInfoForBooking(bedInfo.bookingId);
             final ArrayList<DataModule.Tenant> dependentsList = datamodule.getDependents(mainTenant.id);
             if(!dependentsList.isEmpty()) {
                 final ArrayList<String> tenants = new ArrayList<String>();
