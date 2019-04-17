@@ -24,12 +24,14 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
 
     TextView roomNoTextView, rIdTextView, onlineAmountTextView, cashAmountTextView, typeForTextView;
 
-    Spinner monthSpiner, roomSpinner;
+    Spinner monthSpiner, roomSpinner, modeSpiner, typeSpiner;
 
     int currentRowNumber = 1;
     ReceiptsListFragment fragment = null;
 
     String[] months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    String[] modes = {"All", "Online", "Cash"};
+    String[] types = {"All", "Rent", "Deposit"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +43,9 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
         datamodule = DataModule.getInstance();
 
         monthSpiner = findViewById(R.id.spinner);
+        modeSpiner = findViewById(R.id.spinnerMode);
+        typeSpiner = findViewById(R.id.spinnerType);
+
 
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, months);
@@ -61,6 +66,47 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
 
             }
         });
+
+        Bundle bundle = getIntent().getExtras();
+
+        ArrayAdapter<String> adapterMode = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, modes);
+        modeSpiner.setAdapter(adapterMode);
+        adapterMode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        modeSpiner.setSelection(bundle.getInt("MODE"));
+        modeSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                ((TextView) modeSpiner.getSelectedView()).setBackgroundColor(Color.LTGRAY);
+//                currentRowNumber = 1;
+                if(fragment != null) {
+                    fragment.refreshForMode(i);
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        ArrayAdapter<String> adapterType = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
+        typeSpiner.setAdapter(adapterType);
+        adapterType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typeSpiner.setSelection(bundle.getInt("TYPE"));
+        typeSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                ((TextView) typeSpiner.getSelectedView()).setBackgroundColor(Color.LTGRAY);
+//                currentRowNumber = 1;
+                if(fragment != null) {
+                    fragment.refreshForType(i);
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
 
         if (savedInstanceState == null) {
             DataModule.Tenant tenantInfoForModification = null;

@@ -152,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.receivedRent:
                 Intent receivedIntent = new Intent(MainActivity.this, ViewReceiptsActivity.class);
+                receivedIntent.putExtra("MODE", 0);//ALL
+                receivedIntent.putExtra("TYPE", 0);//ALL
                 startActivity(receivedIntent);
                 break;
             case R.id.receipt_button:
