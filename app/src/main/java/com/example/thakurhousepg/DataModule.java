@@ -429,13 +429,16 @@ public class DataModule extends SQLiteOpenHelper {
         if(!mobile2.isEmpty()) contentValues.put(TENANT_MOBILE_2, mobile2);
         if(!address.isEmpty()) contentValues.put(TENANT_ADDRESS, address);
         contentValues.put(TENANT_IS_CURRENT, isCurrent != null ? isCurrent : false);
-        if(!parentId.isEmpty()) contentValues.put(PARENT_TENANT_ID, parentId);
+        //if(!parentId.isEmpty()) contentValues.put(PARENT_TENANT_ID, parentId);
 
 
         String query = "select * from " + TENANT_TABLE_NAME + " where TENANT_ID = " + id;
         Cursor checkRecord = db.rawQuery(query, null);
 
         if (checkRecord.getCount() != 0) {
+            /* Keep Original parent id */
+            checkRecord.moveToNext();
+            contentValues.put(PARENT_TENANT_ID, checkRecord.getString(checkRecord.getColumnIndex(PARENT_TENANT_ID)));
             db.update(TENANT_TABLE_NAME, contentValues, "TENANT_ID = ?", new String[]{id.toString()});
             opSuccess = true;
         }
