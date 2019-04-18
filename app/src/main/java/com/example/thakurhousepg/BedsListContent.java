@@ -4,11 +4,8 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Helper class for providing sample content for user interfaces created by
@@ -25,9 +22,10 @@ public class BedsListContent {
     public static HashMap<Integer, List<BedsListItem>> itemMap = new HashMap<>();
 //    public static List<BedsListItem> items = new ArrayList<BedsListItem>();
     private static ArraySet<String> rooms = new ArraySet<String>();
+    private static NetworkDataModule restService;
 
     public static void create() {
-        DataModule dataModule = DataModule.getInstance();
+        restService = NetworkDataModule.getInstance();
 
         for (int i = 0; i < 7; i++) {
             List<BedsListItem> items = itemMap.get(Integer.valueOf(i));
@@ -37,17 +35,17 @@ public class BedsListContent {
             }
             if (items.isEmpty()) {
                 Log.i(TAG, "Creating Beds list");
-                ArrayList<DataModule.Bed> beds = dataModule.getBedsList();
+                ArrayList<DataModel.Bed> beds = restService.getBedsList();
     
-                for (DataModule.Bed bed : beds) {
-                    DataModule.Tenant tenant = null;
-                    DataModule.Booking booking = null;
+                for (DataModel.Bed bed : beds) {
+                    DataModel.Tenant tenant = null;
+                    DataModel.Booking booking = null;
                     String pendingAmount = bed.rentAmount;
     
                     if (bed.bookingId != null) {
-                        booking = dataModule.getBookingInfo(bed.bookingId);
-                        tenant = dataModule.getTenantInfoForBooking(bed.bookingId);
-                        pendingAmount = String.valueOf(dataModule.getPendingAmountForBooking(booking.id));
+                        booking = restService.getBookingInfo(bed.bookingId);
+                        tenant = restService.getTenantInfoForBooking(bed.bookingId);
+                        pendingAmount = String.valueOf(restService.getPendingAmountForBooking(booking.id));
                     }
     
                     if (OccupancyAndBookingActivity.isRoomForSelectedTab(Integer.valueOf(bed.bedNumber.split("\\.")[0]), i)) {

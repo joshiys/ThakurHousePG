@@ -3,18 +3,13 @@ package com.example.thakurhousepg;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseBooleanArray;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class SelectTenantActivity extends AppCompatActivity {
@@ -23,7 +18,7 @@ public class SelectTenantActivity extends AppCompatActivity {
 
     private static final String TAG = "SelectTenantActivity";
     private Intent returnIntent = new Intent();
-    private ArrayList<DataModule.Tenant> tenants = null;
+    private ArrayList<DataModel.Tenant> tenants = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +34,7 @@ public class SelectTenantActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
 
         if("MODIFY_FULLY_SELECTED_LIST".equals(bundle.getString("LIST_MODE"))) {
-            tenants = (ArrayList<DataModule.Tenant>) bundle.getSerializable("TENANT_LIST");
+            tenants = (ArrayList<DataModel.Tenant>) bundle.getSerializable("TENANT_LIST");
         } else {
             tenants = dataModule.getAllTenants(false);
         }
@@ -47,8 +42,8 @@ public class SelectTenantActivity extends AppCompatActivity {
 
         final ArrayList<String> tenantNamesList = new ArrayList<String>();
 
-        for(DataModule.Tenant tenant:tenants) {
-            DataModule.Booking booking = dataModule.getBookingInfoForTenant(tenant.id);
+        for(DataModel.Tenant tenant:tenants) {
+            DataModel.Booking booking = dataModule.getBookingInfoForTenant(tenant.id);
             tenantNamesList.add(tenant.name + (tenant.isCurrent ? " , Current" :
                     (booking != null ? ", Old, Bed = " + booking.bedNumber :" New")
             ));
@@ -62,7 +57,7 @@ public class SelectTenantActivity extends AppCompatActivity {
         if("MODIFY_PARTIALLY_SELECTED_LIST".equals(bundle.getString("LIST_MODE"))) {
             ArrayList<String> tenantIds = (ArrayList<String>) bundle.getSerializable("TENANT_LIST");
             for (String id : tenantIds) {
-                for (DataModule.Tenant t: tenants) {
+                for (DataModel.Tenant t: tenants) {
                     if(t.id.equals(id))
                         tenantsListView.setItemChecked(tenants.indexOf(t), true);
                 }

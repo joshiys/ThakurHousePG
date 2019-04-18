@@ -1,11 +1,9 @@
 package com.example.thakurhousepg;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -13,15 +11,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -36,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView headerView;
 
     private static final String TAG = "MainActivity";
+    private NetworkDataModule restService;
 
     int PERMISSION_ALL = 1;
     String[] PERMISSIONS = {
@@ -91,7 +87,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setPendingAmountEntries();
         headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
         headerView.setOnClickListener(this);
+
         sendSMS.setOnClickListener(this);
+        restService = NetworkDataModule.getInstance();
     }
 
     private void checkForPermissions() {
@@ -117,13 +115,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch(view.getId()){
             case R.id.sendSMSButton:
                 if(!roomNumber.getText().toString().isEmpty()) {
-                    DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+                    DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
                     if (bedInfo.bookingId == null) {
                         Snackbar.make(view, "Room has not been Booked yet.", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                         break;
                     }
-                    DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
+                    DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
                     if(!tenant.mobile.isEmpty()) {
                         Snackbar.make(view, "Sending DEFAULT SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
@@ -210,10 +208,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     void setTotalOutstandingRent(){
         receivedRentValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
-                DataModule.ReceiptType.RENT));
+                DataModel.ReceiptType.RENT));
 //        outstandingRentValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
 //                DataModule.ReceiptType.DEPOSIT));
-        outstandingRentValue.setText(String.valueOf(dbHelper.getTotalPendingAmount(DataModule.PendingType.RENT)));
+        outstandingRentValue.setText(String.valueOf(dbHelper.getTotalPendingAmount(DataModel.PendingType.RENT)));
 //        totalExpectedRentValue.setText(dbHelper.getTotalExpectedRent());
     }
 
@@ -225,7 +223,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
             Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
-
 
             if(dbHelper.createMonthlyPendingEntries((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED))) {
                 SharedPreferences.Editor settingsEditor = settings.edit();

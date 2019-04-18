@@ -2,7 +2,6 @@ package com.example.thakurhousepg;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -21,8 +20,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -206,7 +203,7 @@ public class ReceiptActivity extends AppCompatActivity {
                     /* SAHIRE Fetch Rent for room number from Booking Table */
                     if(roomNumber.getText().toString().isEmpty() == false){
                         Log.v(TAG, "Focus Changed: " + roomNumber.getText().toString());
-                        DataModule.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
+                        DataModel.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
                         if(bed != null && bed.bookingId != null) {
                             reloadDueAmount();
                             totalAmount.setText(dueAmount);
@@ -234,12 +231,12 @@ public class ReceiptActivity extends AppCompatActivity {
                 public void onClick(View view) {
 //                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                            .setAction("Action", null).show();
-                    DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+                    DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
                     if (bedInfo.bookingId == null) {
                         Snackbar.make(view, "Room has not been Booked yet.", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     } else {
-                        DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
+                        DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
                         if (tenant.mobile.isEmpty() == false) {
                             Snackbar.make(view, "Sending REMINDER SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
@@ -277,30 +274,30 @@ public class ReceiptActivity extends AppCompatActivity {
                     SMSManagement.SMS_TYPE smsType = SMSManagement.SMS_TYPE.DEFAULT;
                     //SAHIRE: Do we need AlterDialog to confirm Room Payment
                     if(validate()) {
-                        final DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+                        final DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
 
-                        DataModule.ReceiptType type = DataModule.ReceiptType.RENT;
+                        DataModel.ReceiptType type = DataModel.ReceiptType.RENT;
 
                         switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
                             case 2:
-                                type = DataModule.ReceiptType.DEPOSIT;
+                                type = DataModel.ReceiptType.DEPOSIT;
                                 smsType = SMSManagement.SMS_TYPE.DEFAULT;
                                 break;
                             case 3:
-                                type = DataModule.ReceiptType.PENALTY;
+                                type = DataModel.ReceiptType.PENALTY;
                                 smsType = SMSManagement.SMS_TYPE.PENALTY_GENERATED;
                                 break;
                         }
 
                         if (advanceCheckBox.isChecked()) {
-                            type = DataModule.ReceiptType.ADVANCE;
+                            type = DataModel.ReceiptType.ADVANCE;
                         }
 
                         //TODO: Check if the cash+online amount exceeds total amount, and ask user if they want to create an advance payment entry
                         dbHelper.createReceipt(type, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString(),
-                                (type == DataModule.ReceiptType.PENALTY ? waiveOffCheckBox.isChecked() : false));
+                                (type == DataModel.ReceiptType.PENALTY ? waiveOffCheckBox.isChecked() : false));
 
-                        if(type != DataModule.ReceiptType.ADVANCE) {
+                        if(type != DataModel.ReceiptType.ADVANCE) {
                             dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, type,
                                     String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())));
                         }
@@ -316,7 +313,7 @@ public class ReceiptActivity extends AppCompatActivity {
                                 .setPositiveButton("SMS", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         SMSManagement smsManagement = SMSManagement.getInstance();
-                                        DataModule.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
+                                        DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
                                         /* mobile Number should be mandatory */
                                         if(tenant.mobile.isEmpty() == false) {
                                             //SAHIRE : Handle waive-off payments.
@@ -403,7 +400,7 @@ public class ReceiptActivity extends AppCompatActivity {
         private boolean validate() {
             boolean isValid = true;
 
-            DataModule.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+            DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
             if(bedInfo == null) {
                 Toast.makeText(getActivity(), "Please enter a correct bed number", Toast.LENGTH_SHORT).show();
                 isValid = false;
@@ -468,19 +465,19 @@ public class ReceiptActivity extends AppCompatActivity {
         private void reloadDueAmount() {
             String bookingRent = "0", bookingDeposit = "0", bookingPenalty = "0";
             if(roomNumber.getText().toString().isEmpty() == false){
-                DataModule.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
+                DataModel.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
                 if (bed != null && bed.bookingId != null) {
 
-                    ArrayList<DataModule.Pending> entry = dbHelper.getPendingEntriesForBooking(bed.bookingId);
-                    for (DataModule.Pending pendingEntry : entry) {
-                        if (pendingEntry.type == DataModule.PendingType.DEPOSIT) {
+                    ArrayList<DataModel.Pending> entry = dbHelper.getPendingEntriesForBooking(bed.bookingId);
+                    for (DataModel.Pending pendingEntry : entry) {
+                        if (pendingEntry.type == DataModel.PendingType.DEPOSIT) {
                             bookingDeposit = String.valueOf(pendingEntry.pendingAmt);
 
                         }
-                        if (pendingEntry.type == DataModule.PendingType.PENALTY) {
+                        if (pendingEntry.type == DataModel.PendingType.PENALTY) {
                             bookingPenalty = String.valueOf(pendingEntry.pendingAmt);
                         }
-                        if (pendingEntry.type == DataModule.PendingType.RENT) {
+                        if (pendingEntry.type == DataModel.PendingType.RENT) {
                             bookingRent = String.valueOf(pendingEntry.pendingAmt);
                         }
                     }

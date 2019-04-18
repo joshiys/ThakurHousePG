@@ -12,12 +12,12 @@ import java.util.ArrayList;
 
 public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public ArrayList<DataModule.Receipt> mValues;
+    public ArrayList<DataModel.Receipt> mValues;
     private final OnListFragmentInteractionListener mListener;
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
 
-    public ReceiptsListViewAdapter(ArrayList<DataModule.Receipt> items, OnListFragmentInteractionListener listener) {
+    public ReceiptsListViewAdapter(ArrayList<DataModel.Receipt> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -86,7 +86,7 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         public final TextView cashRentAmount;
         public final TextView receiptDate;
         public final TextView receiptType;
-        public DataModule.Receipt mItem;
+        public DataModel.Receipt mItem;
 
         public ItemViewHolder(View view) {
             super(view);

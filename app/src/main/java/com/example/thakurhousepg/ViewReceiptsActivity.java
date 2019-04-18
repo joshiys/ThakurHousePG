@@ -7,14 +7,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsListFragment.OnListFragmentInteractionListener {
@@ -63,7 +59,7 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
         });
 
         if (savedInstanceState == null) {
-            DataModule.Tenant tenantInfoForModification = null;
+            DataModel.Tenant tenantInfoForModification = null;
 
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             fragment = new ReceiptsListFragment();
@@ -81,7 +77,7 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
         return true;
     }
 
-    public void onListFragmentInteraction(DataModule.Receipt item) {
+    public void onListFragmentInteraction(DataModel.Receipt item) {
 
     }
 }

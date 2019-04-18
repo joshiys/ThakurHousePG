@@ -40,18 +40,18 @@ public class MonthlyDataActivity extends AppCompatActivity {
         expectedRent.setText("Rs." + dataModule.getTotalExpectedRent());
 
         rentCash.setText("Rs." + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
-                DataModule.ReceiptType.RENT));
+                DataModel.ReceiptType.RENT));
         depositCash.setText("Rs." + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
-                DataModule.ReceiptType.DEPOSIT));
+                DataModel.ReceiptType.DEPOSIT));
 
         rentReceipts.setText("Rs." + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
-                DataModule.ReceiptType.RENT));
-        totalOutstanding.setText("Rs." + String.valueOf(dataModule.getTotalPendingAmount(DataModule.PendingType.RENT)));
+                DataModel.ReceiptType.RENT));
+        totalOutstanding.setText("Rs." + String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.RENT)));
 
         depositReceipts.setText("Rs." + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
-                DataModule.ReceiptType.DEPOSIT));
+                DataModel.ReceiptType.DEPOSIT));
 
-        totalDepositOutstanding.setText("Rs." + String.valueOf(dataModule.getTotalPendingAmount(DataModule.PendingType.DEPOSIT)));
+        totalDepositOutstanding.setText("Rs." + String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.DEPOSIT)));
     }
 
     @Override

@@ -7,7 +7,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -39,7 +38,7 @@ public class BookingScreenActivity extends AppCompatActivity {
 
     private ImageButton addTenantButton;
     private String action = null;
-    private DataModule.Tenant tenant = null;
+    private DataModel.Tenant tenant = null;
     private CheckBox reduceFirstRentCheckbox;
     private EditText firstRent;
 
@@ -126,12 +125,12 @@ public class BookingScreenActivity extends AppCompatActivity {
                             c.setTime(dateFormat.parse(bookingDate.getText().toString()));
                             Log.i(TAG, "Booking Month: " + c.get(Calendar.MONTH) + " , And currentMonth: " + Calendar.getInstance().get(Calendar.MONTH));
                             if(c.get(Calendar.MONTH) != (Calendar.getInstance().get(Calendar.MONTH) + 1)) {
-                                dataModule.createPendingEntryForBooking(newBookingId, DataModule.PendingType.RENT, pendingRent, Calendar.getInstance().get(Calendar.MONTH) + 1);
+                                dataModule.createPendingEntryForBooking(newBookingId, DataModel.PendingType.RENT, pendingRent, Calendar.getInstance().get(Calendar.MONTH) + 1);
                             }
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
-                        dataModule.createPendingEntryForBooking(newBookingId, DataModule.PendingType.DEPOSIT, depositAmount.getText().toString(), Calendar.getInstance().get(Calendar.MONTH) + 1);
+                        dataModule.createPendingEntryForBooking(newBookingId, DataModel.PendingType.DEPOSIT, depositAmount.getText().toString(), Calendar.getInstance().get(Calendar.MONTH) + 1);
 
                         for(String id: dependentsIdList) {
                             dataModule.updateTenant(id, "", "", "", "", "", true, tenantId);
@@ -261,7 +260,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                     tenantNamesList.clear();
                     dependentsIdList.clear();
                     for (String id : selectedTenants) {
-                        DataModule.Tenant newTenant = dataModule.getTenantInfo(id);
+                        DataModel.Tenant newTenant = dataModule.getTenantInfo(id);
                         if(newTenant.isCurrent) {
                             new AlertDialog.Builder(BookingScreenActivity.this)
                                     .setTitle("Tenat Already has a booking")
@@ -290,7 +289,7 @@ public class BookingScreenActivity extends AppCompatActivity {
         boolean validationSuccessful = true;
 
         if (tenantId != null) {
-            DataModule.Tenant tenant = dataModule.getTenantInfo(tenantId);
+            DataModel.Tenant tenant = dataModule.getTenantInfo(tenantId);
             if(tenant .isCurrent || !tenant.parentId.equals("0")) {
                 // The main tenant already has a booking
                 validationSuccessful = false;

@@ -1,28 +1,20 @@
 package com.example.thakurhousepg;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TableLayout;
 import android.widget.Toast;
-import com.example.thakurhousepg.BedViewActivity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,6 +24,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     public DataModule datamodule;
     public TabLayout tabLayout;
     public static int currentSelectedTab = 0;
+    private NetworkDataModule restService;
 
     private static final String TAG = "OccupancyAndBookingActivity";
 
@@ -49,6 +42,8 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         tabLayout = (TabLayout) findViewById(R.id.floor_tabs_id);
 
         tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
+
+        restService = NetworkDataModule.getInstance();
     }
 
     @Override
@@ -155,14 +150,14 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     public void onTenantClick(BedsListContent.BedsListItem item) {
         Toast toast;
 
-        DataModule.Bed bedInfo = datamodule.getBedInfo(item.bedNumber);
+        DataModel.Bed bedInfo = restService.getBedInfo(item.bedNumber);
         if(bedInfo.bookingId != null) {
-            final DataModule.Tenant mainTenant = datamodule.getTenantInfoForBooking(bedInfo.bookingId);
-            final ArrayList<DataModule.Tenant> dependentsList = datamodule.getDependents(mainTenant.id);
+            final DataModel.Tenant mainTenant = restService.getTenantInfoForBooking(bedInfo.bookingId);
+            final ArrayList<DataModel.Tenant> dependentsList = restService.getDependents(mainTenant.id);
             if(!dependentsList.isEmpty()) {
                 final ArrayList<String> tenants = new ArrayList<String>();
                 tenants.add(mainTenant.name);
-                for(DataModule.Tenant t: dependentsList) {
+                for(DataModel.Tenant t: dependentsList) {
                     tenants.add(t.name);
                 }
 
@@ -172,7 +167,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
                 builder.setTitle("Select Tenant to view/modify")
                         .setSingleChoiceItems(tenants.toArray(new String[0]), -1, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int item) {
-                                DataModule.Tenant temp;
+                                DataModel.Tenant temp;
                                 if(item == 0) {
                                     temp = mainTenant;
                                 } else {
@@ -195,7 +190,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         }
     }
 
-    private void showTenantActivity(DataModule.Tenant t) {
+    private void showTenantActivity(DataModel.Tenant t) {
         Intent modifyTenantIntent = new Intent(OccupancyAndBookingActivity.this, TenantInformationActivity.class);
         modifyTenantIntent.putExtra("TENANT_ID", t.id);
         modifyTenantIntent.putExtra("ACTION", "MODIFY_TENANT");
@@ -203,7 +198,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     }
 
     public void onRentClick(BedsListContent.BedsListItem item){
-        DataModule.Bed bed = datamodule.getBedInfo(item.bedNumber);
+        DataModel.Bed bed = datamodule.getBedInfo(item.bedNumber);
 
         if(bed != null && bed.bookingId != null) {
             Toast.makeText(OccupancyAndBookingActivity.this, "Launching Rent Payment", Toast.LENGTH_SHORT).show();
@@ -212,12 +207,12 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
             receiptIntent.putExtra("ROOM_NUMBER", item.bedNumber);
 
             //XXX : Assuming there will be maximum three entries
-            ArrayList<DataModule.Pending> pendingEntries = datamodule.getPendingEntriesForBooking(bed.bookingId);
+            ArrayList<DataModel.Pending> pendingEntries = datamodule.getPendingEntriesForBooking(bed.bookingId);
             String rent = "", deposit = "";
-            for (DataModule.Pending pendingEntry : pendingEntries) {
-                if(pendingEntry.type == DataModule.PendingType.DEPOSIT){
+            for (DataModel.Pending pendingEntry : pendingEntries) {
+                if(pendingEntry.type == DataModel.PendingType.DEPOSIT){
                     deposit = String.valueOf(pendingEntry.pendingAmt);
-                } else if(pendingEntry.type == DataModule.PendingType.RENT){
+                } else if(pendingEntry.type == DataModel.PendingType.RENT){
                     rent = String.valueOf(pendingEntry.pendingAmt);
                 }
             }

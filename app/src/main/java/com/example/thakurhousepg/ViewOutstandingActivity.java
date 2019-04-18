@@ -7,7 +7,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class ViewOutstandingActivity extends AppCompatActivity {
 
@@ -37,15 +36,15 @@ public class ViewOutstandingActivity extends AppCompatActivity {
         outstandingTableList.add(i, outstandingTable);
         i++;
 
-        ArrayList<DataModule.Booking> bookingEntries = dataModule.getAllBookingInfo();
+        ArrayList<DataModel.Booking> bookingEntries = dataModule.getAllBookingInfo();
 
-        for(DataModule.Booking entry : bookingEntries){
-            ArrayList<DataModule.Pending> pendingList = dataModule.getPendingEntriesForBooking(entry.id);
-            for(DataModule.Pending pendingentry : pendingList) {
+        for(DataModel.Booking entry : bookingEntries){
+            ArrayList<DataModel.Pending> pendingList = dataModule.getPendingEntriesForBooking(entry.id);
+            for(DataModel.Pending pendingentry : pendingList) {
                 String rent = "0", deposit = "0", penalty = "0";
-                if (pendingentry.type == DataModule.PendingType.RENT) {
+                if (pendingentry.type == DataModel.PendingType.RENT) {
                     rent = String.valueOf(pendingentry.pendingAmt);
-                } else if (pendingentry.type == DataModule.PendingType.DEPOSIT) {
+                } else if (pendingentry.type == DataModel.PendingType.DEPOSIT) {
                     deposit = String.valueOf(pendingentry.pendingAmt);
                 } else {
                     penalty = String.valueOf(pendingentry.pendingAmt);

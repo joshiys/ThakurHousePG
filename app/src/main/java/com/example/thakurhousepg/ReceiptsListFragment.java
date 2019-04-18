@@ -3,10 +3,8 @@ package com.example.thakurhousepg;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +68,7 @@ public class ReceiptsListFragment extends Fragment {
     }
 
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(DataModule.Receipt item);
+        void onListFragmentInteraction(DataModel.Receipt item);
     }
 
     public void refresh() {
@@ -85,9 +83,9 @@ public class ReceiptsListFragment extends Fragment {
         refresh();
     }
 
-    private ArrayList<DataModule.Receipt> getAdapterValues () {
+    private ArrayList<DataModel.Receipt> getAdapterValues () {
         Bundle bundle = getArguments();
-        ArrayList<DataModule.Receipt> receiptList = null;
+        ArrayList<DataModel.Receipt> receiptList = null;
 
         if(forMonth > 0) {
             receiptList = dataModule.getAllReceipts(forMonth);

@@ -1,6 +1,5 @@
 package com.example.thakurhousepg;
 
-import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -33,7 +32,7 @@ public class BedViewActivity extends AppCompatActivity {
 
     private DataModule dataModule;
     private boolean viewBookingMode = false;
-    private ArrayList<DataModule.Tenant> dependentsList = new ArrayList<DataModule.Tenant>();
+    private ArrayList<DataModel.Tenant> dependentsList = new ArrayList<DataModel.Tenant>();
     private static final String TAG = "BedViewActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,16 +63,16 @@ public class BedViewActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        final DataModule.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
+        final DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
         if(bedInfo.isOccupied == true) {
             viewBookingMode = true;
             bookButton.setText("Close Booking");
             bedNumber.setBackgroundColor(Color.BLACK);
 
-            DataModule.Booking booking = dataModule.getBookingInfo(bedInfo.bookingId);
+            DataModel.Booking booking = dataModule.getBookingInfo(bedInfo.bookingId);
             Log.i(TAG, "Found Booking with Id " + bedInfo.bookingId);
 
-            final DataModule.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
+            final DataModel.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
             tenantName.setVisibility(View.VISIBLE);
             Log.i(TAG, "Found Tenat with Id " + tenant.id + " Name: " + tenant.name);
 
@@ -82,7 +81,7 @@ public class BedViewActivity extends AppCompatActivity {
 
             String tempNameHolder = tenant.name;
             dependentsList = dataModule.getDependents(tenant.id);
-            for (DataModule.Tenant dependent: dependentsList) {
+            for (DataModel.Tenant dependent: dependentsList) {
                 Log.i(TAG, "Found Dependent with Id " + dependent.id + " Name: " + dependent.name);
                 tempNameHolder += " , " + dependent.name;
                 modifyButton.setVisibility(View.VISIBLE);
@@ -99,7 +98,7 @@ public class BedViewActivity extends AppCompatActivity {
             smsButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    DataModule.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
+                    DataModel.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
                     if(!tenant.mobile.isEmpty()) {
                         Snackbar.make(view, "Sending BOOKING SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
@@ -199,13 +198,13 @@ public class BedViewActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         Log.i(TAG, "Back from the Booking activity");
         if(requestCode == 1) {
-            DataModule.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
+            DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
             closeBooking(bedInfo.bookingId);
             finish();
         } else if(requestCode == 2 && resultCode == RESULT_OK) {
             modifyButton.setVisibility(View.INVISIBLE);
             ArrayList<String> selectedTenants = (ArrayList<String>) data.getSerializableExtra("SELECTED_TENANT_IDS");
-            for (DataModule.Tenant t : dependentsList) {
+            for (DataModel.Tenant t : dependentsList) {
                 if(!selectedTenants.contains(t.id)) {
                     dataModule.updateTenant(t.id, "", "", "", "", "", false, "0");
                 }

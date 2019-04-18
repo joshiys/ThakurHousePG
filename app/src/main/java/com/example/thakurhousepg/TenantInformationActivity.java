@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,12 +22,13 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
     private Button saveButton;
 
     private DataModule dataModule;
-    public DataModule.Tenant tenantInfoForModification = null;
+    public DataModel.Tenant tenantInfoForModification = null;
     private String tenantId = null;
 
     private Intent returnIntent = new Intent();
 
     private boolean addTenantMode = true;
+    private NetworkDataModule restService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +38,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         dataModule = DataModule.getInstance();
+        restService = NetworkDataModule.getInstance();
         final Bundle bundle = getIntent().getExtras();
 
         tenantName = findViewById(R.id.add_tenant_name);
@@ -48,7 +49,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
         if(bundle != null) {
             if(bundle.getString("TENANT_ID") != null) {
                 String tenantId = bundle.getString("TENANT_ID");
-                tenantInfoForModification = dataModule.getTenantInfo(tenantId);
+                tenantInfoForModification = restService.getTenantInfo(tenantId);
 
                 tenantName.setText(tenantInfoForModification.name);
                 tenantEmail.setText(tenantInfoForModification.email);
@@ -105,6 +106,13 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                             tenantEmail.getText().toString(),
                             tenantAddress.getText().toString(), "0");
 
+                    //Just to make sure call goes successfully to the server
+                    //Todo: Implement Callback mechanism
+                    restService.addNewTenant(tenantName.getText().toString(),
+                            tenantMobile.getText().toString(),
+                            tenantEmail.getText().toString(),
+                            tenantAddress.getText().toString(), "0", false);
+
                     if(tenantId != null) {
                         returnIntent.putExtra("TENANT_ID", tenantId);
                         setResult(Activity.RESULT_OK, returnIntent);
@@ -115,7 +123,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                 } else {
                     boolean status = false;
                     if(tenantInfoForModification != null) {
-                        status = dataModule.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
+                        status = restService.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
                                 "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), false, "0");
                     }
 
@@ -145,7 +153,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
         return true;
     }
 
-    public void onListFragmentInteraction(DataModule.Receipt item) {
+    public void onListFragmentInteraction(DataModel.Receipt item) {
 
     }
 }
