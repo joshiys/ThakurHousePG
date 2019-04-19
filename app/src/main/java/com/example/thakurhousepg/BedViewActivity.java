@@ -34,6 +34,7 @@ public class BedViewActivity extends AppCompatActivity {
     private boolean viewBookingMode = false;
     private ArrayList<DataModel.Tenant> dependentsList = new ArrayList<DataModel.Tenant>();
     private static final String TAG = "BedViewActivity";
+    private DataModule.Tenant tenant;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +73,7 @@ public class BedViewActivity extends AppCompatActivity {
             DataModel.Booking booking = dataModule.getBookingInfo(bedInfo.bookingId);
             Log.i(TAG, "Found Booking with Id " + bedInfo.bookingId);
 
-            final DataModel.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
+            tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
             tenantName.setVisibility(View.VISIBLE);
             Log.i(TAG, "Found Tenat with Id " + tenant.id + " Name: " + tenant.name);
 
@@ -86,6 +87,7 @@ public class BedViewActivity extends AppCompatActivity {
                 tempNameHolder += " , " + dependent.name;
                 modifyButton.setVisibility(View.VISIBLE);
             }
+            modifyButton.setVisibility(View.VISIBLE);
             tenantName.setText(tempNameHolder);
 
             rentAmount.setText(booking.rentAmount);
@@ -183,7 +185,7 @@ public class BedViewActivity extends AppCompatActivity {
         modifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!dependentsList.isEmpty()) {
+                /*if(!dependentsList.isEmpty())*/ {
                     Intent selectTenantIntent = new Intent(BedViewActivity.this, SelectTenantActivity.class);
                     selectTenantIntent.putExtra("LIST_MODE", "MODIFY_FULLY_SELECTED_LIST");
                     selectTenantIntent.putExtra("TENANT_LIST", dependentsList);
@@ -207,6 +209,8 @@ public class BedViewActivity extends AppCompatActivity {
             for (DataModel.Tenant t : dependentsList) {
                 if(!selectedTenants.contains(t.id)) {
                     dataModule.updateTenant(t.id, "", "", "", "", "", false, "0");
+                } else {
+                    dataModule.updateTenant(t.id, "", "", "", "", "", true, tenant.id);
                 }
             }
         }

@@ -24,7 +24,7 @@ public class ReceiptsListFragment extends Fragment {
     private ReceiptsListViewAdapter adapter = null;
     private static final String TAG = "ReceiptListFragment";
 
-    private int forMonth = 0;
+    private int forMonth = 0, forMode = 0, forType = 0;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -83,12 +83,39 @@ public class ReceiptsListFragment extends Fragment {
         refresh();
     }
 
+    public void refreshForMode(int mode) {
+        forMode = mode;
+        refresh();
+    }
+
+    public void refreshForType(int type) {
+        forType = type;
+        refresh();
+    }
+
     private ArrayList<DataModel.Receipt> getAdapterValues () {
         Bundle bundle = getArguments();
-        ArrayList<DataModel.Receipt> receiptList = null;
+        ArrayList<DataModule.Receipt> receiptList = null, testReceiptList = null;
 
         if(forMonth > 0) {
-            receiptList = dataModule.getAllReceipts(forMonth);
+            testReceiptList = dataModule.getAllReceipts(forMonth);
+            receiptList = new ArrayList<>();
+            for(DataModule.Receipt receipt: testReceiptList){
+                if(forMode > 0 || forType > 0 ){
+                    if((forMode == 0) ||
+                            (forMode == 1 && (!receipt.onlineAmount.isEmpty() && Integer.valueOf(receipt.onlineAmount) > 0)) ||
+                            (forMode == 2 && (!receipt.cashAmount.isEmpty() && Integer.valueOf(receipt.cashAmount) > 0))){
+                        if((forType == 0) ||
+                                (forType == 1 && (receipt.type == DataModule.ReceiptType.RENT)) ||
+                                (forType == 2 && (receipt.type == DataModule.ReceiptType.DEPOSIT))){
+                            receiptList.add(receipt);
+                        }
+
+                    }
+                } else {
+                    receiptList.add(receipt);
+                }
+            }
         } else if(bundle != null) {
             if(bundle.getString("TENANT_ID") != null) {
                 String tenantId = bundle.getString("TENANT_ID");

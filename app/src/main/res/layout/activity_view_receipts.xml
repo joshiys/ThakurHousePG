@@ -14,14 +14,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="fill_horizontal"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="2">
 
 
         <TextView
             android:id="@+id/editText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="2dp"
             android:inputType="textPersonName"
             android:text="Month"
             app:layout_constraintEnd_toEndOf="@id/spinner"
@@ -35,8 +36,55 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
+            android:padding="5dp"
+            android:spinnerMode="dropdown"
+            tools:layout_editor_absoluteX="128dp"
+            tools:layout_editor_absoluteY="24dp" />
+
+        <TextView
+            android:id="@+id/editText1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="2dp"
+            android:inputType="textPersonName"
+            android:text="Mode"
+            app:layout_constraintEnd_toEndOf="@id/spinner"
+
+            app:layout_constraintEnd_toStartOf="@+id/spinner"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="29dp" />
+
+        <Spinner
+            android:id="@+id/spinnerMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
             android:padding="20dp"
             android:spinnerMode="dropdown"
+            tools:layout_editor_absoluteX="128dp"
+            tools:layout_editor_absoluteY="24dp" />
+        <TextView
+            android:id="@+id/editText2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="2dp"
+            android:inputType="textPersonName"
+            android:text="Type"
+            app:layout_constraintEnd_toEndOf="@id/spinner"
+
+            app:layout_constraintEnd_toStartOf="@+id/spinner"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"
+            tools:layout_editor_absoluteY="29dp" />
+
+        <Spinner
+            android:id="@+id/spinnerType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:padding="20dp"
+            android:spinnerMode="dropdown"
+            android:visibility="gone"
             tools:layout_editor_absoluteX="128dp"
             tools:layout_editor_absoluteY="24dp" />
 

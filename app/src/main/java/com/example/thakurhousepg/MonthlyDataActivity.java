@@ -33,6 +33,28 @@ public class MonthlyDataActivity extends AppCompatActivity {
 
 
         setTitle("Monthly Data");
+        rentCash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent receivedIntent = new Intent(MonthlyDataActivity.this, ViewReceiptsActivity.class);
+                receivedIntent.putExtra("MODE", 2);//Cash
+                receivedIntent.putExtra("TYPE", 1);//Rent
+                startActivity(receivedIntent);
+
+            }
+        });
+
+
+        depositCash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent receivedIntent = new Intent(MonthlyDataActivity.this, ViewReceiptsActivity.class);
+                receivedIntent.putExtra("MODE", 2);//Cash
+                receivedIntent.putExtra("TYPE", 2);//Deposit
+                startActivity(receivedIntent);
+
+            }
+        });
 
         totalOutstanding.setOnClickListener(new View.OnClickListener() {
             @Override
