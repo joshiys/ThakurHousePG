@@ -116,7 +116,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                     boolean status = false;
                     if(tenantInfoForModification != null) {
                         status = dataModule.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
-                                "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), false, "0");
+                                "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), tenantInfoForModification.isCurrent, tenantInfoForModification.parentId);
                     }
 
                     if (status == true) {

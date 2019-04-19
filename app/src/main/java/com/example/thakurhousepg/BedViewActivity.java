@@ -35,6 +35,7 @@ public class BedViewActivity extends AppCompatActivity {
     private boolean viewBookingMode = false;
     private ArrayList<DataModule.Tenant> dependentsList = new ArrayList<DataModule.Tenant>();
     private static final String TAG = "BedViewActivity";
+    private DataModule.Tenant tenant;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +74,7 @@ public class BedViewActivity extends AppCompatActivity {
             DataModule.Booking booking = dataModule.getBookingInfo(bedInfo.bookingId);
             Log.i(TAG, "Found Booking with Id " + bedInfo.bookingId);
 
-            final DataModule.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
+            tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
             tenantName.setVisibility(View.VISIBLE);
             Log.i(TAG, "Found Tenat with Id " + tenant.id + " Name: " + tenant.name);
 
@@ -209,6 +210,8 @@ public class BedViewActivity extends AppCompatActivity {
             for (DataModule.Tenant t : dependentsList) {
                 if(!selectedTenants.contains(t.id)) {
                     dataModule.updateTenant(t.id, "", "", "", "", "", false, "0");
+                } else {
+                    dataModule.updateTenant(t.id, "", "", "", "", "", true, tenant.id);
                 }
             }
         }
