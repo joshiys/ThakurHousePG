@@ -87,6 +87,7 @@ public class BedViewActivity extends AppCompatActivity {
                 tempNameHolder += " , " + dependent.name;
                 modifyButton.setVisibility(View.VISIBLE);
             }
+            modifyButton.setVisibility(View.VISIBLE);
             tenantName.setText(tempNameHolder);
 
             rentAmount.setText(booking.rentAmount);
@@ -184,7 +185,7 @@ public class BedViewActivity extends AppCompatActivity {
         modifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!dependentsList.isEmpty()) {
+                /*if(!dependentsList.isEmpty())*/ {
                     Intent selectTenantIntent = new Intent(BedViewActivity.this, SelectTenantActivity.class);
                     selectTenantIntent.putExtra("LIST_MODE", "MODIFY_FULLY_SELECTED_LIST");
                     selectTenantIntent.putExtra("TENANT_LIST", dependentsList);

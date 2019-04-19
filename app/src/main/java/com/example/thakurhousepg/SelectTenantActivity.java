@@ -24,6 +24,7 @@ public class SelectTenantActivity extends AppCompatActivity {
     private static final String TAG = "SelectTenantActivity";
     private Intent returnIntent = new Intent();
     private ArrayList<DataModule.Tenant> tenants = null;
+    int checkTenantSize = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,17 +41,28 @@ public class SelectTenantActivity extends AppCompatActivity {
 
         if("MODIFY_FULLY_SELECTED_LIST".equals(bundle.getString("LIST_MODE"))) {
             tenants = (ArrayList<DataModule.Tenant>) bundle.getSerializable("TENANT_LIST");
+            checkTenantSize = tenants.size();
+            ArrayList<DataModule.Tenant> allTenants = dataModule.getAllTenants(false);
+            for(DataModule.Tenant tenant:allTenants) {
+                DataModule.Booking booking = dataModule.getBookingInfoForTenant(tenant.id);
+                if(!tenant.isCurrent) {
+                    tenants.add(tenant);
+                }
+            }
         } else {
             tenants = dataModule.getAllTenants(false);
         }
-
 
         final ArrayList<String> tenantNamesList = new ArrayList<String>();
 
         for(DataModule.Tenant tenant:tenants) {
             DataModule.Booking booking = dataModule.getBookingInfoForTenant(tenant.id);
-            tenantNamesList.add(tenant.name + (tenant.isCurrent ? " , Current" :
-                    (booking != null ? ", Old, Bed = " + booking.bedNumber :" New")
+            if((tenant.isCurrent) && (Integer.valueOf(tenant.parentId) != 0)) {
+                    DataModule.Tenant parentTenant = dataModule.getTenantInfo(tenant.parentId);
+                    booking = dataModule.getBookingInfoForTenant(parentTenant.id);
+            }
+            tenantNamesList.add(tenant.name + (tenant.isCurrent ? " , Current=" + booking.bedNumber :
+                    (booking != null ? ", Old, Bed = " + booking.bedNumber : " New")
             ));
         }
 
@@ -68,7 +80,7 @@ public class SelectTenantActivity extends AppCompatActivity {
                 }
             }
         } else if("MODIFY_FULLY_SELECTED_LIST".equals(bundle.getString("LIST_MODE"))) {
-            for (int i = 0; i < tenants.size(); i++) {
+            for (int i = 0; i < checkTenantSize; i++) {
                 tenantsListView.setItemChecked(i, true);
             }
         }
