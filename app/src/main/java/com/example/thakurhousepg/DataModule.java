@@ -622,7 +622,8 @@ public class DataModule extends SQLiteOpenHelper {
                             cursor.getString(cursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
                             cursor.getString(cursor.getColumnIndex(BOOKING_DATE)),
                             cursor.getInt(cursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
-                            cursor.getString(cursor.getColumnIndex(TENANT_ID))
+                            cursor.getString(cursor.getColumnIndex(TENANT_ID)),
+                            null
                     ));
         }
 
@@ -661,7 +662,8 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_DATE)),
                     cursor.getInt(cursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
-                    cursor.getString(cursor.getColumnIndex(TENANT_ID))
+                    cursor.getString(cursor.getColumnIndex(TENANT_ID)),
+                    cursor.getString(cursor.getColumnIndex(BOOKING_CLOSE_DATE))
             );
         }
 
@@ -681,7 +683,8 @@ public class DataModule extends SQLiteOpenHelper {
                     bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
                     bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_DATE)),
                     bookingCursor.getInt(bookingCursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
-                    bookingCursor.getString(bookingCursor.getColumnIndex(TENANT_ID)))
+                    bookingCursor.getString(bookingCursor.getColumnIndex(TENANT_ID)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_CLOSE_DATE)))
             );
         }
 
@@ -726,7 +729,8 @@ public class DataModule extends SQLiteOpenHelper {
                     bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_DEPOSIT_AMT)),
                     bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_DATE)),
                     bookingCursor.getInt(bookingCursor.getColumnIndex(BOOKING_IS_WHOLE_ROOM)) > 0,
-                    bookingCursor.getString(bookingCursor.getColumnIndex(TENANT_ID)));
+                    bookingCursor.getString(bookingCursor.getColumnIndex(TENANT_ID)),
+                    bookingCursor.getString(bookingCursor.getColumnIndex(BOOKING_CLOSE_DATE)));
         }
 
         bookingCursor.close();
@@ -893,7 +897,8 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndex(PENDING_AMOUNT)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                     cursor.getString(cursor.getColumnIndex(TENANT_ID)),
-                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))]
+                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))],
+                    cursor.getInt(cursor.getColumnIndex(PENDING_MONTH))
             ));
         }
 
@@ -912,7 +917,8 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndex(PENDING_AMOUNT)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                     cursor.getString(cursor.getColumnIndex(TENANT_ID)),
-                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))]
+                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))],
+                    cursor.getInt(cursor.getColumnIndex(PENDING_MONTH))
             ));
         }
 
@@ -1086,7 +1092,8 @@ public class DataModule extends SQLiteOpenHelper {
                     cursor.getInt(cursor.getColumnIndex(PENDING_AMOUNT)),
                     cursor.getString(cursor.getColumnIndex(BOOKING_ID)),
                     cursor.getString(cursor.getColumnIndex(TENANT_ID)),
-                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))]
+                    pendingTypeValues[cursor.getInt(cursor.getColumnIndex(PENDING_TYPE))],
+                    cursor.getInt(cursor.getColumnIndex(PENDING_MONTH))
             ));
         }
         cursor.close();

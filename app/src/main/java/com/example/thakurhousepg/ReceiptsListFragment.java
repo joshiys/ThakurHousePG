@@ -95,19 +95,19 @@ public class ReceiptsListFragment extends Fragment {
 
     private ArrayList<DataModel.Receipt> getAdapterValues () {
         Bundle bundle = getArguments();
-        ArrayList<DataModule.Receipt> receiptList = null, testReceiptList = null;
+        ArrayList<DataModel.Receipt> receiptList = null, testReceiptList = null;
 
         if(forMonth > 0) {
             testReceiptList = dataModule.getAllReceipts(forMonth);
             receiptList = new ArrayList<>();
-            for(DataModule.Receipt receipt: testReceiptList){
+            for(DataModel.Receipt receipt: testReceiptList){
                 if(forMode > 0 || forType > 0 ){
                     if((forMode == 0) ||
                             (forMode == 1 && (!receipt.onlineAmount.isEmpty() && Integer.valueOf(receipt.onlineAmount) > 0)) ||
                             (forMode == 2 && (!receipt.cashAmount.isEmpty() && Integer.valueOf(receipt.cashAmount) > 0))){
                         if((forType == 0) ||
-                                (forType == 1 && (receipt.type == DataModule.ReceiptType.RENT)) ||
-                                (forType == 2 && (receipt.type == DataModule.ReceiptType.DEPOSIT))){
+                                (forType == 1 && (receipt.type == DataModel.ReceiptType.RENT)) ||
+                                (forType == 2 && (receipt.type == DataModel.ReceiptType.DEPOSIT))){
                             receiptList.add(receipt);
                         }
 

@@ -1,5 +1,6 @@
 package com.example.thakurhousepg;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        restService = NetworkDataModule.getInstance();
+
 
         btn_receipt = findViewById(R.id.receipt_button);
         btn_occupancy = findViewById(R.id.occupancy_button);
@@ -84,12 +87,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SMSManagement.setContext(this);
         smsHandle = SMSManagement.getInstance();
 
-        setPendingAmountEntries();
         headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
         headerView.setOnClickListener(this);
 
         sendSMS.setOnClickListener(this);
-        restService = NetworkDataModule.getInstance();
+
+        ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("Loading");
+        progress.setMessage("Wait while loading...");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
+        if (!restService.isInitialDataFetchComplete()) {
+            restService.initialDataFetchCompletionCallBack = new NetworkDataModulCallback() {
+                @Override
+                public void onSuccess(Object obj) {
+
+                }
+
+                @Override
+                public void onFailure() {
+
+                }
+
+                @Override
+                public void onResult() {
+                    progress.dismiss();
+                    setPendingAmountEntries();
+                    setTotalOutstandingRent();
+                }
+            };
+        }
     }
 
     private void checkForPermissions() {
@@ -105,7 +132,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         checkForPermissions();
-        setTotalOutstandingRent();
+        if (restService.isInitialDataFetchComplete()) {
+            setTotalOutstandingRent();
+        }
     }
 
     @Override
@@ -115,13 +144,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch(view.getId()){
             case R.id.sendSMSButton:
                 if(!roomNumber.getText().toString().isEmpty()) {
-                    DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+                    DataModel.Bed bedInfo = restService.getBedInfo(roomNumber.getText().toString());
                     if (bedInfo.bookingId == null) {
                         Snackbar.make(view, "Room has not been Booked yet.", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                         break;
                     }
-                    DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
+                    DataModel.Tenant tenant = restService.getTenantInfoForBooking(bedInfo.bookingId);
                     if(!tenant.mobile.isEmpty()) {
                         Snackbar.make(view, "Sending DEFAULT SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
@@ -209,11 +238,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     void setTotalOutstandingRent(){
-        receivedRentValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        receivedRentValue.setText(restService.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.RENT));
 //        outstandingRentValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
 //                DataModule.ReceiptType.DEPOSIT));
-        outstandingRentValue.setText(String.valueOf(dbHelper.getTotalPendingAmount(DataModel.PendingType.RENT)));
+        outstandingRentValue.setText(String.valueOf(restService.getTotalPendingAmount(DataModel.PendingType.RENT)));
 //        totalExpectedRentValue.setText(dbHelper.getTotalExpectedRent());
     }
 
@@ -226,14 +255,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
             Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
 
-            if(dbHelper.createMonthlyPendingEntries((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED))) {
-                SharedPreferences.Editor settingsEditor = settings.edit();
+            restService.createMonthlyPendingEntries((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED), new NetworkDataModulCallback<DataModel.Pending>() {
+                @Override
+                public void onSuccess(DataModel.Pending obj) {
+                    SharedPreferences.Editor settingsEditor = settings.edit();
                     /* Calendar object in Java starts the month entries from 0, (as in 0 for Jauary to 11 for December)
                         But SQlite starts them from 1, so make calculation in DataModule easier, add 1 here
                     */
-                settingsEditor.putInt("pendingEntriesUpdatedForMonth", (rightNow.get(Calendar.MONTH) + 1));
-                settingsEditor.commit();
-            }
+                    settingsEditor.putInt("pendingEntriesUpdatedForMonth", (rightNow.get(Calendar.MONTH) + 1));
+                    settingsEditor.commit();
+                }
+
+                @Override
+                public void onFailure() {
+                    Toast.makeText(MainActivity.this, "Could not create Monthly Pending Entries", Toast.LENGTH_LONG).show();
+                }
+            });
         }
     }
 }

@@ -13,7 +13,7 @@ import android.widget.ListView;
 import java.util.ArrayList;
 
 public class SelectTenantActivity extends AppCompatActivity {
-    private DataModule dataModule = DataModule.getInstance();
+    private NetworkDataModule dataModule = NetworkDataModule.getInstance();
     Button selectButton;
 
     private static final String TAG = "SelectTenantActivity";
@@ -37,9 +37,9 @@ public class SelectTenantActivity extends AppCompatActivity {
         if("MODIFY_FULLY_SELECTED_LIST".equals(bundle.getString("LIST_MODE"))) {
             tenants = (ArrayList<DataModel.Tenant>) bundle.getSerializable("TENANT_LIST");
             checkTenantSize = tenants.size();
-            ArrayList<DataModule.Tenant> allTenants = dataModule.getAllTenants(false);
-            for(DataModule.Tenant tenant:allTenants) {
-                DataModule.Booking booking = dataModule.getBookingInfoForTenant(tenant.id);
+            ArrayList<DataModel.Tenant> allTenants = dataModule.getAllTenants(false);
+            for(DataModel.Tenant tenant:allTenants) {
+                DataModel.Booking booking = dataModule.getBookingInfoForTenant(tenant.id);
                 if(!tenant.isCurrent) {
                     tenants.add(tenant);
                 }
@@ -53,7 +53,7 @@ public class SelectTenantActivity extends AppCompatActivity {
         for(DataModel.Tenant tenant:tenants) {
             DataModel.Booking booking = dataModule.getBookingInfoForTenant(tenant.id);
             if((tenant.isCurrent) && (Integer.valueOf(tenant.parentId) != 0)) {
-                    DataModule.Tenant parentTenant = dataModule.getTenantInfo(tenant.parentId);
+                DataModel.Tenant parentTenant = dataModule.getTenantInfo(tenant.parentId);
                     booking = dataModule.getBookingInfoForTenant(parentTenant.id);
             }
             tenantNamesList.add(tenant.name + (tenant.isCurrent ? " , Current=" + booking.bedNumber :

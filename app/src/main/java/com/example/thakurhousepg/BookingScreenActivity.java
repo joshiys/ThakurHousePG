@@ -29,7 +29,8 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HI
 
 public class BookingScreenActivity extends AppCompatActivity {
 
-    private DataModule dataModule;
+    private NetworkDataModule dataModule;
+    private NetworkDataModule restService;
     private EditText rentAmount, depositAmount, bedNumber, bookingDate;
 
     private SeekBar roomSplitSeeker;
@@ -59,7 +60,7 @@ public class BookingScreenActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
 
-        dataModule = DataModule.getInstance();
+        dataModule = NetworkDataModule.getInstance();
 
         rentAmount = findViewById(R.id.booking_rent);
         depositAmount = findViewById(R.id.booking_deposit);
@@ -106,69 +107,77 @@ public class BookingScreenActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(validate()) {
                     int numRooms = roomSplitSeeker.getProgress();
+                    //TODO: Sanity check, If room is split makes sure the new room is booked with only 1 tenant
+                    // Also check the room number for CreateNewBooking is correct after the split
                     if(numRooms > 1) {
                         dataModule.splitRoom(bedNumber.getText().toString(), numRooms, rentAmount.getText().toString(), depositAmount.getText().toString());
                     }
 
-                    String newBookingId = dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), bookingDate.getText().toString());
-                    Log.i(TAG, "result is " + newBookingId);
+                    dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), bookingDate.getText().toString(),
+                            new NetworkDataModulCallback<DataModel.Booking>() {
+                        @Override
+                        public void onSuccess(DataModel.Booking obj) {
+                            String newBookingId = obj.id;
+                            Log.i(TAG, "result is " + newBookingId);
+                            String pendingRent = reduceFirstRentCheckbox.isChecked() ? firstRent.getText().toString():rentAmount.getText().toString();
 
-                    if(!newBookingId.equals("-1")) {
-                        String pendingRent = reduceFirstRentCheckbox.isChecked() ? firstRent.getText().toString():rentAmount.getText().toString();
-
-                        //XXX : Do not create pending entry if Booking date is advance because penalty will be added automatically if month changes
-                        try {
-                            // काय बकवास API design केली आहे ... All of this just to get the month out of a date?
-                            // अजुन काहीतरी चांगला मार्ग असणार
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                            Calendar c = Calendar.getInstance();
-                            c.setTime(dateFormat.parse(bookingDate.getText().toString()));
-                            Log.i(TAG, "Booking Month: " + c.get(Calendar.MONTH) + " , And currentMonth: " + Calendar.getInstance().get(Calendar.MONTH));
-                            if(c.get(Calendar.MONTH) != (Calendar.getInstance().get(Calendar.MONTH) + 1)) {
-                                dataModule.createPendingEntryForBooking(newBookingId, DataModel.PendingType.RENT, pendingRent, Calendar.getInstance().get(Calendar.MONTH) + 1);
+                            //XXX : Do not create pending entry if Booking date is advance because penalty will be added automatically if month changes
+                            try {
+                                // काय बकवास API design केली आहे ... All of this just to get the month out of a date?
+                                // अजुन काहीतरी चांगला मार्ग असणार
+                                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                                Calendar c = Calendar.getInstance();
+                                c.setTime(dateFormat.parse(bookingDate.getText().toString()));
+                                Log.i(TAG, "Booking Month: " + c.get(Calendar.MONTH) + " , And currentMonth: " + Calendar.getInstance().get(Calendar.MONTH));
+                                if(c.get(Calendar.MONTH) != (Calendar.getInstance().get(Calendar.MONTH) + 1)) {
+                                    dataModule.createPendingEntryForBooking(newBookingId, DataModel.PendingType.RENT, pendingRent, Calendar.getInstance().get(Calendar.MONTH) + 1, null);
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
                             }
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+                            dataModule.createPendingEntryForBooking(newBookingId, DataModel.PendingType.DEPOSIT, depositAmount.getText().toString(), Calendar.getInstance().get(Calendar.MONTH) + 1, null);
+
+                            for(String id: dependentsIdList) {
+                                dataModule.updateTenant(id, "", "", "", "", "", true, tenantId, null);
+                            }
+
+                            BedsListContent.refresh();
+                            new AlertDialog.Builder(BookingScreenActivity.this)
+                                    .setTitle("Created new Booking successfully")
+                                    .setMessage("Do you want to pay the deposit for this booking?")
+
+                                    // Specifying a listener allows you to take an action before dismissing the dialog.
+                                    // The dialog is automatically dismissed when a dialog button is clicked.
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Intent receiptIntent = new Intent(BookingScreenActivity.this, ReceiptActivity.class);
+                                            receiptIntent.putExtra("SECTION", "Deposit");
+                                            receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
+                                            receiptIntent.putExtra("DEPOSIT_AMOUNT", depositAmount .getText().toString());
+
+                                            startActivity(receiptIntent);
+                                            finish();
+                                        }
+                                    })
+
+                                    // A null listener allows the button to dismiss the dialog and take no further action.
+                                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            finish();
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.ic_dialog_info)
+                                    .show();
                         }
-                        dataModule.createPendingEntryForBooking(newBookingId, DataModel.PendingType.DEPOSIT, depositAmount.getText().toString(), Calendar.getInstance().get(Calendar.MONTH) + 1);
 
-                        for(String id: dependentsIdList) {
-                            dataModule.updateTenant(id, "", "", "", "", "", true, tenantId);
+                        @Override
+                        public void onFailure() {
+                            Toast.makeText(BookingScreenActivity.this, "Can not create the Booking", Toast.LENGTH_SHORT).show();
+                            Log.i(TAG, "Booking creation failed");
+                            //TODO: Remove the new Tenant if the Booking Creation fails?
                         }
-
-                        BedsListContent.refresh();
-                        new AlertDialog.Builder(BookingScreenActivity.this)
-                                .setTitle("Created new Booking successfully")
-                                .setMessage("Do you want to pay the deposit for this booking?")
-
-                                // Specifying a listener allows you to take an action before dismissing the dialog.
-                                // The dialog is automatically dismissed when a dialog button is clicked.
-                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Intent receiptIntent = new Intent(BookingScreenActivity.this, ReceiptActivity.class);
-                                        receiptIntent.putExtra("SECTION", "Deposit");
-                                        receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
-                                        receiptIntent.putExtra("DEPOSIT_AMOUNT", depositAmount .getText().toString());
-
-                                        startActivity(receiptIntent);
-                                        finish();
-                                    }
-                                })
-
-                                // A null listener allows the button to dismiss the dialog and take no further action.
-                                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        finish();
-                                    }
-                                })
-                                .setIcon(android.R.drawable.ic_dialog_info)
-                                .show();
-                    } else {
-                        Toast.makeText(BookingScreenActivity.this, "Can not create the Booking", Toast.LENGTH_SHORT).show();
-                        Log.i(TAG, "Booking creation failed");
-                        //TODO: Remove the new Tenant if the Booking Creation fails?
-                    }
+                    });
                 }
             }
         });

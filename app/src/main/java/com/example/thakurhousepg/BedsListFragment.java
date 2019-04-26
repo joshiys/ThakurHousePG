@@ -26,7 +26,6 @@ public class BedsListFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 3;
     private OnBedsListInteractionListener mListener;
-    private DataModule datamodule;
     private RecyclerView recyclerView;
     private static BedsListRecyclerViewAdapter mAdapter;
 

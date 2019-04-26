@@ -21,7 +21,6 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class OccupancyAndBookingActivity extends AppCompatActivity implements BedsListFragment.OnBedsListInteractionListener {
-    public DataModule datamodule;
     public TabLayout tabLayout;
     public static int currentSelectedTab = 0;
     private NetworkDataModule restService;
@@ -31,7 +30,6 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        datamodule = DataModule.getInstance();
 
         setContentView(R.layout.activity_occupancy_and_booking);
 
@@ -107,15 +105,31 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
                 int monthUpdated = settings.getInt("penaltyAddedForMonth", 0);
                 if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
                     Log.i(TAG, "Adding Penalties for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
-                    datamodule.addPenaltyToOutstandingPayments();
+                    restService.addPenaltyToOutstandingPayments(new NetworkDataModulCallback<DataModel.Pending>() {
+                        @Override
+                        public void onSuccess(DataModel.Pending obj) {
+                        }
 
-                    SharedPreferences.Editor settingsEditor = settings.edit();
-                    settingsEditor.putInt("penaltyAddedForMonth", (rightNow.get(Calendar.MONTH) + 1));
-                    settingsEditor.commit();
+                        @Override
+                        public void onFailure() {
+                        }
 
-                    BedsListContent.refresh();
-                    BedsListFragment bedsFrag = (BedsListFragment) getSupportFragmentManager().findFragmentById(R.id.beds_fragment);
-                    bedsFrag.reloadData();
+                        @Override
+                        public void onResult() {
+                            SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
+                            Calendar rightNow = Calendar.getInstance();
+                            SharedPreferences.Editor settingsEditor = settings.edit();
+                            settingsEditor.putInt("penaltyAddedForMonth", (rightNow.get(Calendar.MONTH) + 1));
+                            settingsEditor.commit();
+
+                            BedsListContent.refresh();
+                            BedsListFragment bedsFrag = (BedsListFragment) getSupportFragmentManager().findFragmentById(R.id.beds_fragment);
+                            bedsFrag.reloadData();
+                        }
+
+                    });
+
+
                 } else {
                     Toast.makeText(OccupancyAndBookingActivity.this, "Penalty has already been added for this Month.", Toast.LENGTH_SHORT).show();
                 }
@@ -198,7 +212,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     }
 
     public void onRentClick(BedsListContent.BedsListItem item){
-        DataModel.Bed bed = datamodule.getBedInfo(item.bedNumber);
+        DataModel.Bed bed = restService.getBedInfo(item.bedNumber);
 
         if(bed != null && bed.bookingId != null) {
             Toast.makeText(OccupancyAndBookingActivity.this, "Launching Rent Payment", Toast.LENGTH_SHORT).show();
@@ -207,7 +221,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
             receiptIntent.putExtra("ROOM_NUMBER", item.bedNumber);
 
             //XXX : Assuming there will be maximum three entries
-            ArrayList<DataModel.Pending> pendingEntries = datamodule.getPendingEntriesForBooking(bed.bookingId);
+            ArrayList<DataModel.Pending> pendingEntries = restService.getPendingEntriesForBooking(bed.bookingId);
             String rent = "", deposit = "";
             for (DataModel.Pending pendingEntry : pendingEntries) {
                 if(pendingEntry.type == DataModel.PendingType.DEPOSIT){

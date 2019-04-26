@@ -21,7 +21,6 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
     private EditText tenantAddress;
     private Button saveButton;
 
-    private DataModule dataModule;
     public DataModel.Tenant tenantInfoForModification = null;
     private String tenantId = null;
 
@@ -37,7 +36,6 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        dataModule = DataModule.getInstance();
         restService = NetworkDataModule.getInstance();
         final Bundle bundle = getIntent().getExtras();
 
@@ -100,39 +98,42 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
             @Override
             public void onClick(View v) {
                 if(addTenantMode) {
-                    tenantId = dataModule.addNewTenant(tenantName.getText().toString(),
-                            tenantMobile.getText().toString(),
-                            "",
-                            tenantEmail.getText().toString(),
-                            tenantAddress.getText().toString(), "0");
-
                     //Just to make sure call goes successfully to the server
                     //Todo: Implement Callback mechanism
-                    restService.addNewTenant(tenantName.getText().toString(),
-                            tenantMobile.getText().toString(),
-                            tenantEmail.getText().toString(),
-                            tenantAddress.getText().toString(), "0", false);
+                    restService.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(),
+                            tenantEmail.getText().toString(), tenantAddress.getText().toString(), "0", false,
+                            new NetworkDataModulCallback<DataModel.Tenant>() {
+                                @Override
+                                public void onSuccess(DataModel.Tenant t) {
+                                    tenantId = t.id;
+                                    returnIntent.putExtra("TENANT_ID", tenantId);
+                                    setResult(Activity.RESULT_OK, returnIntent);
+                                    finish();
+                                }
 
-                    if(tenantId != null) {
-                        returnIntent.putExtra("TENANT_ID", tenantId);
-                        setResult(Activity.RESULT_OK, returnIntent);
-                        finish();
-                    } else {
-                        Toast.makeText(TenantInformationActivity.this, "Can not create new Tenant", Toast.LENGTH_SHORT);
-                    }
+                                @Override
+                                public void onFailure() {
+                                    Toast.makeText(TenantInformationActivity.this, "Can not create new Tenant", Toast.LENGTH_SHORT);
+                                }
+                            });
                 } else {
                     boolean status = false;
                     if(tenantInfoForModification != null) {
-                        status = dataModule.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
-                                "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), tenantInfoForModification.isCurrent, tenantInfoForModification.parentId);
-                    }
+                        restService.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
+                        "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), tenantInfoForModification.isCurrent, tenantInfoForModification.parentId,
+                            new NetworkDataModulCallback<DataModel.Tenant>() {
+                                @Override
+                                public void onSuccess(DataModel.Tenant t) {
+                                    tenantId = tenantInfoForModification.id;
+                                    Toast.makeText(TenantInformationActivity.this, "Tenant Record Updated Successfully", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                }
 
-                    if (status == true) {
-                        tenantId = tenantInfoForModification.id;
-                        Toast.makeText(TenantInformationActivity.this, "Tenant Record Updated Successfully", Toast.LENGTH_SHORT).show();
-                        finish();
-                    } else {
-                        Toast.makeText(TenantInformationActivity.this, "Tenant Record Update Failed", Toast.LENGTH_SHORT).show();
+                                @Override
+                                public void onFailure() {
+                                    Toast.makeText(TenantInformationActivity.this, "Tenant Record Update Failed", Toast.LENGTH_SHORT).show();
+                                }
+                        });
                     }
                 }
 

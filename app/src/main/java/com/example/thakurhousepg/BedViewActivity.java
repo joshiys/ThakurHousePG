@@ -30,11 +30,11 @@ public class BedViewActivity extends AppCompatActivity {
     private FloatingActionButton smsButton;
     private Button bookButton, modifyButton;
 
-    private DataModule dataModule;
+    private NetworkDataModule dataModule;
     private boolean viewBookingMode = false;
     private ArrayList<DataModel.Tenant> dependentsList = new ArrayList<DataModel.Tenant>();
     private static final String TAG = "BedViewActivity";
-    private DataModule.Tenant tenant;
+    private DataModel.Tenant tenant;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +52,7 @@ public class BedViewActivity extends AppCompatActivity {
         bookingDate = findViewById(R.id.bedview_booking_date);
         smsButton = findViewById(R.id.bedview_floating_sms);
 
-        dataModule = DataModule.getInstance();
+        dataModule = NetworkDataModule.getInstance();
 
         Bundle bundle = getIntent().getExtras();
         bedNumber.setText(bundle.getString("BED_NUMBER"));
@@ -81,7 +81,6 @@ public class BedViewActivity extends AppCompatActivity {
             dependentsList = dataModule.getDependents(tenant.id);
 
             String tempNameHolder = tenant.name;
-            dependentsList = dataModule.getDependents(tenant.id);
             for (DataModel.Tenant dependent: dependentsList) {
                 Log.i(TAG, "Found Dependent with Id " + dependent.id + " Name: " + dependent.name);
                 tempNameHolder += " , " + dependent.name;
@@ -107,12 +106,12 @@ public class BedViewActivity extends AppCompatActivity {
 
                         SMSManagement smsManagement = SMSManagement.getInstance();
 
-                        smsManagement.sendSMS(tenant.mobile,
+                        /*smsManagement.sendSMS(tenant.mobile,
                                 dataModule.getSMSMessage(bedInfo.bookingId,
                                         tenant,
                                         0,
                                         SMSManagement.SMS_TYPE.BOOKING)
-                        );
+                        );*/
                     } else {
                         Snackbar.make(view, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
@@ -145,11 +144,22 @@ public class BedViewActivity extends AppCompatActivity {
                     bookingIntent.putExtra("DEPOSIT", depositAmount.getText().toString());
                     startActivityForResult(bookingIntent, 0);
                 } else if(bookingButton.getText().toString().equals("Update Booking")) {
-                    if(dataModule.updateBooking(bedInfo.bookingId, rentAmount.getText().toString(), depositAmount.getText().toString())) {
-                        //Update any Pending entries, now that the rent is update?
-                    }
-                    BedsListContent.refresh();
-                    finish();
+                    dataModule.updateBooking(bedInfo.bookingId, rentAmount.getText().toString(), depositAmount.getText().toString(),
+                            new NetworkDataModulCallback<DataModel.Booking>() {
+                                @Override
+                                public void onSuccess(DataModel.Booking obj) {
+                                }
+
+                                @Override
+                                public void onFailure() {
+                                }
+
+                                @Override
+                                public void onResult() {
+                                    BedsListContent.refresh();
+                                    finish();
+                                }
+                    });
                 } else {
                     Toast.makeText(BedViewActivity.this, "Closing the Booking", Toast.LENGTH_SHORT).show();
                     final int pendingAmount = dataModule.getPendingAmountForBooking(bedInfo.bookingId);
@@ -202,15 +212,14 @@ public class BedViewActivity extends AppCompatActivity {
         if(requestCode == 1) {
             DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
             closeBooking(bedInfo.bookingId);
-            finish();
         } else if(requestCode == 2 && resultCode == RESULT_OK) {
             modifyButton.setVisibility(View.INVISIBLE);
             ArrayList<String> selectedTenants = (ArrayList<String>) data.getSerializableExtra("SELECTED_TENANT_IDS");
             for (DataModel.Tenant t : dependentsList) {
                 if(!selectedTenants.contains(t.id)) {
-                    dataModule.updateTenant(t.id, "", "", "", "", "", false, "0");
+                    dataModule.updateTenant(t.id, "", "", "", "", "", false, "0", null);
                 } else {
-                    dataModule.updateTenant(t.id, "", "", "", "", "", true, tenant.id);
+                    dataModule.updateTenant(t.id, "", "", "", "", "", true, tenant.id, null);
                 }
             }
         }
@@ -244,10 +253,17 @@ public class BedViewActivity extends AppCompatActivity {
     }
 
     private void closeBooking(String id) {
-        Boolean result = dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString());
-        if (result) {
-            BedsListContent.refresh();
-        }
-        finish();
+        dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), new NetworkDataModulCallback<DataModel.Booking>() {
+            @Override
+            public void onSuccess(DataModel.Booking obj) {
+                BedsListContent.refresh();
+                finish();
+            }
+
+            @Override
+            public void onFailure() {
+                //TODO: What?
+            }
+        });
     }
 }

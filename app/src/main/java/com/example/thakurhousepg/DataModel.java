@@ -48,13 +48,13 @@ public class DataModel {
     //MARK: ---------------------------------- Data Class Definitions ---------------------------------
     public static class Bed {
         @SerializedName("roomNumber")
-        public final String bedNumber;
-        public final String bookingId;
+        public String bedNumber;
+        public String bookingId;
         @SerializedName("defaultRent")
-        public final String rentAmount;
+        public String rentAmount;
         @SerializedName("defaultDeposit")
-        public final String depositAmount;
-        public final Boolean isOccupied;
+        public String depositAmount;
+        public Boolean isOccupied;
 
         public Bed(String bedNumber, String bookingId, String rentAmount, String depositAmount, Boolean isOccupied) {
             this.bedNumber = bedNumber;
@@ -74,14 +74,15 @@ public class DataModel {
         @SerializedName("bookingId")
         public final String id;
         @SerializedName("roomNumber")
-        public final String bedNumber;
-        public final String rentAmount;
-        public final String depositAmount;
-        public final String bookingDate;
-        public final Boolean isWholeRoom;
-        public final String tenantId;
+        public String bedNumber;
+        public String rentAmount;
+        public String depositAmount;
+        public String bookingDate;
+        public Boolean isWholeRoom;
+        public String tenantId;
+        public String closingDate;
 
-        public Booking(String bookingId, String bedNumber, String rentAmount, String depositAmount, String bookingDate, Boolean isWholeRoom, String tenantId) {
+        public Booking(String bookingId, String bedNumber, String rentAmount, String depositAmount, String bookingDate, Boolean isWholeRoom, String tenantId, String closingDate) {
             this.bedNumber = bedNumber;
             this.id = bookingId;
             this.rentAmount = rentAmount;
@@ -89,18 +90,19 @@ public class DataModel {
             this.bookingDate = bookingDate;
             this.isWholeRoom = isWholeRoom;
             this.tenantId = tenantId;
+            this.closingDate = closingDate;
         }
     }
 
     public static class Tenant implements java.io.Serializable {
         @SerializedName("tenantId")
-        public final String id;
-        public final String name;
-        public final String mobile;
-        public final String email;
-        public final String address;
-        public final Boolean isCurrent;
-        public final String parentId;
+        public String id;
+        public String name;
+        public String mobile;
+        public String email;
+        public String address;
+        public Boolean isCurrent;
+        public String parentId;
 
         public Tenant(String id, String name, String mobile, String email, String address, Boolean isCurrent, String parentId) {
             this.id = id;
@@ -145,12 +147,14 @@ public class DataModel {
         public final String tenantId;
         @SerializedName("pendingType")
         public final PendingType type;
+        public int pendingMonth;
 
-        public Pending(int pendingAmt, String bookingId, String tenantId, PendingType type) {
+        public Pending(int pendingAmt, String bookingId, String tenantId, PendingType type, int pendingMonth) {
             this.pendingAmt = pendingAmt;
             this.bookingId = bookingId;
             this.tenantId = tenantId;
             this.type = type;
+            this.pendingMonth = pendingMonth;
         }
     }
 }

@@ -35,7 +35,7 @@ public class BedsListContent {
             }
             if (items.isEmpty()) {
                 Log.i(TAG, "Creating Beds list");
-                ArrayList<DataModel.Bed> beds = restService.getBedsList();
+                ArrayList<DataModel.Bed> beds = restService.getRoomsList();
     
                 for (DataModel.Bed bed : beds) {
                     DataModel.Tenant tenant = null;
