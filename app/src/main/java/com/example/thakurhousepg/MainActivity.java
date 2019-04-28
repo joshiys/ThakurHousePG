@@ -22,10 +22,8 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-
-    DataModule dbHelper;
     SMSManagement smsHandle;
-    Button sendSMS, adminScreen, viewTenant;
+    Button sendSMS;
     Button btn_receipt, btn_occupancy, btn_payment;
     EditText roomNumber;
     Button receivedRentValue, outstandingRentValue, totalExpectedRentValue;
@@ -57,9 +55,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_occupancy = findViewById(R.id.occupancy_button);
         btn_payment = findViewById(R.id.payments_button);
 
-        adminScreen = findViewById(R.id.adminScreen);
-        viewTenant = findViewById(R.id.load_database_button);
-
         roomNumber = findViewById(R.id.roomNumberText);
         sendSMS = findViewById(R.id.sendSMSButton);
 
@@ -72,8 +67,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_receipt.setOnClickListener(this);
         btn_occupancy.setOnClickListener(this);
         btn_payment.setOnClickListener(this);
-        adminScreen.setOnClickListener(this);
-        viewTenant.setOnClickListener(this);
 
         receivedRentValue.setOnClickListener(this);
         outstandingRentValue.setOnClickListener(this);
@@ -81,8 +74,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         roomNumber.setSelection(roomNumber.getText().length());
 
         //sendSMS.setEnabled(false);
-        DataModule.setContext(this);
-        dbHelper = DataModule.getInstance();
 
         SMSManagement.setContext(this);
         smsHandle = SMSManagement.getInstance();
@@ -157,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         SMSManagement smsManagement = SMSManagement.getInstance();
 
                         smsManagement.sendSMS(tenant.mobile,
-                                dbHelper.getSMSMessage(bedInfo.bookingId,
+                                smsManagement.getSMSMessage(bedInfo.bookingId,
                                         tenant,
                                         0,
                                         SMSManagement.SMS_TYPE.DEFAULT)
@@ -209,30 +200,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                paymentIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
 //                paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
 //                startActivity(paymentIntent);
-                break;
-            case R.id.load_database_button:
-                //TODO: Decide if we need this feature
-                Toast.makeText(MainActivity.this, "Loading Database from External Storage", Toast.LENGTH_SHORT).show();
-                try {
-                    dbHelper.loadDatabaseFromExternalStorage();
-                    Toast.makeText(MainActivity.this, "Load Database Complete", Toast.LENGTH_SHORT).show();
-                    onResume();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(MainActivity.this, "Load Database Failed: "+ e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-                break;
-
-            case R.id.adminScreen:
-
-                try {
-                    dbHelper.copyDatabaseToExternalStorage();
-                    Toast.makeText(MainActivity.this, "Database Backup Complete.", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(MainActivity.this, "Database Backup Failed: "+ e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-
                 break;
         }
     }

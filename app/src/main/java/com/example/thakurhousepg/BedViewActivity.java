@@ -106,12 +106,12 @@ public class BedViewActivity extends AppCompatActivity {
 
                         SMSManagement smsManagement = SMSManagement.getInstance();
 
-                        /*smsManagement.sendSMS(tenant.mobile,
-                                dataModule.getSMSMessage(bedInfo.bookingId,
+                        smsManagement.sendSMS(tenant.mobile,
+                                smsManagement.getSMSMessage(bedInfo.bookingId,
                                         tenant,
                                         0,
                                         SMSManagement.SMS_TYPE.BOOKING)
-                        );*/
+                        );
                     } else {
                         Snackbar.make(view, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
@@ -218,9 +218,11 @@ public class BedViewActivity extends AppCompatActivity {
             for (DataModel.Tenant t : dependentsList) {
                 if(!selectedTenants.contains(t.id)) {
                     dataModule.updateTenant(t.id, "", "", "", "", "", false, "0", null);
-                } else {
-                    dataModule.updateTenant(t.id, "", "", "", "", "", true, tenant.id, null);
+                    selectedTenants.remove(t.id);
                 }
+            }
+            for (String tid : selectedTenants) {
+                dataModule.updateTenant(tid, "", "", "", "", "", true, tenant.id, null);
             }
         }
         depositAmount.removeTextChangedListener(amountWatcher);

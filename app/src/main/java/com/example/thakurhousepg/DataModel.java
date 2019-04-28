@@ -119,8 +119,11 @@ public class DataModel {
         public final String id;
         public final String onlineAmount;
         public final String cashAmount;
+        @SerializedName("receiptDate")
         public final String date;
+        @SerializedName("penaltyWaiveOff")
         public final boolean ispPenaltyWaiveOff;
+        @SerializedName("receiptType")
         public final ReceiptType type;
         public final String bookingId;
 
@@ -141,15 +144,17 @@ public class DataModel {
     }
 
     public static class Pending {
+        public String id;
         @SerializedName("pendingAmount")
-        public final int pendingAmt;
-        public final String bookingId;
-        public final String tenantId;
+        public int pendingAmt;
+        public String bookingId;
+        public String tenantId;
         @SerializedName("pendingType")
-        public final PendingType type;
+        public PendingType type;
         public int pendingMonth;
 
-        public Pending(int pendingAmt, String bookingId, String tenantId, PendingType type, int pendingMonth) {
+        public Pending(String id, int pendingAmt, String bookingId, String tenantId, PendingType type, int pendingMonth) {
+            this.id = id;
             this.pendingAmt = pendingAmt;
             this.bookingId = bookingId;
             this.tenantId = tenantId;

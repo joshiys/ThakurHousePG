@@ -51,7 +51,7 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             holder.receiptType.setText(holder.mItem.type.toString());
 
             //TODO: Modify the mItem to point to a local struct that will contain, bed+receipt info
-            holder.roomNumber.setText(DataModule.getInstance().getBookingInfo(holder.mItem.bookingId).bedNumber);
+            holder.roomNumber.setText(NetworkDataModule.getInstance().getBookingInfo(holder.mItem.bookingId).bedNumber);
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override

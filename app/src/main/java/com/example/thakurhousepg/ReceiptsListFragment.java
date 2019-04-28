@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class ReceiptsListFragment extends Fragment {
 
     private OnListFragmentInteractionListener mListener;
-    private DataModule dataModule = DataModule.getInstance();
+    private NetworkDataModule dataModule = NetworkDataModule.getInstance();
     private ReceiptsListViewAdapter adapter = null;
     private static final String TAG = "ReceiptListFragment";
 

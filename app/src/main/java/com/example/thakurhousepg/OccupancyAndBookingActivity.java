@@ -145,6 +145,8 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
                 break;
             case R.id.menu_actionShowReceipts:
                 Intent receivedIntent = new Intent(OccupancyAndBookingActivity.this, ViewReceiptsActivity.class);
+                receivedIntent.putExtra("MODE", 0);//All
+                receivedIntent.putExtra("TYPE", 0);//All
                 startActivity(receivedIntent);
                 break;
         }

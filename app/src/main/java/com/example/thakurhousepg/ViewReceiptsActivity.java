@@ -15,7 +15,7 @@ import java.util.Calendar;
 
 public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsListFragment.OnListFragmentInteractionListener {
 
-    DataModule datamodule;
+    NetworkDataModule datamodule;
     TableLayout tableLayout;
 
     TextView roomNoTextView, rIdTextView, onlineAmountTextView, cashAmountTextView, typeForTextView;
@@ -36,7 +36,7 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("View Receipts");
 
-        datamodule = DataModule.getInstance();
+        datamodule = NetworkDataModule.getInstance();
 
         monthSpiner = findViewById(R.id.spinner);
         modeSpiner = findViewById(R.id.spinnerMode);

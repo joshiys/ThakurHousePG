@@ -138,10 +138,23 @@ public class BookingScreenActivity extends AppCompatActivity {
                             dataModule.createPendingEntryForBooking(newBookingId, DataModel.PendingType.DEPOSIT, depositAmount.getText().toString(), Calendar.getInstance().get(Calendar.MONTH) + 1, null);
 
                             for(String id: dependentsIdList) {
-                                dataModule.updateTenant(id, "", "", "", "", "", true, tenantId, null);
+                                dataModule.updateTenant(id, "", "", "", "", "", true, tenantId, new NetworkDataModulCallback<DataModel.Tenant>() {
+                                    @Override
+                                    public void onSuccess(DataModel.Tenant obj) {
+
+                                    }
+
+                                    @Override
+                                    public void onFailure() {
+
+                                    }
+                                    @Override
+                                    public void onResult() {
+                                        BedsListContent.refresh();
+                                    }
+                                });
                             }
 
-                            BedsListContent.refresh();
                             new AlertDialog.Builder(BookingScreenActivity.this)
                                     .setTitle("Created new Booking successfully")
                                     .setMessage("Do you want to pay the deposit for this booking?")
@@ -218,7 +231,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent selectTenantIntent = new Intent(BookingScreenActivity.this, SelectTenantActivity.class);
-                                if (!dependentsIdList.isEmpty()) {
+                                if (tenantId != null) {
                                     selectTenantIntent.putExtra("LIST_MODE", "MODIFY_PARTIALLY_SELECTED_LIST");
                                     // When the Mode is "MODIFY_PARTIALLY_SELECTED_LIST" we send only the Id's.
                                     // But Main tenant Id is not in the dependentsIdList. So we add it first.

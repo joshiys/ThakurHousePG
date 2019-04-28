@@ -12,7 +12,7 @@ import java.util.Locale;
 
 public class MonthlyDataActivity extends AppCompatActivity {
 
-    private DataModule dataModule;
+    private NetworkDataModule dataModule;
     TextView expectedRent, rentCash, depositCash, rentReceipts, totalOutstanding, depositReceipts, totalDepositOutstanding;
     Button showMonth;
     @Override
@@ -74,7 +74,7 @@ public class MonthlyDataActivity extends AppCompatActivity {
         });
 
         showMonth.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()));
-        dataModule = DataModule.getInstance();
+        dataModule = NetworkDataModule.getInstance();
 
 
 

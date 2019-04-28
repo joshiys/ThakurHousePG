@@ -124,33 +124,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/holo_blue_light">
-
-            <Button
-                android:id="@+id/load_database_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="1"
-                android:text="Load Database"
-                android:textStyle="bold"
-                android:tooltipText="Access Admin screen" />
-
-            <Button
-                android:id="@+id/adminScreen"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
-                android:text="Backup Database"
-                android:textStyle="bold"
-                android:tooltipText="Access Admin screen" />
-
-        </LinearLayout>
-
     </LinearLayout>
 
 

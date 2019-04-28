@@ -13,7 +13,7 @@ public class ViewOutstandingActivity extends AppCompatActivity {
     ArrayList<TableViewColumns> outstandingTableList;
     TableViewColumns outstandingTable;
     ListView listView;
-    DataModule dataModule;
+    NetworkDataModule dataModule;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +23,7 @@ public class ViewOutstandingActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Outstanding List");
 
-        dataModule = DataModule.getInstance();
+        dataModule = NetworkDataModule.getInstance();
 
         showOutstandingIncoming();
     }
