@@ -49,7 +49,7 @@ public class BookingScreenActivity extends AppCompatActivity {
     private ArrayAdapter tenantListAdapter = null;
     private ListView tenantsListView;
 
-    private static final String TAG = "BookingScreenActivity";
+    private static final String TAG = BookingScreenActivity.class.getName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,8 +74,9 @@ public class BookingScreenActivity extends AppCompatActivity {
         addTenantButton = findViewById(R.id.booking_add_tenant);
 
         tenantsListView = findViewById(R.id.booking_tenant_list);
-        tenantListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, tenantNamesList);
+        tenantListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, tenantNamesList);
         tenantsListView.setAdapter(tenantListAdapter);
+        tenantsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         rentAmount.setText(bundle.getString("RENT"));
         depositAmount.setText(bundle.getString("DEPOSIT"));
@@ -111,6 +112,12 @@ public class BookingScreenActivity extends AppCompatActivity {
                     // Also check the room number for CreateNewBooking is correct after the split
                     if(numRooms > 1) {
                         dataModule.splitRoom(bedNumber.getText().toString(), numRooms, rentAmount.getText().toString(), depositAmount.getText().toString());
+                    }
+                    int mainTenant = tenantsListView.getCheckedItemPosition();
+                    if (mainTenant > 0) {
+                        String tempId = tenantId;
+                        tenantId = dependentsIdList.get(mainTenant - 1);
+                        dependentsIdList.set(mainTenant - 1, tempId);
                     }
 
                     dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), bookingDate.getText().toString(),
@@ -300,8 +307,8 @@ public class BookingScreenActivity extends AppCompatActivity {
                             dependentsIdList.add(id);
                         }
                         tenantNamesList.add(newTenant.name);
-                        tenantListAdapter.notifyDataSetChanged();
                     }
+                    tenantListAdapter.notifyDataSetChanged();
                 }
             }
         }

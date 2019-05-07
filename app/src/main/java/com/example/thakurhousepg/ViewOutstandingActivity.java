@@ -1,5 +1,6 @@
 package com.example.thakurhousepg;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -36,23 +37,13 @@ public class ViewOutstandingActivity extends AppCompatActivity {
         outstandingTableList.add(i, outstandingTable);
         i++;
 
-        ArrayList<DataModel.Booking> bookingEntries = dataModule.getAllBookingInfo();
+        ArrayList<DataModel.Pending> pendingList = dataModule.getAllPendingEntries();
 
-        for(DataModel.Booking entry : bookingEntries){
-            ArrayList<DataModel.Pending> pendingList = dataModule.getPendingEntriesForBooking(entry.id);
-            for(DataModel.Pending pendingentry : pendingList) {
-                String rent = "0", deposit = "0", penalty = "0";
-                if (pendingentry.type == DataModel.PendingType.RENT) {
-                    rent = String.valueOf(pendingentry.pendingAmt);
-                } else if (pendingentry.type == DataModel.PendingType.DEPOSIT) {
-                    deposit = String.valueOf(pendingentry.pendingAmt);
-                } else {
-                    penalty = String.valueOf(pendingentry.pendingAmt);
-                }
-                outstandingTable = new TableViewColumns(entry.bedNumber, rent, deposit, penalty);
-                outstandingTableList.add(i++, outstandingTable);
-            }
+        for(DataModel.Pending pendingentry : pendingList) {
+            outstandingTable = TableViewColumns.fromPendingEntry(pendingentry);
+            outstandingTableList.add(i++, outstandingTable);
         }
+
         final MultiColumn_ListAdapter adapter = new MultiColumn_ListAdapter(this, 4,
                 R.layout.list_adapter_view, outstandingTableList);
         listView = (ListView) findViewById(R.id.listView);
@@ -61,7 +52,28 @@ public class ViewOutstandingActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent receiptIntent = new Intent(ViewOutstandingActivity.this, ReceiptActivity.class);
+                DataModel.Pending pendingEntry = outstandingTableList.get((int)l).getPendingEntry();
 
+                receiptIntent.putExtra("ROOM_NUMBER", outstandingTableList.get((int)l).getRoomNumber());
+                receiptIntent.putExtra("PENDING_ID", outstandingTableList.get((int)l).getPendingEntry().id);
+
+                switch (pendingEntry.type) {
+                    case DEPOSIT:
+                        receiptIntent.putExtra("DEPOSIT_AMOUNT", String.valueOf(pendingEntry.pendingAmt));
+                        receiptIntent.putExtra("SECTION", "Deposit");
+                        break;
+                    case RENT:
+                        receiptIntent.putExtra("RENT_AMOUNT", String.valueOf(pendingEntry.pendingAmt));
+                        receiptIntent.putExtra("SECTION", "Rent");
+                        break;
+                    case PENALTY:
+                        receiptIntent.putExtra("PENALTY_AMOUNT", String.valueOf(pendingEntry.pendingAmt));
+                        receiptIntent.putExtra("SECTION", "Penalty");
+                        break;
+                }
+
+                startActivity(receiptIntent);
             }
         });
     }

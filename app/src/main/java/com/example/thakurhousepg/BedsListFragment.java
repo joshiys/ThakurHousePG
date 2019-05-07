@@ -22,14 +22,13 @@ import com.example.thakurhousepg.BedsListContent.BedsListItem;
 public class BedsListFragment extends Fragment {
 
     // TODO: Customize parameter argument names
-    private static final String ARG_COLUMN_COUNT = "column-count";
+    private static final String ARG_SECTION_NUMBER = "section_number";
     // TODO: Customize parameters
-    private int mColumnCount = 3;
     private OnBedsListInteractionListener mListener;
     private RecyclerView recyclerView;
-    private static BedsListRecyclerViewAdapter mAdapter;
+    private BedsListRecyclerViewAdapter mAdapter;
 
-    private static final String TAG = "BedsListFragment";
+    private static final String TAG = BedsListFragment.class.getName();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -40,10 +39,10 @@ public class BedsListFragment extends Fragment {
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static BedsListFragment newInstance(int columnCount) {
+    public static BedsListFragment newInstance(int sectionNumber) {
         BedsListFragment fragment = new BedsListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
+        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,13 +50,7 @@ public class BedsListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
-//        datamodule = DataModule.getInstance();
-
-        BedsListContent.create();
+//        BedsListContent.create();
     }
 
     @Override
@@ -70,13 +63,13 @@ public class BedsListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_beds_list, container, true);
+        View view = inflater.inflate(R.layout.fragment_beds_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             recyclerView = (RecyclerView) view;
-            mAdapter = new BedsListRecyclerViewAdapter(BedsListContent.itemMap.get(OccupancyAndBookingActivity.getSelectedTab()),
+            mAdapter = new BedsListRecyclerViewAdapter(BedsListContent.itemMap.get(getArguments().getInt(ARG_SECTION_NUMBER)),
                     mListener);
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(mAdapter);
@@ -113,7 +106,7 @@ public class BedsListFragment extends Fragment {
 
     public void reloadData(){
         if(mAdapter != null) {
-            mAdapter.setmValues(BedsListContent.itemMap.get(OccupancyAndBookingActivity.getSelectedTab()));
+            mAdapter.setmValues(BedsListContent.itemMap.get(getArguments().getInt(ARG_SECTION_NUMBER)));
             mAdapter.notifyDataSetChanged();
         }
     }

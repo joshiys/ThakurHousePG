@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,65 +51,65 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        restService = NetworkDataModule.getInstance();
+        if(isNetworkAvailable()) {
+            restService = NetworkDataModule.getInstance();
 
+            btn_receipt = findViewById(R.id.receipt_button);
+            btn_occupancy = findViewById(R.id.occupancy_button);
+            btn_payment = findViewById(R.id.payments_button);
 
-        btn_receipt = findViewById(R.id.receipt_button);
-        btn_occupancy = findViewById(R.id.occupancy_button);
-        btn_payment = findViewById(R.id.payments_button);
+            roomNumber = findViewById(R.id.roomNumberText);
+            sendSMS = findViewById(R.id.sendSMSButton);
 
-        roomNumber = findViewById(R.id.roomNumberText);
-        sendSMS = findViewById(R.id.sendSMSButton);
+            receivedRentValue = findViewById(R.id.receivedRent);
+            outstandingRentValue = findViewById(R.id.outstandingRent);
 
-        receivedRentValue = findViewById(R.id.receivedRent);
-        outstandingRentValue = findViewById(R.id.outstandingRent);
-//        totalExpectedRentValue = (Button) findViewById(R.id.totalRent);
+            headerView = findViewById(R.id.main_monthButton);
 
-        headerView = findViewById(R.id.main_monthButton);
+            btn_receipt.setOnClickListener(this);
+            btn_occupancy.setOnClickListener(this);
+            btn_payment.setOnClickListener(this);
 
-        btn_receipt.setOnClickListener(this);
-        btn_occupancy.setOnClickListener(this);
-        btn_payment.setOnClickListener(this);
+            receivedRentValue.setOnClickListener(this);
+            outstandingRentValue.setOnClickListener(this);
 
-        receivedRentValue.setOnClickListener(this);
-        outstandingRentValue.setOnClickListener(this);
+            roomNumber.setSelection(roomNumber.getText().length());
 
-        roomNumber.setSelection(roomNumber.getText().length());
+            SMSManagement.setContext(this);
+            smsHandle = SMSManagement.getInstance();
 
-        //sendSMS.setEnabled(false);
+            headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
+            headerView.setOnClickListener(this);
 
-        SMSManagement.setContext(this);
-        smsHandle = SMSManagement.getInstance();
+            sendSMS.setOnClickListener(this);
 
-        headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
-        headerView.setOnClickListener(this);
+            ProgressDialog progress = new ProgressDialog(this);
+            progress.setTitle("Loading");
+            progress.setMessage("Wait while loading...");
+            progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+            progress.show();
+            if (!restService.isInitialDataFetchComplete()) {
+                restService.initialDataFetchCompletionCallBack = new NetworkDataModulCallback() {
+                    @Override
+                    public void onSuccess(Object obj) {
+                        progress.dismiss();
+                        setPendingAmountEntries();
+                        setTotalOutstandingRent();
+                    }
 
-        sendSMS.setOnClickListener(this);
+                    @Override
+                    public void onFailure() {
+                        progress.dismiss();
+                        Toast toast = Toast.makeText(MainActivity.this, "Call To Network Service Failed", Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
+                    }
 
-        ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Loading");
-        progress.setMessage("Wait while loading...");
-        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
-        progress.show();
-        if (!restService.isInitialDataFetchComplete()) {
-            restService.initialDataFetchCompletionCallBack = new NetworkDataModulCallback() {
-                @Override
-                public void onSuccess(Object obj) {
-
-                }
-
-                @Override
-                public void onFailure() {
-
-                }
-
-                @Override
-                public void onResult() {
-                    progress.dismiss();
-                    setPendingAmountEntries();
-                    setTotalOutstandingRent();
-                }
-            };
+                    @Override
+                    public void onResult() {
+                        progress.dismiss();
+                    }
+                };
+            }
         }
     }
 
@@ -204,13 +207,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    void setTotalOutstandingRent(){
+    void setTotalOutstandingRent() {
         receivedRentValue.setText(restService.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.RENT));
-//        outstandingRentValue.setText(dbHelper.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
-//                DataModule.ReceiptType.DEPOSIT));
         outstandingRentValue.setText(String.valueOf(restService.getTotalPendingAmount(DataModel.PendingType.RENT)));
-//        totalExpectedRentValue.setText(dbHelper.getTotalExpectedRent());
     }
 
     private void setPendingAmountEntries() {
@@ -239,5 +239,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             });
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

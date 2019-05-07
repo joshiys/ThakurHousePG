@@ -7,12 +7,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -106,7 +108,7 @@ public class NetworkDataModule {
     private static NetworkDataModule _instance = null;
 
     private HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-    private OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+    private OkHttpClient.Builder httpClient = new OkHttpClient.Builder().readTimeout(60, TimeUnit.SECONDS).connectTimeout(60, TimeUnit.SECONDS);
     private Retrofit retrofit = null;
 
     private ArrayList<DataModel.Bed> roomsList = new ArrayList<DataModel.Bed>();
@@ -176,16 +178,13 @@ public class NetworkDataModule {
                     }
                 });
 
-                for (DataModel.Bed bed : roomsList) {
-                    Log.d(TAG, bed.toString());
-                }
-
-                invokeInitialDataFetchComplettionCallback();
+                invokeInitialDataFetchComplettionCallback(true);
             }
 
             @Override
             public void onFailure(Call<List<DataModel.Bed>> call, Throwable t) {
-                Log.i(TAG, "Call to Rest Service failed");
+                Log.i(TAG, "Call to Room Service failed");
+                invokeInitialDataFetchComplettionCallback(false);
             }
         });
     }
@@ -204,16 +203,14 @@ public class NetworkDataModule {
                         return o2.id.compareTo(o1.id);
                     }
                 });
-                for (DataModel.Booking booking : bookingsList) {
-                    Log.d(TAG, booking.toString());
-                }
 
-                invokeInitialDataFetchComplettionCallback();
+                invokeInitialDataFetchComplettionCallback(true);
             }
 
             @Override
             public void onFailure(Call<List<DataModel.Booking>> call, Throwable t) {
-                Log.i(TAG, "Call to Rest Service failed");
+                Log.i(TAG, "Call to Bookings Service failed");
+                invokeInitialDataFetchComplettionCallback(false);
             }
         });
     }
@@ -232,16 +229,14 @@ public class NetworkDataModule {
                         return o2.id.compareTo(o1.id);
                     }
                 });
-                for (DataModel.Tenant tenant : tenantsList) {
-                    Log.d(TAG, tenant.toString());
-                }
 
-                invokeInitialDataFetchComplettionCallback();
+                invokeInitialDataFetchComplettionCallback(true);
             }
 
             @Override
             public void onFailure(Call<List<DataModel.Tenant>> call, Throwable t) {
                 Log.i(TAG, "Call to Tenant Service failed");
+                invokeInitialDataFetchComplettionCallback(false);
             }
         });
     }
@@ -254,16 +249,14 @@ public class NetworkDataModule {
             public void onResponse(Call<List<DataModel.Pending>> call, Response<List<DataModel.Pending>> response) {
                 pendingList.clear();
                 pendingList.addAll(response.body());
-                for (DataModel.Pending pending : pendingList) {
-                    Log.d(TAG, pending.toString());
-                }
 
-                invokeInitialDataFetchComplettionCallback();
+                invokeInitialDataFetchComplettionCallback(true);
             }
 
             @Override
             public void onFailure(Call<List<DataModel.Pending>> call, Throwable t) {
-                Log.i(TAG, "Call to Tenant Service failed");
+                Log.i(TAG, "Call to Pending Service failed");
+                invokeInitialDataFetchComplettionCallback(false);
             }
         });
     }
@@ -282,16 +275,14 @@ public class NetworkDataModule {
                         return o2.id.compareTo(o1.id);
                     }
                 });
-                for (DataModel.Receipt receipt : receiptsList) {
-                    Log.d(TAG, receipt.toString());
-                }
 
-                invokeInitialDataFetchComplettionCallback();
+                invokeInitialDataFetchComplettionCallback(true);
             }
 
             @Override
             public void onFailure(Call<List<DataModel.Receipt>> call, Throwable t) {
                 Log.i(TAG, "Call to Receipt Service failed" );
+                invokeInitialDataFetchComplettionCallback(false);
             }
         });
     }
@@ -301,10 +292,16 @@ public class NetworkDataModule {
         return initialDataFetchCompletionCount == 5;
     }
 
-    public void invokeInitialDataFetchComplettionCallback() {
+    public void invokeInitialDataFetchComplettionCallback(boolean success) {
         initialDataFetchCompletionCount ++;
 
         if (isInitialDataFetchComplete() && initialDataFetchCompletionCallBack != null) {
+            if(success) {
+                initialDataFetchCompletionCallBack.onSuccess(null);
+            } else {
+                initialDataFetchCompletionCallBack.onFailure();
+            }
+
             initialDataFetchCompletionCallBack.onResult();
         }
     }
@@ -372,6 +369,13 @@ public class NetworkDataModule {
         return tenant;
     }
 
+    public ArrayList<DataModel.Pending> getAllPendingEntries() {
+        ArrayList<DataModel.Pending> pendingArrayList = new ArrayList<>();
+        pendingArrayList.addAll(pendingList);
+
+        return pendingArrayList;
+    }
+
     public int getPendingAmountForBooking(String id) {
         int totalPendingAmount = 0;
         ArrayList<DataModel.Pending> pendings = getPendingEntriesForBooking(id);
@@ -390,6 +394,16 @@ public class NetworkDataModule {
         }
 
         return pendingEntries;
+    }
+
+    public DataModel.Pending getPendingEntryByID(String id) {
+        DataModel.Pending pending = null;
+        for (DataModel.Pending pendingEntry : pendingList) {
+            if (pendingEntry.id.equals(id))
+                pending = pendingEntry;
+        }
+
+        return pending;
     }
 
     public ArrayList<DataModel.Tenant> getDependents(String id) {
@@ -574,7 +588,7 @@ public class NetworkDataModule {
                     rentAmount -= Integer.parseInt(r.cashAmount) + Integer.parseInt(r.onlineAmount);
                 }
             }
-            createPendingEntryForBooking(booking.id, DataModel.PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1, null);
+            createPendingEntryForBooking(booking.id, DataModel.PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1, callback);
 
             if(smsPermission) {
                 DataModel.Tenant tenant = getTenantInfoForBooking(booking.id);
@@ -592,56 +606,62 @@ public class NetworkDataModule {
         }
     }
 
-    public void updatePendingEntryForBooking(String id, DataModel.ReceiptType type, String amount, NetworkDataModulCallback<DataModel.Pending> callback) {
+    public void updatePendingEntry(String id, String amount, NetworkDataModulCallback<DataModel.Pending> callback) {
+        DataModel.Pending pending = getPendingEntryByID(id);
+        int totalPendingAmount = pending.pendingAmt;
 
-        for (DataModel.Pending p: pendingList) {
-            if(p.bookingId.equals(id) && p.type.getIntValue() == type.getIntValue()) {
-                int totalPendingAmount = p.pendingAmt;
-                totalPendingAmount -= Integer.parseInt(amount);
-                if (totalPendingAmount <= 0) {
-                    Call <ResponseBody> pendingCall = pendingService.deletePendingEntry(Integer.parseInt(p.id));
-                    pendingCall.enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if (callback != null) {
-                                pendingList.remove(p);
-                                callback.onSuccess(null);
-                                callback.onResult();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            if (callback != null) {
-                                callback.onFailure();
-                                callback.onResult();
-                            }
-                        }
-                    });
-                } else {
-                    Call <DataModel.Pending> pendingCall;
-                    p.pendingAmt = totalPendingAmount;
-                    pendingCall = pendingService.updatePendingEntry(p.bookingId, p);
-                    pendingCall.enqueue(new Callback<DataModel.Pending>() {
-                        @Override
-                        public void onResponse(Call<DataModel.Pending> call, Response<DataModel.Pending> response) {
-                            if (callback != null) {
-                                pendingList.set(pendingList.indexOf(p),response.body());
-                                callback.onSuccess(response.body());
-                                callback.onResult();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<DataModel.Pending> call, Throwable t) {
-                            if (callback != null) {
-                                callback.onFailure();
-                                callback.onResult();
-                            }
-                        }
-                    });
+        totalPendingAmount -= Integer.parseInt(amount);
+        if (totalPendingAmount <= 0) {
+            Call <ResponseBody> pendingCall = pendingService.deletePendingEntry(Integer.parseInt(pending.id));
+            pendingCall.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (callback != null) {
+                        pendingList.remove(pending);
+                        callback.onSuccess(null);
+                        callback.onResult();
+                    }
                 }
 
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    if (callback != null) {
+                        callback.onFailure();
+                        callback.onResult();
+                    }
+                }
+            });
+        } else {
+            Call <DataModel.Pending> pendingCall;
+            pending.pendingAmt = totalPendingAmount;
+            pendingCall = pendingService.updatePendingEntry(pending.bookingId, pending);
+            pendingCall.enqueue(new Callback<DataModel.Pending>() {
+                @Override
+                public void onResponse(Call<DataModel.Pending> call, Response<DataModel.Pending> response) {
+                    if (callback != null) {
+                        pendingList.set(pendingList.indexOf(pending),response.body());
+                        callback.onSuccess(response.body());
+                        callback.onResult();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<DataModel.Pending> call, Throwable t) {
+                    if (callback != null) {
+                        callback.onFailure();
+                        callback.onResult();
+                    }
+                }
+            });
+        }
+
+    }
+
+    public void updatePendingEntryForBooking(String id, DataModel.PendingType type, String amount, NetworkDataModulCallback<DataModel.Pending> callback) {
+
+        for (DataModel.Pending p: pendingList) {
+            if(p.bookingId.equals(id) && p.type == type) {
+                updatePendingEntry(p.id, amount, callback);
                 break;
             }
         }
@@ -658,6 +678,7 @@ public class NetworkDataModule {
                 roomsList.add(response.body());
                 if(callback != null) {
                     callback.onSuccess(response.body());
+                    callback.onResult();
                 }
             }
 
@@ -666,6 +687,7 @@ public class NetworkDataModule {
                 Log.i(TAG, "Call to Add Room Service failed: " + call.request());
                 if(callback != null) {
                     callback.onFailure();
+                    callback.onResult();
                 }
             }
         });
@@ -717,6 +739,7 @@ public class NetworkDataModule {
                 tenantsList.add(0, newTenant);
                 if(callback != null) {
                     callback.onSuccess(newTenant);
+                    callback.onResult();
                 }
             }
 
@@ -725,6 +748,7 @@ public class NetworkDataModule {
                 Log.i(TAG, "Add new tenant failed");
                 if(callback != null) {
                     callback.onFailure();
+                    callback.onResult();
                 }
             }
         });
@@ -796,6 +820,7 @@ public class NetworkDataModule {
 
                 if(callback != null) {
                     callback.onSuccess(response.body());
+                    callback.onResult();
                 }
             }
 
@@ -804,6 +829,7 @@ public class NetworkDataModule {
                 Log.i(TAG, "Call to Create Booking Service failed: " + call.request());
                 if(callback != null) {
                     callback.onFailure();
+                    callback.onResult();
                 }
             }
         });
@@ -827,9 +853,22 @@ public class NetworkDataModule {
                         bookingsList.set(bookingsList.indexOf(b), booking);
                         if (callback != null) {
                             callback.onSuccess(response.body());
+                            callback.onResult();
                         }
                         break;
                     }
+                }
+                for(DataModel.Pending p: getPendingEntriesForBooking (booking.id)) {
+                    String amt = "";
+                    if (Integer.parseInt(booking.rentAmount) != p.pendingAmt && p.type == DataModel.PendingType.RENT) {
+                        amt = booking.rentAmount;
+                    }
+                    if (Integer.parseInt(booking.depositAmount) != p.pendingAmt && p.type == DataModel.PendingType.DEPOSIT) {
+                        amt = booking.depositAmount;
+                    }
+
+                    if (!amt.isEmpty())
+                        updatePendingEntryForBooking(booking.id, p.type, amt, null);
                 }
             }
 
@@ -838,6 +877,7 @@ public class NetworkDataModule {
                 Log.i(TAG, "Call to UpdateBooking Service failed: " + call.request());
                 if(callback != null) {
                     callback.onFailure();
+                    callback.onResult();
                 }
             }
         });
@@ -862,7 +902,13 @@ public class NetworkDataModule {
 
                 DataModel.Tenant tenant = getTenantInfoForBooking(booking.id);
                 tenant.isCurrent = false;
+                tenant.parentId = "0";
                 updateTenant(tenant, null);
+                for (DataModel.Tenant t: getDependents(tenant.id)){
+                    tenant.isCurrent = false;
+                    tenant.parentId = "0";
+                    updateTenant(tenant, null);
+                }
 
                 int index = -1;
                 for (DataModel.Booking b : bookingsList) {
@@ -877,6 +923,7 @@ public class NetworkDataModule {
 
                 if (callback != null) {
                     callback.onSuccess(response.body());
+                    callback.onResult();
                 }
             }
 
@@ -885,8 +932,46 @@ public class NetworkDataModule {
                 Log.i(TAG, "Call to UpdateBooking Service for Close failed: " + call.request());
                 if(callback != null) {
                     callback.onFailure();
+                    callback.onResult();
                 }
             }
+        });
+    }
+
+    public void createReceiptForPendingEntry(String id, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModulCallback<DataModel.Receipt> callback) {
+        DataModel.Pending pendingEntry = getPendingEntryByID(id);
+
+        createReceipt(DataModel.ReceiptType.values()[pendingEntry.type.getIntValue()], pendingEntry.bookingId, onlineAmount, cashAmount, penaltyWaiveOff,
+                new NetworkDataModulCallback<DataModel.Receipt>() {
+                    @Override
+                    public void onSuccess(DataModel.Receipt newReceipt) {
+                        updatePendingEntry(pendingEntry.id, String.valueOf(pendingEntry.pendingAmt),
+                                new NetworkDataModulCallback<DataModel.Pending>() {
+                                    @Override
+                                    public void onSuccess(DataModel.Pending obj) {
+                                        if(callback != null) {
+                                            callback.onSuccess(newReceipt);
+                                            callback.onResult();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure() {
+                                        if(callback != null) {
+                                            callback.onFailure();
+                                            callback.onResult();
+                                        }
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        if(callback != null) {
+                            callback.onFailure();
+                            callback.onResult();
+                        }
+                    }
         });
     }
 

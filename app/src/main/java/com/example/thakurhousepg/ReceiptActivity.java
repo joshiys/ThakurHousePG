@@ -70,26 +70,28 @@ public class ReceiptActivity extends AppCompatActivity {
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(3);
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        TabLayout tabLayout = findViewById(R.id.tabs);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
         tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
         String selectedSection = bundle.getString("SECTION");
 
-        String bundleArgument_Rent = bundle.getString("RENT_AMOUNT");
-        String bundleArgument_Deposit = bundle.getString("DEPOSIT_AMOUNT");
-
         if("Rent".equals(selectedSection)) {
+            mViewPager.setCurrentItem(0);
+/*
+                YSJ - I JUST DONT UNDERSTAND WHAT IS THIS FOR, COMMENTING IT FOR NOW
+
                 if ((bundleArgument_Rent != null && bundleArgument_Rent.isEmpty()) && (bundleArgument_Deposit != null && !bundleArgument_Deposit.isEmpty())) {
                     mViewPager.setCurrentItem(1);
                 } else {
                     mViewPager.setCurrentItem(0);
                 }
-        } else if(bundleArgument_Deposit != null && !bundleArgument_Deposit.isEmpty()) {
+*/
+        } else if("Deposit".equals(selectedSection)) {
             mViewPager.setCurrentItem(1);
         } else {
             mViewPager.setCurrentItem(2);
@@ -119,7 +121,8 @@ public class ReceiptActivity extends AppCompatActivity {
         private CheckBox onlineCheckBox, cashCheckBox, advanceCheckBox, waiveOffCheckBox;
         private FloatingActionButton fab;
 
-        String dueAmount = "0";
+        private String dueAmount = "0";
+        private DataModel.Pending pendingEntry = null;
 
         public ReceiptFragment() {
         }
@@ -180,6 +183,10 @@ public class ReceiptActivity extends AppCompatActivity {
             if(bundle.getString("ROOM_NUMBER") != null) {
                 roomNumber.setText(bundle.getString("ROOM_NUMBER"));
             }
+            if(bundle.getString("PENDING_ID") != null) {
+                pendingEntry = dbHelper.getPendingEntryByID(bundle.getString("PENDING_ID"));
+                advanceCheckBox.setVisibility(View.INVISIBLE);
+            }
 
             reloadDueAmount();
 
@@ -201,7 +208,7 @@ public class ReceiptActivity extends AppCompatActivity {
                     Log.v(TAG, "Section Number: " + getArguments().getInt(ARG_SECTION_NUMBER) + " and room number: " + roomNumber.getText().toString());
 
                     /* SAHIRE Fetch Rent for room number from Booking Table */
-                    if(roomNumber.getText().toString().isEmpty() == false){
+                    if(!roomNumber.getText().toString().isEmpty()){
                         Log.v(TAG, "Focus Changed: " + roomNumber.getText().toString());
                         DataModel.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
                         if(bed != null && bed.bookingId != null) {
@@ -229,15 +236,13 @@ public class ReceiptActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-//                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                            .setAction("Action", null).show();
                     DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
                     if (bedInfo.bookingId == null) {
                         Snackbar.make(view, "Room has not been Booked yet.", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     } else {
                         DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
-                        if (tenant.mobile.isEmpty() == false) {
+                        if (!tenant.mobile.isEmpty()) {
                             Snackbar.make(view, "Sending REMINDER SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                             SMSManagement smsManagement = SMSManagement.getInstance();
@@ -266,6 +271,7 @@ public class ReceiptActivity extends AppCompatActivity {
                     }
                 }
             });
+
             saveButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -298,70 +304,48 @@ public class ReceiptActivity extends AppCompatActivity {
                             public void onSuccess(DataModel.Pending obj) {
                                 Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
                                 BedsListContent.refresh();
-                                new AlertDialog.Builder(getActivity())
-                                        .setTitle("SMS")
-                                        .setMessage("Do you want to send SMS?")
-
-                                        // Specifying a listener allows you to take an action before dismissing the dialog.
-                                        // The dialog is automatically dismissed when a dialog button is clicked.
-                                        .setPositiveButton("SMS", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                SMSManagement smsManagement = SMSManagement.getInstance();
-                                                DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
-                                                /* mobile Number should be mandatory */
-                                                if(tenant.mobile.isEmpty() == false) {
-                                                    //SAHIRE : Handle waive-off payments.
-                                                    smsManagement.sendSMS(tenant.mobile,
-                                                            smsManagement.getSMSMessage(bedInfo.bookingId,
-                                                                    tenant,
-                                                                    Integer.valueOf(onlineAmt.getText().toString()) + Integer.valueOf(cashAmt.getText().toString()),
-                                                                    SMSManagement.SMS_TYPE.RECEIPT)
-                                                    );
-                                                }
-                                                dialog.dismiss();
-//                                        getActivity().finish();
-                                            }
-                                        })
-                                        // A null listener allows the button to dismiss the dialog and take no further action.
-                                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                getActivity().finish();
-                                            }
-                                        })
-                                        .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                            @Override
-                                            public void onDismiss(DialogInterface dialog) {
-                                                BedsListContent.refresh();
-                                                getActivity().finish();
-                                            }
-                                        })
-                                        .show();
+                                showSMSSendAlert();
                             }
 
                             @Override
                             public void onFailure() {
-
+                                Toast.makeText(getActivity(), "Receipt Generation Failed.", Toast.LENGTH_SHORT).show();
                             }
                         };
 
-                        //TODO: Check if the cash+online amount exceeds total amount, and ask user if they want to create an advance payment entry
-                        dbHelper.createReceipt(type, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString(),
-                                (type == DataModel.ReceiptType.PENALTY ? waiveOffCheckBox.isChecked() : false), new NetworkDataModulCallback<DataModel.Receipt>() {
-                                    @Override
-                                    public void onSuccess(DataModel.Receipt obj) {
-                                        if(obj.type != DataModel.ReceiptType.ADVANCE) {
-                                            dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, obj.type,
-                                                    String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())),
-                                                    updatePendingEntryCallBack);
+                        if (pendingEntry != null) {
+                            dbHelper.createReceiptForPendingEntry(pendingEntry.id, onlineAmt.getText().toString(), cashAmt.getText().toString(),
+                                    (type == DataModel.ReceiptType.PENALTY && waiveOffCheckBox.isChecked()), new NetworkDataModulCallback<DataModel.Receipt>() {
+                                        @Override
+                                        public void onSuccess(DataModel.Receipt obj) {
+                                            Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
+                                            BedsListContent.refresh();
+                                            showSMSSendAlert();                                        }
+
+                                        @Override
+                                        public void onFailure() {
+                                            Toast.makeText(getActivity(), "Receipt Generation Failed.", Toast.LENGTH_SHORT).show();
                                         }
-                                    }
+                                    });
+                        } else {
+                            //TODO: Check if the cash+online amount exceeds total amount, and ask user if they want to create an advance payment entry
+                            dbHelper.createReceipt(type, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString(),
+                                    (type == DataModel.ReceiptType.PENALTY && waiveOffCheckBox.isChecked()), new NetworkDataModulCallback<DataModel.Receipt>() {
+                                        @Override
+                                        public void onSuccess(DataModel.Receipt obj) {
+                                            if (obj.type != DataModel.ReceiptType.ADVANCE) {
+                                                dbHelper.updatePendingEntryForBooking(bedInfo.bookingId, DataModel.PendingType.values()[obj.type.getIntValue()],
+                                                        String.valueOf(Integer.parseInt(onlineAmt.getText().toString()) + Integer.parseInt(cashAmt.getText().toString())),
+                                                        updatePendingEntryCallBack);
+                                            }
+                                        }
 
-                                    @Override
-                                    public void onFailure() {
+                                        @Override
+                                        public void onFailure() {
 
-                                    }
-                                });
+                                        }
+                                    });
+                        }
                     }
                 }
             });
@@ -419,11 +403,11 @@ public class ReceiptActivity extends AppCompatActivity {
             boolean isValid = true;
 
             DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
-            if(bedInfo == null) {
+            if(bedInfo == null && pendingEntry != null) {
                 Toast.makeText(getActivity(), "Please enter a correct bed number", Toast.LENGTH_SHORT).show();
                 isValid = false;
                 return isValid;
-            } else if(bedInfo.bookingId == null) {
+            } else if(bedInfo.bookingId == null && pendingEntry != null) {
                 Toast.makeText(getActivity(), "No booking exists for this Room number", Toast.LENGTH_SHORT).show();
                 isValid = false;
                 return isValid;
@@ -480,27 +464,34 @@ public class ReceiptActivity extends AppCompatActivity {
 
             }
         };
+
         private void reloadDueAmount() {
             String bookingRent = "0", bookingDeposit = "0", bookingPenalty = "0";
-            if(roomNumber.getText().toString().isEmpty() == false){
+
+            if(!roomNumber.getText().toString().isEmpty()) {
                 DataModel.Bed bed = dbHelper.getBedInfo(roomNumber.getText().toString());
+                ArrayList<DataModel.Pending> entry = null;
+
                 if (bed != null && bed.bookingId != null) {
+                    entry = dbHelper.getPendingEntriesForBooking(bed.bookingId);
+                } else if(pendingEntry != null) {
+                    entry = new ArrayList<DataModel.Pending>();
+                    entry.add(pendingEntry);
+                }
 
-                    ArrayList<DataModel.Pending> entry = dbHelper.getPendingEntriesForBooking(bed.bookingId);
-                    for (DataModel.Pending pendingEntry : entry) {
-                        if (pendingEntry.type == DataModel.PendingType.DEPOSIT) {
-                            bookingDeposit = String.valueOf(pendingEntry.pendingAmt);
-
-                        }
-                        if (pendingEntry.type == DataModel.PendingType.PENALTY) {
-                            bookingPenalty = String.valueOf(pendingEntry.pendingAmt);
-                        }
-                        if (pendingEntry.type == DataModel.PendingType.RENT) {
-                            bookingRent = String.valueOf(pendingEntry.pendingAmt);
-                        }
+                for (DataModel.Pending pending : entry) {
+                    if (pending.type == DataModel.PendingType.DEPOSIT) {
+                        bookingDeposit = String.valueOf(pending.pendingAmt);
+                    }
+                    if (pending.type == DataModel.PendingType.PENALTY) {
+                        bookingPenalty = String.valueOf(pending.pendingAmt);
+                    }
+                    if (pending.type == DataModel.PendingType.RENT) {
+                        bookingRent = String.valueOf(pending.pendingAmt);
                     }
                 }
             }
+
             switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
                 case 1:
                     dueAmount = bookingRent;
@@ -512,6 +503,49 @@ public class ReceiptActivity extends AppCompatActivity {
                     dueAmount = bookingPenalty;
                     break;
             }
+        }
+
+        private void showSMSSendAlert() {
+            new AlertDialog.Builder(getActivity())
+                    .setTitle("SMS")
+                    .setMessage("Do you want to send SMS?")
+
+                    // Specifying a listener allows you to take an action before dismissing the dialog.
+                    // The dialog is automatically dismissed when a dialog button is clicked.
+                    .setPositiveButton("SMS", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            SMSManagement smsManagement = SMSManagement.getInstance();
+                            DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
+
+                            DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking((pendingEntry != null) ? pendingEntry.bookingId : bedInfo.bookingId);
+                            /* mobile Number should be mandatory */
+                            if(!tenant.mobile.isEmpty()) {
+                                //SAHIRE : Handle waive-off payments.
+                                smsManagement.sendSMS(tenant.mobile,
+                                        smsManagement.getSMSMessage(bedInfo.bookingId,
+                                                tenant,
+                                                Integer.valueOf(onlineAmt.getText().toString()) + Integer.valueOf(cashAmt.getText().toString()),
+                                                SMSManagement.SMS_TYPE.RECEIPT)
+                                );
+                            }
+                            dialog.dismiss();
+//                                        getActivity().finish();
+                        }
+                    })
+                    // A null listener allows the button to dismiss the dialog and take no further action.
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            getActivity().finish();
+                        }
+                    })
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            BedsListContent.refresh();
+                            getActivity().finish();
+                        }
+                    }).show();
         }
     }
 

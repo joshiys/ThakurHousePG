@@ -6,6 +6,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,7 +29,10 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     public static int currentSelectedTab = 0;
     private NetworkDataModule restService;
 
-    private static final String TAG = "OccupancyAndBookingActivity";
+    private RoomsPagerAdapter roomPagerAdapter;
+    private ViewPager roomPager;
+
+    private static final String TAG = OccupancyAndBookingActivity.class.getName();;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +44,20 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        tabLayout = (TabLayout) findViewById(R.id.floor_tabs_id);
+        restService = NetworkDataModule.getInstance();
 
+        tabLayout = (TabLayout) findViewById(R.id.floor_tabs_id);
         tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
 
-        restService = NetworkDataModule.getInstance();
+        roomPagerAdapter = new RoomsPagerAdapter(getSupportFragmentManager());
+        // Set up the ViewPager with the sections adapter.
+        roomPager = (ViewPager) findViewById(R.id.RoomsPagerContainer);
+        roomPager.setAdapter(roomPagerAdapter);
+        roomPager.setOffscreenPageLimit(7);
+        roomPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(roomPager));
+
+        roomPager.setCurrentItem(0);
     }
 
     @Override
@@ -49,17 +65,14 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         super.onResume();
 //        currentSelectedTab = 0;
         tabLayout.getTabAt(currentSelectedTab).select();
-
+        BedsListContent.refresh();
+        BedsListFragment bedsFrag = (BedsListFragment) roomPagerAdapter.getItem(currentSelectedTab);
+        bedsFrag.reloadData();
 
         tabLayout.addOnTabSelectedListener(new TabLayout.BaseOnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-//                Log.e("TAGG", "OccupancyAnd... onTabSelected: " + tab.getPosition());
                 currentSelectedTab = tab.getPosition();
-//                BedsListContent.refresh();
-                /* SAHIRE Need to find someother way to update Fragment here */
-                BedsListFragment bedsFrag = (BedsListFragment) getSupportFragmentManager().findFragmentById(R.id.beds_fragment);
-                bedsFrag.reloadData();
             }
 
             @Override
@@ -78,7 +91,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     protected void onStop() {
         super.onStop();
 //        currentSelectedTab = 0;
-        BedsListContent.refresh();
+//        BedsListContent.refresh();
         //tabLayout.removeOnTabSelectedListener();
     }
 
@@ -123,7 +136,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
                             settingsEditor.commit();
 
                             BedsListContent.refresh();
-                            BedsListFragment bedsFrag = (BedsListFragment) getSupportFragmentManager().findFragmentById(R.id.beds_fragment);
+                            BedsListFragment bedsFrag = (BedsListFragment) roomPagerAdapter.getItem(currentSelectedTab);
                             bedsFrag.reloadData();
                         }
 
@@ -291,6 +304,31 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
     public boolean onSupportNavigateUp(){
         finish();
         return true;
+    }
+
+    public class RoomsPagerAdapter extends FragmentPagerAdapter {
+        private BedsListFragment[] fragmentList = new BedsListFragment[]{null, null, null, null, null, null, null};
+
+        public RoomsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a BedsListFragment.
+            Log.d(TAG, "Creatning new BedsListFragment, position : " + position);
+            if (fragmentList[position] == null)
+                fragmentList[position] = BedsListFragment.newInstance(position);
+
+            return fragmentList[position];
+        }
+
+        @Override
+        public int getCount() {
+            // There are 7 floors(6 + ground), so 7 pages
+            return 7;
+        }
     }
 
 }

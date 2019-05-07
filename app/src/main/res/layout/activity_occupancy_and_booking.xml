@@ -61,9 +61,8 @@
 
     </android.support.design.widget.TabLayout>
 
-    <fragment
-        android:id="@+id/beds_fragment"
-        android:name="com.example.thakurhousepg.BedsListFragment"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/RoomsPagerContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
