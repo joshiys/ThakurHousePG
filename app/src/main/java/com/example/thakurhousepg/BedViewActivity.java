@@ -27,7 +27,7 @@ public class BedViewActivity extends AppCompatActivity {
     private EditText rentAmount;
     private EditText depositAmount;
     private EditText bookingDate;
-    private FloatingActionButton smsButton;
+    private FloatingActionButton cancelBookingButton;
     private Button bookButton, modifyButton;
 
     private NetworkDataModule dataModule;
@@ -50,7 +50,7 @@ public class BedViewActivity extends AppCompatActivity {
         rentAmount = findViewById(R.id.bedview_rent);
         depositAmount = findViewById(R.id.bedview_deposit);
         bookingDate = findViewById(R.id.bedview_booking_date);
-        smsButton = findViewById(R.id.bedview_floating_sms);
+        cancelBookingButton = findViewById(R.id.bedview_floating_cancelButton);
 
         dataModule = NetworkDataModule.getInstance();
 
@@ -95,27 +95,12 @@ public class BedViewActivity extends AppCompatActivity {
             bookingDate.setText(booking.bookingDate);
 
 
-            smsButton.show();
-            smsButton.setOnClickListener(new View.OnClickListener() {
+            cancelBookingButton.show();
+            cancelBookingButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    DataModel.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
-                    if(!tenant.mobile.isEmpty()) {
-                        Snackbar.make(view, "Sending BOOKING SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-
-                        SMSManagement smsManagement = SMSManagement.getInstance();
-
-                        smsManagement.sendSMS(tenant.mobile,
-                                smsManagement.getSMSMessage(bedInfo.bookingId,
-                                        tenant,
-                                        0,
-                                        SMSManagement.SMS_TYPE.BOOKING)
-                        );
-                    } else {
-                        Snackbar.make(view, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    }
+                    final DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
+                    closeBooking(bedInfo.bookingId, true);
                 }
             });
 
@@ -125,7 +110,7 @@ public class BedViewActivity extends AppCompatActivity {
         } else {
             tenantName.setVisibility(View.INVISIBLE);
             bookingDate.setVisibility(View.GONE);
-            smsButton.hide();
+            cancelBookingButton.hide();
             bedNumber.setBackgroundColor(Color.GREEN);
 
             rentAmount.setText(bedInfo.rentAmount);
@@ -145,7 +130,7 @@ public class BedViewActivity extends AppCompatActivity {
                     startActivityForResult(bookingIntent, 0);
                 } else if(bookingButton.getText().toString().equals("Update Booking")) {
                     dataModule.updateBooking(bedInfo.bookingId, rentAmount.getText().toString(), depositAmount.getText().toString(),
-                            new NetworkDataModulCallback<DataModel.Booking>() {
+                            new NetworkDataModuleCallback<DataModel.Booking>() {
                                 @Override
                                 public void onSuccess(DataModel.Booking obj) {
                                 }
@@ -181,12 +166,12 @@ public class BedViewActivity extends AppCompatActivity {
                                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        closeBooking(bedInfo.bookingId);
+                                        closeBooking(bedInfo.bookingId, false);
                                     }
                                 })
                                 .show();
                     } else {
-                        closeBooking(bedInfo.bookingId);
+                        closeBooking(bedInfo.bookingId, false);
                     }
                 }
             }
@@ -211,7 +196,7 @@ public class BedViewActivity extends AppCompatActivity {
         Log.i(TAG, "Back from the Booking activity");
         if(requestCode == 1) {
             DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
-            closeBooking(bedInfo.bookingId);
+            closeBooking(bedInfo.bookingId, false);
         } else if(requestCode == 2 && resultCode == RESULT_OK) {
             modifyButton.setVisibility(View.INVISIBLE);
             ArrayList<String> selectedTenants = (ArrayList<String>) data.getSerializableExtra("SELECTED_TENANT_IDS");
@@ -224,6 +209,7 @@ public class BedViewActivity extends AppCompatActivity {
             for (String tid : selectedTenants) {
                 dataModule.updateTenant(tid, "", "", "", "", "", true, tenant.id, null);
             }
+            sendBookingSMS();
         }
         depositAmount.removeTextChangedListener(amountWatcher);
         rentAmount.removeTextChangedListener(amountWatcher);
@@ -254,8 +240,8 @@ public class BedViewActivity extends AppCompatActivity {
         return true;
     }
 
-    private void closeBooking(String id) {
-        dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), new NetworkDataModulCallback<DataModel.Booking>() {
+    private void closeBooking(String id, boolean shouldCancel) {
+        dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), shouldCancel, new NetworkDataModuleCallback<DataModel.Booking>() {
             @Override
             public void onSuccess(DataModel.Booking obj) {
                 BedsListContent.refresh();
@@ -267,5 +253,26 @@ public class BedViewActivity extends AppCompatActivity {
                 //TODO: What?
             }
         });
+    }
+
+    private void sendBookingSMS() {
+        final DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
+        DataModel.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
+        if(!tenant.mobile.isEmpty()) {
+            Snackbar.make(this.findViewById(R.id.sendSMSButton), "Sending BOOKING SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+
+            SMSManagement smsManagement = SMSManagement.getInstance();
+
+            smsManagement.sendSMS(tenant.mobile,
+                    smsManagement.getSMSMessage(bedInfo.bookingId,
+                            tenant,
+                            0,
+                            SMSManagement.SMS_TYPE.BOOKING)
+            );
+        } else {
+            Snackbar.make(this.findViewById(R.id.sendSMSButton), "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+        }
     }
 }

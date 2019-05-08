@@ -118,7 +118,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
                 int monthUpdated = settings.getInt("penaltyAddedForMonth", 0);
                 if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
                     Log.i(TAG, "Adding Penalties for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
-                    restService.addPenaltyToOutstandingPayments(new NetworkDataModulCallback<DataModel.Pending>() {
+                    restService.addPenaltyToOutstandingPayments(new NetworkDataModuleCallback<DataModel.Pending>() {
                         @Override
                         public void onSuccess(DataModel.Pending obj) {
                         }

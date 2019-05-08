@@ -102,7 +102,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                     //Todo: Implement Callback mechanism
                     restService.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(),
                             tenantEmail.getText().toString(), tenantAddress.getText().toString(), "0", false,
-                            new NetworkDataModulCallback<DataModel.Tenant>() {
+                            new NetworkDataModuleCallback<DataModel.Tenant>() {
                                 @Override
                                 public void onSuccess(DataModel.Tenant t) {
                                     tenantId = t.id;
@@ -121,7 +121,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
                     if(tenantInfoForModification != null) {
                         restService.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
                         "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), tenantInfoForModification.isCurrent, tenantInfoForModification.parentId,
-                            new NetworkDataModulCallback<DataModel.Tenant>() {
+                            new NetworkDataModuleCallback<DataModel.Tenant>() {
                                 @Override
                                 public void onSuccess(DataModel.Tenant t) {
                                     tenantId = tenantInfoForModification.id;

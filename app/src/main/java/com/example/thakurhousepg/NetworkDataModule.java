@@ -7,13 +7,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -94,7 +93,7 @@ interface ReceiptService {
 
 //endregion
 
-interface NetworkDataModulCallback<T> {
+interface NetworkDataModuleCallback<T> {
     void onSuccess(T obj);
     void onFailure();
     default void onResult() {
@@ -124,7 +123,50 @@ public class NetworkDataModule {
     private ReceiptService receiptsService = null;
 
     private int initialDataFetchCompletionCount = 0;
-    public NetworkDataModulCallback initialDataFetchCompletionCallBack;
+    public NetworkDataModuleCallback initialDataFetchCompletionCallBack;
+
+    private NetworkDataModuleCallback<DataModel.Tenant> tenantWaitCallback = new NetworkDataModuleCallback<DataModel.Tenant>() {
+        public boolean callComplete = false;
+        @Override
+        public void onSuccess(DataModel.Tenant obj) {
+            callComplete = true;
+        }
+
+        @Override
+        public void onFailure() {
+            callComplete = true;
+        }
+    };
+
+    private NetworkDataModuleCallback<DataModel.Bed> roomsWaitCallback = new NetworkDataModuleCallback<DataModel.Bed>() {
+        public boolean callComplete = false;
+        @Override
+        public void onSuccess(DataModel.Bed obj) {
+            callComplete = true;
+        }
+
+        @Override
+        public void onFailure() {
+            callComplete = true;
+        }
+    };
+
+    private NetworkDataModuleCallback<DataModel.Bed> pendingWaitCallback = new NetworkDataModuleCallback<DataModel.Bed>() {
+        public boolean callComplete = false;
+        @Override
+        public void onSuccess(DataModel.Bed obj) {
+            callComplete = true;
+        }
+
+        @Override
+        public void onFailure() {
+            callComplete = true;
+        }
+    };
+
+//    Observable
+
+
     //</editor-fold>
 
     public static NetworkDataModule getInstance() {
@@ -140,7 +182,7 @@ public class NetworkDataModule {
         httpClient.addInterceptor(logging);
 
         retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8080/")
+                .baseUrl("http://192.168.0.100:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(httpClient.build())
                 .build();
@@ -508,13 +550,13 @@ public class NetworkDataModule {
         return String.valueOf(totalRent);
     }
 
-    public void addPenaltyToOutstandingPayments(final NetworkDataModulCallback<DataModel.Pending> callback) {
+    public void addPenaltyToOutstandingPayments(final NetworkDataModuleCallback<DataModel.Pending> callback) {
         final int[] callsMade = {0};
         for (DataModel.Pending pendingEntry : pendingList) {
             if(pendingEntry.type == DataModel.PendingType.RENT) {
                 callsMade[0]++;
                 createPendingEntryForBooking(pendingEntry.bookingId, DataModel.PendingType.PENALTY, "200", Calendar.getInstance().get(Calendar.MONTH) + 1,
-                        new NetworkDataModulCallback<DataModel.Pending>() {
+                        new NetworkDataModuleCallback<DataModel.Pending>() {
                             @Override
                             public void onSuccess(DataModel.Pending obj) {
                                 callsMade[0]--;
@@ -548,7 +590,7 @@ public class NetworkDataModule {
         }
     }
 
-    public void createPendingEntryForBooking(String bookingId, DataModel.PendingType type, String amount, int month, final NetworkDataModulCallback<DataModel.Pending> callback) {
+    public void createPendingEntryForBooking(String bookingId, DataModel.PendingType type, String amount, int month, final NetworkDataModuleCallback<DataModel.Pending> callback) {
 
         DataModel.Pending pending = new DataModel.Pending(null, Integer.parseInt(amount), bookingId, null, type, month);
         Call<DataModel.Pending> createPendingEntryCall = pendingService.createPendingEntry (pending);
@@ -578,7 +620,7 @@ public class NetworkDataModule {
     }
 
     //TODO: Complete this. Create Receipts Service
-    public void createMonthlyPendingEntries(boolean smsPermission, final NetworkDataModulCallback<DataModel.Pending> callback) {
+    public void createMonthlyPendingEntries(boolean smsPermission, final NetworkDataModuleCallback<DataModel.Pending> callback) {
         for (DataModel.Booking booking: bookingsList) {
             int rentAmount = Integer.parseInt(booking.rentAmount);
             for (DataModel.Receipt r: receiptsList) {
@@ -606,7 +648,7 @@ public class NetworkDataModule {
         }
     }
 
-    public void updatePendingEntry(String id, String amount, NetworkDataModulCallback<DataModel.Pending> callback) {
+    public void updatePendingEntry(String id, String amount, NetworkDataModuleCallback<DataModel.Pending> callback) {
         DataModel.Pending pending = getPendingEntryByID(id);
         int totalPendingAmount = pending.pendingAmt;
 
@@ -657,7 +699,7 @@ public class NetworkDataModule {
 
     }
 
-    public void updatePendingEntryForBooking(String id, DataModel.PendingType type, String amount, NetworkDataModulCallback<DataModel.Pending> callback) {
+    public void updatePendingEntryForBooking(String id, DataModel.PendingType type, String amount, NetworkDataModuleCallback<DataModel.Pending> callback) {
 
         for (DataModel.Pending p: pendingList) {
             if(p.bookingId.equals(id) && p.type == type) {
@@ -667,7 +709,15 @@ public class NetworkDataModule {
         }
     }
 
-    public void addNewBed(DataModel.Bed bedInfo, final NetworkDataModulCallback<DataModel.Bed> callback) {
+    private void deletePendingEntriesForBooking(String id, NetworkDataModuleCallback<DataModel.Pending> callback) {
+        for (DataModel.Pending p: pendingList) {
+            if(p.bookingId.equals(id)) {
+                updatePendingEntry(p.id, String.valueOf(p.pendingAmt), callback);
+            }
+        }
+    }
+
+    public void addNewBed(DataModel.Bed bedInfo, final NetworkDataModuleCallback<DataModel.Bed> callback) {
         Call<DataModel.Bed> addRoomCall = roomsService.addRoom(bedInfo.bedNumber, bedInfo);
 
         addRoomCall.enqueue(new Callback<DataModel.Bed>() {
@@ -693,13 +743,13 @@ public class NetworkDataModule {
         });
     }
 
-    public void addNewBed(String bedNumber, String rent, String deposit, final NetworkDataModulCallback<DataModel.Bed> callback) {
+    public void addNewBed(String bedNumber, String rent, String deposit, final NetworkDataModuleCallback<DataModel.Bed> callback) {
 
         DataModel.Bed room = new DataModel.Bed(bedNumber, null, rent, deposit, false);
         addNewBed(room, callback);
     }
 
-    public void updateBed(DataModel.Bed bedInfo, final NetworkDataModulCallback<DataModel.Bed> callback) {
+    public void updateBed(DataModel.Bed bedInfo, final NetworkDataModuleCallback<DataModel.Bed> callback) {
         Call<DataModel.Bed> updateBedCall = roomsService.updateRoom(bedInfo.bedNumber, bedInfo);
         updateBedCall.enqueue(new Callback<DataModel.Bed>() {
             @Override
@@ -728,7 +778,7 @@ public class NetworkDataModule {
         });
     }
 
-    public void addNewTenant(String name, String mobile, String email, String address, String parentId, boolean isCurrent, final NetworkDataModulCallback<DataModel.Tenant> callback) {
+    public void addNewTenant(String name, String mobile, String email, String address, String parentId, boolean isCurrent, final NetworkDataModuleCallback<DataModel.Tenant> callback) {
         DataModel.Tenant newTenant = new DataModel.Tenant(null, name, mobile, email, address, isCurrent, parentId);
         Call<DataModel.Tenant> addTenantCall = tenantService.addTenant(newTenant);
 
@@ -754,13 +804,13 @@ public class NetworkDataModule {
         });
     }
 
-    public void updateTenant(DataModel.Tenant tenant, NetworkDataModulCallback<DataModel.Tenant> callback) {
+    public void updateTenant(DataModel.Tenant tenant, NetworkDataModuleCallback<DataModel.Tenant> callback) {
         updateTenant(tenant.id, tenant.name, tenant.mobile, "", tenant.email, tenant.address, tenant.isCurrent, tenant.parentId, callback);
     }
 
     public void updateTenant(String id, String name, String mobile, String mobile2, String email,
                              String address, Boolean isCurrent, @NotNull String parentId,
-                             final NetworkDataModulCallback<DataModel.Tenant> callback) {
+                             final NetworkDataModuleCallback<DataModel.Tenant> callback) {
         DataModel.Tenant newTenant = getTenantInfo(id); //new DataModel.Tenant(id, name, mobile, email, address, isCurrent, parentId);
         if(!name.isEmpty()) newTenant.name = name;
         if(!email.isEmpty()) newTenant.email = email;
@@ -799,7 +849,7 @@ public class NetworkDataModule {
     }
 
     public void createNewBooking(final String bedNumber, String tenantId, String rent, String deposit, String admissionDate,
-                                 final NetworkDataModulCallback<DataModel.Booking> callback) {
+                                 final NetworkDataModuleCallback<DataModel.Booking> callback) {
         DataModel.Booking booking = new DataModel.Booking(null, bedNumber, rent, deposit, admissionDate, true, tenantId, null);
         Call<DataModel.Booking> createBookingCall = bookingService.createBooking(booking);
 
@@ -836,7 +886,7 @@ public class NetworkDataModule {
     }
 
     public void updateBooking(String id, String newRent, String newDeposit,
-                                 final NetworkDataModulCallback<DataModel.Booking> callback) {
+                                 final NetworkDataModuleCallback<DataModel.Booking> callback) {
         DataModel.Booking booking = getBookingInfo(id);
         booking.rentAmount = newRent;
         booking.depositAmount = newDeposit;
@@ -883,8 +933,9 @@ public class NetworkDataModule {
         });
     }
 
-    public void closeBooking(String id, String closeingDate,
-                                final NetworkDataModulCallback<DataModel.Booking> callback) {
+
+    public void closeBooking(String id, String closeingDate, boolean cancelBooking,
+                                final NetworkDataModuleCallback<DataModel.Booking> callback) {
         DataModel.Booking booking = getBookingInfo(id);
         booking.closingDate = closeingDate;
 
@@ -905,9 +956,9 @@ public class NetworkDataModule {
                 tenant.parentId = "0";
                 updateTenant(tenant, null);
                 for (DataModel.Tenant t: getDependents(tenant.id)){
-                    tenant.isCurrent = false;
-                    tenant.parentId = "0";
-                    updateTenant(tenant, null);
+                    t.isCurrent = false;
+                    t.parentId = "0";
+                    updateTenant(t, null);
                 }
 
                 int index = -1;
@@ -919,6 +970,10 @@ public class NetworkDataModule {
                 }
                 if(index != -1) {
                     bookingsList.remove(index);
+                }
+
+                if(cancelBooking) {
+                    deletePendingEntriesForBooking(booking.id, null);
                 }
 
                 if (callback != null) {
@@ -938,15 +993,15 @@ public class NetworkDataModule {
         });
     }
 
-    public void createReceiptForPendingEntry(String id, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModulCallback<DataModel.Receipt> callback) {
+    public void createReceiptForPendingEntry(String id, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModuleCallback<DataModel.Receipt> callback) {
         DataModel.Pending pendingEntry = getPendingEntryByID(id);
 
         createReceipt(DataModel.ReceiptType.values()[pendingEntry.type.getIntValue()], pendingEntry.bookingId, onlineAmount, cashAmount, penaltyWaiveOff,
-                new NetworkDataModulCallback<DataModel.Receipt>() {
+                new NetworkDataModuleCallback<DataModel.Receipt>() {
                     @Override
                     public void onSuccess(DataModel.Receipt newReceipt) {
                         updatePendingEntry(pendingEntry.id, String.valueOf(pendingEntry.pendingAmt),
-                                new NetworkDataModulCallback<DataModel.Pending>() {
+                                new NetworkDataModuleCallback<DataModel.Pending>() {
                                     @Override
                                     public void onSuccess(DataModel.Pending obj) {
                                         if(callback != null) {
@@ -975,7 +1030,7 @@ public class NetworkDataModule {
         });
     }
 
-    public void createReceipt(DataModel.ReceiptType type, String bookingId, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModulCallback<DataModel.Receipt> callback) {
+    public void createReceipt(DataModel.ReceiptType type, String bookingId, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModuleCallback<DataModel.Receipt> callback) {
         DataModel.Receipt newReceipt = new DataModel.Receipt(null, bookingId, onlineAmount, cashAmount, penaltyWaiveOff, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), type);
         Call<DataModel.Receipt> createReceiptCall = receiptsService.createReceipt(newReceipt);
 

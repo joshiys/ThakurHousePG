@@ -20,7 +20,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -89,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
             progress.show();
             if (!restService.isInitialDataFetchComplete()) {
-                restService.initialDataFetchCompletionCallBack = new NetworkDataModulCallback() {
+                restService.initialDataFetchCompletionCallBack = new NetworkDataModuleCallback() {
                     @Override
                     public void onSuccess(Object obj) {
                         progress.dismiss();
@@ -222,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
             Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
 
-            restService.createMonthlyPendingEntries((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED), new NetworkDataModulCallback<DataModel.Pending>() {
+            restService.createMonthlyPendingEntries((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED), new NetworkDataModuleCallback<DataModel.Pending>() {
                 @Override
                 public void onSuccess(DataModel.Pending obj) {
                     SharedPreferences.Editor settingsEditor = settings.edit();

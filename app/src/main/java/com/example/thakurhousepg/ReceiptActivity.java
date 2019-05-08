@@ -299,7 +299,7 @@ public class ReceiptActivity extends AppCompatActivity {
                             type = DataModel.ReceiptType.ADVANCE;
                         }
 
-                        NetworkDataModulCallback<DataModel.Pending> updatePendingEntryCallBack = new NetworkDataModulCallback<DataModel.Pending>() {
+                        NetworkDataModuleCallback<DataModel.Pending> updatePendingEntryCallBack = new NetworkDataModuleCallback<DataModel.Pending>() {
                             @Override
                             public void onSuccess(DataModel.Pending obj) {
                                 Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
@@ -315,7 +315,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
                         if (pendingEntry != null) {
                             dbHelper.createReceiptForPendingEntry(pendingEntry.id, onlineAmt.getText().toString(), cashAmt.getText().toString(),
-                                    (type == DataModel.ReceiptType.PENALTY && waiveOffCheckBox.isChecked()), new NetworkDataModulCallback<DataModel.Receipt>() {
+                                    (type == DataModel.ReceiptType.PENALTY && waiveOffCheckBox.isChecked()), new NetworkDataModuleCallback<DataModel.Receipt>() {
                                         @Override
                                         public void onSuccess(DataModel.Receipt obj) {
                                             Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
@@ -330,7 +330,7 @@ public class ReceiptActivity extends AppCompatActivity {
                         } else {
                             //TODO: Check if the cash+online amount exceeds total amount, and ask user if they want to create an advance payment entry
                             dbHelper.createReceipt(type, bedInfo.bookingId, onlineAmt.getText().toString(), cashAmt.getText().toString(),
-                                    (type == DataModel.ReceiptType.PENALTY && waiveOffCheckBox.isChecked()), new NetworkDataModulCallback<DataModel.Receipt>() {
+                                    (type == DataModel.ReceiptType.PENALTY && waiveOffCheckBox.isChecked()), new NetworkDataModuleCallback<DataModel.Receipt>() {
                                         @Override
                                         public void onSuccess(DataModel.Receipt obj) {
                                             if (obj.type != DataModel.ReceiptType.ADVANCE) {

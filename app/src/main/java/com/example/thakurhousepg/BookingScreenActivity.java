@@ -121,7 +121,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                     }
 
                     dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), bookingDate.getText().toString(),
-                            new NetworkDataModulCallback<DataModel.Booking>() {
+                            new NetworkDataModuleCallback<DataModel.Booking>() {
                         @Override
                         public void onSuccess(DataModel.Booking obj) {
                             String newBookingId = obj.id;
@@ -145,7 +145,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                             dataModule.createPendingEntryForBooking(newBookingId, DataModel.PendingType.DEPOSIT, depositAmount.getText().toString(), Calendar.getInstance().get(Calendar.MONTH) + 1, null);
 
                             for(String id: dependentsIdList) {
-                                dataModule.updateTenant(id, "", "", "", "", "", true, tenantId, new NetworkDataModulCallback<DataModel.Tenant>() {
+                                dataModule.updateTenant(id, "", "", "", "", "", true, tenantId, new NetworkDataModuleCallback<DataModel.Tenant>() {
                                     @Override
                                     public void onSuccess(DataModel.Tenant obj) {
 
