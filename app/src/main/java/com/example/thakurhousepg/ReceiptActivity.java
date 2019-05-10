@@ -2,6 +2,7 @@ package com.example.thakurhousepg;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -33,6 +34,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+
+import static com.example.thakurhousepg.Constants.RECEIPT_ACTIVITY_NUM_SECTIONS;
+import static com.example.thakurhousepg.Constants.RECEIPT_SECTION_DEPOSIT;
+import static com.example.thakurhousepg.Constants.RECEIPT_SECTION_PENALTY;
+import static com.example.thakurhousepg.Constants.RECEIPT_SECTION_RENT;
 
 public class ReceiptActivity extends AppCompatActivity {
 
@@ -72,7 +78,7 @@ public class ReceiptActivity extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(3);
+        mViewPager.setOffscreenPageLimit(RECEIPT_ACTIVITY_NUM_SECTIONS);
         TabLayout tabLayout = findViewById(R.id.tabs);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
@@ -81,7 +87,7 @@ public class ReceiptActivity extends AppCompatActivity {
         String selectedSection = bundle.getString("SECTION");
 
         if("Rent".equals(selectedSection)) {
-            mViewPager.setCurrentItem(0);
+            mViewPager.setCurrentItem(RECEIPT_SECTION_RENT - 1);
 /*
                 YSJ - I JUST DONT UNDERSTAND WHAT IS THIS FOR, COMMENTING IT FOR NOW
 
@@ -92,9 +98,9 @@ public class ReceiptActivity extends AppCompatActivity {
                 }
 */
         } else if("Deposit".equals(selectedSection)) {
-            mViewPager.setCurrentItem(1);
+            mViewPager.setCurrentItem(RECEIPT_SECTION_DEPOSIT - 1);
         } else {
-            mViewPager.setCurrentItem(2);
+            mViewPager.setCurrentItem(RECEIPT_SECTION_PENALTY - 1);
         }
     }
 
@@ -104,6 +110,12 @@ public class ReceiptActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent returnIntent = new Intent();
+        setResult(RESULT_CANCELED, returnIntent);
+        super.onBackPressed();
+    }
 
     /**
      * A placeholder fragment containing a simple view.
@@ -169,13 +181,13 @@ public class ReceiptActivity extends AppCompatActivity {
             advanceCheckBox = rootView.findViewById(R.id.receipt_advance_checkbox);
             waiveOffCheckBox = rootView.findViewById(R.id.waiveOffCheckBox);
             waiveOffCheckBox.setVisibility(View.GONE);
-            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1 ){
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == RECEIPT_SECTION_RENT ){
                 advanceCheckBox.setVisibility(View.VISIBLE);
             }
-            if (getArguments().getInt(ARG_SECTION_NUMBER) == 2 ){
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == RECEIPT_SECTION_DEPOSIT ){
                 advanceCheckBox.setVisibility(View.INVISIBLE);
             }
-            if(getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
+            if(getArguments().getInt(ARG_SECTION_NUMBER) == RECEIPT_SECTION_PENALTY) {
                 advanceCheckBox.setVisibility(View.GONE);
                 waiveOffCheckBox.setVisibility(View.VISIBLE);
             }
@@ -183,9 +195,18 @@ public class ReceiptActivity extends AppCompatActivity {
             if(bundle.getString("ROOM_NUMBER") != null) {
                 roomNumber.setText(bundle.getString("ROOM_NUMBER"));
             }
+
             if(bundle.getString("PENDING_ID") != null) {
                 pendingEntry = dbHelper.getPendingEntryByID(bundle.getString("PENDING_ID"));
                 advanceCheckBox.setVisibility(View.INVISIBLE);
+                waiveOffCheckBox.setVisibility(View.VISIBLE);
+            }
+
+            if(bundle.getString("RECEIPT_MODE") != null &&
+                bundle.getString("RECEIPT_MODE").equals("DEPOSIT_CLOSE_BOOKING") &&
+                bundle.getString("SECTION").equals("DEPOSIT")) {
+
+                waiveOffCheckBox.setVisibility(View.VISIBLE);
             }
 
             reloadDueAmount();
@@ -285,11 +306,11 @@ public class ReceiptActivity extends AppCompatActivity {
                         DataModel.ReceiptType type = DataModel.ReceiptType.RENT;
 
                         switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
-                            case 2:
+                            case RECEIPT_SECTION_DEPOSIT:
                                 type = DataModel.ReceiptType.DEPOSIT;
                                 smsType = SMSManagement.SMS_TYPE.DEFAULT;
                                 break;
-                            case 3:
+                            case RECEIPT_SECTION_PENALTY:
                                 type = DataModel.ReceiptType.PENALTY;
                                 smsType = SMSManagement.SMS_TYPE.PENALTY_GENERATED;
                                 break;
@@ -304,7 +325,7 @@ public class ReceiptActivity extends AppCompatActivity {
                             public void onSuccess(DataModel.Pending obj) {
                                 Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
                                 BedsListContent.refresh();
-                                showSMSSendAlert();
+                                sendSMSAndFInish();
                             }
 
                             @Override
@@ -320,7 +341,7 @@ public class ReceiptActivity extends AppCompatActivity {
                                         public void onSuccess(DataModel.Receipt obj) {
                                             Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
                                             BedsListContent.refresh();
-                                            showSMSSendAlert();                                        }
+                                            sendSMSAndFInish();                                        }
 
                                         @Override
                                         public void onFailure() {
@@ -389,9 +410,6 @@ public class ReceiptActivity extends AppCompatActivity {
                 }
             });
 
-
-            /*if(bundle.getString("RENT_AMOUNT") != null) */
-//                totalAmount.setText(bundle.getString("RENT_AMOUNT"));
             totalAmount.setText(dueAmount);
             onlineCheckBox.setChecked(true);
 
@@ -493,59 +511,37 @@ public class ReceiptActivity extends AppCompatActivity {
             }
 
             switch(getArguments().getInt(ARG_SECTION_NUMBER)) {
-                case 1:
+                case RECEIPT_SECTION_RENT:
                     dueAmount = bookingRent;
                     break;
-                case 2:
+                case RECEIPT_SECTION_DEPOSIT:
                     dueAmount = bookingDeposit;
                     break;
-                case 3:
+                case RECEIPT_SECTION_PENALTY:
                     dueAmount = bookingPenalty;
                     break;
             }
         }
 
-        private void showSMSSendAlert() {
-            new AlertDialog.Builder(getActivity())
-                    .setTitle("SMS")
-                    .setMessage("Do you want to send SMS?")
+        private void sendSMSAndFInish() {
+            SMSManagement smsManagement = SMSManagement.getInstance();
+            DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
 
-                    // Specifying a listener allows you to take an action before dismissing the dialog.
-                    // The dialog is automatically dismissed when a dialog button is clicked.
-                    .setPositiveButton("SMS", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            SMSManagement smsManagement = SMSManagement.getInstance();
-                            DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
-
-                            DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking((pendingEntry != null) ? pendingEntry.bookingId : bedInfo.bookingId);
-                            /* mobile Number should be mandatory */
-                            if(!tenant.mobile.isEmpty()) {
-                                //SAHIRE : Handle waive-off payments.
-                                smsManagement.sendSMS(tenant.mobile,
-                                        smsManagement.getSMSMessage(bedInfo.bookingId,
-                                                tenant,
-                                                Integer.valueOf(onlineAmt.getText().toString()) + Integer.valueOf(cashAmt.getText().toString()),
-                                                SMSManagement.SMS_TYPE.RECEIPT)
-                                );
-                            }
-                            dialog.dismiss();
-//                                        getActivity().finish();
-                        }
-                    })
-                    // A null listener allows the button to dismiss the dialog and take no further action.
-                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            getActivity().finish();
-                        }
-                    })
-                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            BedsListContent.refresh();
-                            getActivity().finish();
-                        }
-                    }).show();
+            DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking((pendingEntry != null) ? pendingEntry.bookingId : bedInfo.bookingId);
+            /* mobile Number should be mandatory */
+            if(!tenant.mobile.isEmpty()) {
+                //SAHIRE : Handle waive-off payments.
+                smsManagement.sendSMS(tenant.mobile,
+                        smsManagement.getSMSMessage(bedInfo.bookingId,
+                                tenant,
+                                Integer.valueOf(onlineAmt.getText().toString()) + Integer.valueOf(cashAmt.getText().toString()),
+                                SMSManagement.SMS_TYPE.RECEIPT)
+                );
+            }
+            BedsListContent.refresh();
+            Intent returnIntent = new Intent();
+            getActivity().setResult(RESULT_OK, returnIntent);
+            getActivity().finish();
         }
     }
 
@@ -569,8 +565,7 @@ public class ReceiptActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            return RECEIPT_ACTIVITY_NUM_SECTIONS;
         }
     }
 }

@@ -20,6 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static com.example.thakurhousepg.Constants.*;
+
 public class BedViewActivity extends AppCompatActivity {
 
     private EditText bedNumber;
@@ -27,7 +29,6 @@ public class BedViewActivity extends AppCompatActivity {
     private EditText rentAmount;
     private EditText depositAmount;
     private EditText bookingDate;
-    private FloatingActionButton cancelBookingButton;
     private Button bookButton, modifyButton;
 
     private NetworkDataModule dataModule;
@@ -50,7 +51,6 @@ public class BedViewActivity extends AppCompatActivity {
         rentAmount = findViewById(R.id.bedview_rent);
         depositAmount = findViewById(R.id.bedview_deposit);
         bookingDate = findViewById(R.id.bedview_booking_date);
-        cancelBookingButton = findViewById(R.id.bedview_floating_cancelButton);
 
         dataModule = NetworkDataModule.getInstance();
 
@@ -95,22 +95,12 @@ public class BedViewActivity extends AppCompatActivity {
             bookingDate.setText(booking.bookingDate);
 
 
-            cancelBookingButton.show();
-            cancelBookingButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
-                    closeBooking(bedInfo.bookingId, true);
-                }
-            });
-
             depositAmount.addTextChangedListener(amountWatcher);
             rentAmount.addTextChangedListener(amountWatcher);
 
         } else {
             tenantName.setVisibility(View.INVISIBLE);
             bookingDate.setVisibility(View.GONE);
-            cancelBookingButton.hide();
             bedNumber.setBackgroundColor(Color.GREEN);
 
             rentAmount.setText(bedInfo.rentAmount);
@@ -127,7 +117,7 @@ public class BedViewActivity extends AppCompatActivity {
                     bookingIntent.putExtra("BED_NUMBER", bedNumber.getText().toString());
                     bookingIntent.putExtra("RENT", rentAmount.getText().toString());
                     bookingIntent.putExtra("DEPOSIT", depositAmount.getText().toString());
-                    startActivityForResult(bookingIntent, 0);
+                    startActivityForResult(bookingIntent, INTENT_REQUEST_CODE_BOOKING);
                 } else if(bookingButton.getText().toString().equals("Update Booking")) {
                     dataModule.updateBooking(bedInfo.bookingId, rentAmount.getText().toString(), depositAmount.getText().toString(),
                             new NetworkDataModuleCallback<DataModel.Booking>() {
@@ -146,33 +136,39 @@ public class BedViewActivity extends AppCompatActivity {
                                 }
                     });
                 } else {
-                    Toast.makeText(BedViewActivity.this, "Closing the Booking", Toast.LENGTH_SHORT).show();
-                    final int pendingAmount = dataModule.getPendingAmountForBooking(bedInfo.bookingId);
-                    if(pendingAmount > 0) {
-                        new AlertDialog.Builder(BedViewActivity.this)
-                                .setTitle("Dues Pending")
-                                .setMessage("Go to Receipt screen before closing the booking?")
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        Intent receiptIntent = new Intent(BedViewActivity.this, ReceiptActivity.class);
-                                        receiptIntent.putExtra("SECTION", "Rent");
-                                        receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
-                                        receiptIntent.putExtra("AMOUNT", String.valueOf(pendingAmount));
+                    AlertDialog.Builder bookingActionBuilder = new AlertDialog.Builder(BedViewActivity.this);
+                    DialogInterface.OnClickListener itemsChoice = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which) {
+                                case 0:
+                                    closeBooking(bedInfo.bookingId, true);
+                                    break;
+                                case 1:
+                                    closeBooking(bedInfo.bookingId, false);
+                                    break;
+                                case 2:
+                                    Intent receiptIntent = new Intent(BedViewActivity.this, ReceiptActivity.class);
+                                    receiptIntent.putExtra("SECTION", "Deposit");
+                                    receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
+                                    receiptIntent.putExtra("RECEIPT_MODE", "DEPOSIT_CLOSE_BOOKING");
 
-                                        startActivityForResult(receiptIntent, 1);
-                                    }
-                                })
-                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        closeBooking(bedInfo.bookingId, false);
-                                    }
-                                })
-                                .show();
+                                    startActivityForResult(receiptIntent, INTENT_REQUEST_CODE_RECEIPT);
+                                    break;
+                            }
+                        }
+                    };
+
+                    if(dataModule.getPendingAmountForBooking(bedInfo.bookingId) > 0) {
+                        bookingActionBuilder.setTitle("Dues Pending")
+                            .setItems(new CharSequence[]{"Cancel Booking", "Close Booking", "Pay Dues"}, itemsChoice)
+                            .create();
                     } else {
-                        closeBooking(bedInfo.bookingId, false);
+                        bookingActionBuilder.setItems(new CharSequence[]{"Cancel Booking", "Close Booking"}, itemsChoice)
+                           .create();
                     }
+
+                    bookingActionBuilder.show();
                 }
             }
         });
@@ -184,7 +180,7 @@ public class BedViewActivity extends AppCompatActivity {
                     Intent selectTenantIntent = new Intent(BedViewActivity.this, SelectTenantActivity.class);
                     selectTenantIntent.putExtra("LIST_MODE", "MODIFY_FULLY_SELECTED_LIST");
                     selectTenantIntent.putExtra("TENANT_LIST", dependentsList);
-                    startActivityForResult(selectTenantIntent, 2);
+                    startActivityForResult(selectTenantIntent, INTENT_REQUEST_CODE_SELECT_TENANT);
                 }
             }
         });
@@ -193,11 +189,16 @@ public class BedViewActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.i(TAG, "Back from the Booking activity");
-        if(requestCode == 1) {
+        Log.i(TAG, "Back from the Launched activity");
+
+        if(requestCode == INTENT_REQUEST_CODE_BOOKING && resultCode == RESULT_OK) {
+            sendBookingSMS();
+        }
+
+        if(requestCode == INTENT_REQUEST_CODE_RECEIPT && resultCode == RESULT_OK) {
             DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
             closeBooking(bedInfo.bookingId, false);
-        } else if(requestCode == 2 && resultCode == RESULT_OK) {
+        } else if(requestCode == INTENT_REQUEST_CODE_SELECT_TENANT && resultCode == RESULT_OK) {
             modifyButton.setVisibility(View.INVISIBLE);
             ArrayList<String> selectedTenants = (ArrayList<String>) data.getSerializableExtra("SELECTED_TENANT_IDS");
             for (DataModel.Tenant t : dependentsList) {
@@ -209,8 +210,8 @@ public class BedViewActivity extends AppCompatActivity {
             for (String tid : selectedTenants) {
                 dataModule.updateTenant(tid, "", "", "", "", "", true, tenant.id, null);
             }
-            sendBookingSMS();
         }
+
         depositAmount.removeTextChangedListener(amountWatcher);
         rentAmount.removeTextChangedListener(amountWatcher);
     }
@@ -241,6 +242,7 @@ public class BedViewActivity extends AppCompatActivity {
     }
 
     private void closeBooking(String id, boolean shouldCancel) {
+        Toast.makeText(BedViewActivity.this, "Closing the Booking", Toast.LENGTH_SHORT).show();
         dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), shouldCancel, new NetworkDataModuleCallback<DataModel.Booking>() {
             @Override
             public void onSuccess(DataModel.Booking obj) {

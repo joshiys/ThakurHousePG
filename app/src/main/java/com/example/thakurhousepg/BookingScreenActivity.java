@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+import static com.example.thakurhousepg.Constants.*;
 
 public class BookingScreenActivity extends AppCompatActivity {
 
@@ -35,9 +36,9 @@ public class BookingScreenActivity extends AppCompatActivity {
 
     private SeekBar roomSplitSeeker;
 
-    private Button bookButton, saveButton;
+    private Button bookButton;
 
-    private ImageButton addTenantButton;
+    private ImageButton addTenantButton, selectTenantButton;
     private String action = null;
     private DataModel.Tenant tenant = null;
     private CheckBox reduceFirstRentCheckbox;
@@ -72,6 +73,7 @@ public class BookingScreenActivity extends AppCompatActivity {
         reduceFirstRentCheckbox = findViewById(R.id.booking_first_rent_checkbox);
         firstRent = findViewById(R.id.booking_first_rent);
         addTenantButton = findViewById(R.id.booking_add_tenant);
+        selectTenantButton = findViewById(R.id.booking_select_tenant);
 
         tenantsListView = findViewById(R.id.booking_tenant_list);
         tenantListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, tenantNamesList);
@@ -113,6 +115,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                     if(numRooms > 1) {
                         dataModule.splitRoom(bedNumber.getText().toString(), numRooms, rentAmount.getText().toString(), depositAmount.getText().toString());
                     }
+
                     int mainTenant = tenantsListView.getCheckedItemPosition();
                     if (mainTenant > 0) {
                         String tempId = tenantId;
@@ -181,7 +184,7 @@ public class BookingScreenActivity extends AppCompatActivity {
                                     })
 
                                     // A null listener allows the button to dismiss the dialog and take no further action.
-                                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                    .setNegativeButton(R.string.negative_button_no, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             finish();
@@ -218,42 +221,28 @@ public class BookingScreenActivity extends AppCompatActivity {
         addTenantButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent addTenantIntent = new Intent(BookingScreenActivity.this, TenantInformationActivity.class);
+                addTenantIntent.putExtra("ACTION", "ADD_TENANT");
+                startActivityForResult(addTenantIntent, INTENT_REQUEST_CODE_ADD_TENANT);
+            }
+        });
 
-                new AlertDialog.Builder(BookingScreenActivity.this)
-                        .setTitle("")
-                        .setMessage("Do you want to Add a new Tenant or select from the existing?")
-
-                        // Specifying a listener allows you to take an action before dismissing the dialog.
-                        // The dialog is automatically dismissed when a dialog button is clicked.
-                        .setPositiveButton("Add New Tenant", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent addTenantIntent = new Intent(BookingScreenActivity.this, TenantInformationActivity.class);
-                                addTenantIntent.putExtra("ACTION", "ADD_TENANT");
-                                startActivityForResult(addTenantIntent, 0);
-                            }
-                        })
-
-                        // A null listener allows the button to dismiss the dialog and take no further action.
-                        .setNegativeButton("Select", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent selectTenantIntent = new Intent(BookingScreenActivity.this, SelectTenantActivity.class);
-                                if (tenantId != null) {
-                                    selectTenantIntent.putExtra("LIST_MODE", "MODIFY_PARTIALLY_SELECTED_LIST");
-                                    // When the Mode is "MODIFY_PARTIALLY_SELECTED_LIST" we send only the Id's.
-                                    // But Main tenant Id is not in the dependentsIdList. So we add it first.
-                                    ArrayList<String> temp = new ArrayList<String>();
-                                    temp.add(tenantId);
-                                    temp.addAll(dependentsIdList);
-                                    selectTenantIntent.putExtra("TENANT_LIST", temp);
-                                } else {
-                                    selectTenantIntent.putExtra("LIST_MODE", "SELECT_FROM_BLANK_LIST");
-                                }
-                                startActivityForResult(selectTenantIntent, 1);
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_info)
-                        .show();
+        selectTenantButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent selectTenantIntent = new Intent(BookingScreenActivity.this, SelectTenantActivity.class);
+                if (tenantId != null) {
+                    selectTenantIntent.putExtra("LIST_MODE", "MODIFY_PARTIALLY_SELECTED_LIST");
+                    // When the Mode is "MODIFY_PARTIALLY_SELECTED_LIST" we send only the Id's.
+                    // But Main tenant Id is not in the dependentsIdList. So we add it first.
+                    ArrayList<String> temp = new ArrayList<String>();
+                    temp.add(tenantId);
+                    temp.addAll(dependentsIdList);
+                    selectTenantIntent.putExtra("TENANT_LIST", temp);
+                } else {
+                    selectTenantIntent.putExtra("LIST_MODE", "SELECT_FROM_BLANK_LIST");
+                }
+                startActivityForResult(selectTenantIntent, INTENT_REQUEST_CODE_SELECT_TENANT);
             }
         });
     }
@@ -272,7 +261,7 @@ public class BookingScreenActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if (requestCode == 0) {
+            if (requestCode == INTENT_REQUEST_CODE_ADD_TENANT) {
                 String newTenanId = data.getStringExtra("TENANT_ID");
                 if (tenantId == null) {
                     tenantId = newTenanId;

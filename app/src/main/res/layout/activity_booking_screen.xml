@@ -169,4 +169,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/booking_split_room_seek_bar" />
 
+    <ImageButton
+        android:id="@+id/booking_select_tenant"
+        android:layout_width="24dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toEndOf="@+id/booking_add_tenant"
+        app:layout_constraintTop_toTopOf="@+id/guideline8"
+        app:srcCompat="@android:drawable/checkbox_on_background" />
+
 </android.support.constraint.ConstraintLayout>

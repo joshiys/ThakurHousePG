@@ -106,18 +106,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/bedview_tenant_name" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/bedview_floating_cancelButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:clickable="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bedview_booking_date"
-        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
-
     <Button
         android:id="@+id/bedview_button_modify"
         style="@style/Widget.AppCompat.Button.Borderless"

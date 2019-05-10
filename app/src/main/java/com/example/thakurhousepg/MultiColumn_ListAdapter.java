@@ -92,8 +92,8 @@ public class MultiColumn_ListAdapter extends ArrayAdapter<TableViewColumns> {
                 colorSet ++;
             }
 
-        }else */if(outstandingTable != null){
-//            Toast.makeText(this.parent, "Inside column  " +totalColumns, Toast.LENGTH_SHORT).show();
+        }else */
+       if(outstandingTable != null){
             TextView roomNumber = (TextView) convertView.findViewById(R.id.roomNumberText);
             TextView rent = (TextView) convertView.findViewById(R.id.outstandingRentText);
             TextView deposit = (TextView) convertView.findViewById(R.id.outstandingDepositText);
@@ -120,9 +120,13 @@ public class MultiColumn_ListAdapter extends ArrayAdapter<TableViewColumns> {
                 deposit.setText(outstandingTable.getOutstandingDeposit());
             }
             if (penalty != null) {
-                penalty.setText(outstandingTable.getOutstandingPenalty());//getTenantOutstanding
+                penalty.setText(outstandingTable.getOutstandingPenalty());
             }
 
+            DataModel.Pending pending = outstandingTable.getPendingEntry();
+            if(pending != null && NetworkDataModule.getInstance().getBookingInfo(pending.bookingId).closingDate != null) {
+                convertView.setBackgroundColor(Color.RED);
+            }
 
             if(outstandingTable.getRoomNumber() == "Room Number") {
                 roomNumber.setBackgroundColor(Color.LTGRAY);

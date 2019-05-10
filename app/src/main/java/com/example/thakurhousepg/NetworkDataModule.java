@@ -3,6 +3,9 @@ package com.example.thakurhousepg;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
@@ -180,10 +183,13 @@ public class NetworkDataModule {
     private NetworkDataModule() {
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
         httpClient.addInterceptor(logging);
+        Gson gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd")
+                .create();
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://192.168.0.100:8080/")
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(httpClient.build())
                 .build();
 
@@ -329,6 +335,11 @@ public class NetworkDataModule {
         });
     }
     //endregion
+
+    public void reload() {
+        initialDataFetchCompletionCount = 0;
+        init();
+    }
 
     public boolean isInitialDataFetchComplete() {
         return initialDataFetchCompletionCount == 5;
@@ -944,14 +955,21 @@ public class NetworkDataModule {
             @Override
             public void onResponse(Call<DataModel.Booking> call, Response<DataModel.Booking> response) {
                 Log.i(TAG, "Close Booking Successful");
-                DataModel.Booking booking = (DataModel.Booking) response.body();
+                DataModel.Booking newBooking = response.body();
 
-                DataModel.Bed bed = getBedInfo(booking.bedNumber);
+                for (DataModel.Booking b : bookingsList) {
+                    if (b.id.equals(newBooking.id)) {
+                        bookingsList.set(bookingsList.indexOf(b), newBooking);
+                        break;
+                    }
+                }
+
+                DataModel.Bed bed = getBedInfo(newBooking.bedNumber);
                 bed.isOccupied = false;
                 bed.bookingId = null;
                 updateBed(bed, null);
 
-                DataModel.Tenant tenant = getTenantInfoForBooking(booking.id);
+                DataModel.Tenant tenant = getTenantInfoForBooking(newBooking.id);
                 tenant.isCurrent = false;
                 tenant.parentId = "0";
                 updateTenant(tenant, null);
@@ -961,19 +979,8 @@ public class NetworkDataModule {
                     updateTenant(t, null);
                 }
 
-                int index = -1;
-                for (DataModel.Booking b : bookingsList) {
-                    if (b.id.equals(booking.id)) {
-                        index = bookingsList.indexOf(b);
-                        break;
-                    }
-                }
-                if(index != -1) {
-                    bookingsList.remove(index);
-                }
-
                 if(cancelBooking) {
-                    deletePendingEntriesForBooking(booking.id, null);
+                    deletePendingEntriesForBooking(newBooking.id, null);
                 }
 
                 if (callback != null) {
@@ -1031,6 +1038,7 @@ public class NetworkDataModule {
     }
 
     public void createReceipt(DataModel.ReceiptType type, String bookingId, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModuleCallback<DataModel.Receipt> callback) {
+        if (bookingId==null) throw new AssertionError("Object cannot be null");
         DataModel.Receipt newReceipt = new DataModel.Receipt(null, bookingId, onlineAmount, cashAmount, penaltyWaiveOff, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), type);
         Call<DataModel.Receipt> createReceiptCall = receiptsService.createReceipt(newReceipt);
 

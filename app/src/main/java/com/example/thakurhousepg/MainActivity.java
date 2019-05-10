@@ -17,6 +17,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,10 +26,10 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     SMSManagement smsHandle;
-    Button sendSMS;
+    Button sendSMS, receivedRentValue, outstandingRentValue;
     Button btn_receipt, btn_occupancy, btn_payment;
     EditText roomNumber;
-    Button receivedRentValue, outstandingRentValue, totalExpectedRentValue;
+    ImageButton reloadButton;
     TextView headerView;
 
     private static final String TAG = "MainActivity";
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             receivedRentValue = findViewById(R.id.receivedRent);
             outstandingRentValue = findViewById(R.id.outstandingRent);
+            reloadButton = findViewById(R.id.reload_button);
 
             headerView = findViewById(R.id.main_monthButton);
 
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             receivedRentValue.setOnClickListener(this);
             outstandingRentValue.setOnClickListener(this);
+            reloadButton.setOnClickListener(this);
 
             roomNumber.setSelection(roomNumber.getText().length());
 
@@ -82,33 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             sendSMS.setOnClickListener(this);
 
-            ProgressDialog progress = new ProgressDialog(this);
-            progress.setTitle("Loading");
-            progress.setMessage("Wait while loading...");
-            progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
-            progress.show();
-            if (!restService.isInitialDataFetchComplete()) {
-                restService.initialDataFetchCompletionCallBack = new NetworkDataModuleCallback() {
-                    @Override
-                    public void onSuccess(Object obj) {
-                        progress.dismiss();
-                        setPendingAmountEntries();
-                        setTotalOutstandingRent();
-                    }
-
-                    @Override
-                    public void onFailure() {
-                        progress.dismiss();
-                        Toast toast = Toast.makeText(MainActivity.this, "Call To Network Service Failed", Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
-                    }
-
-                    @Override
-                    public void onResult() {
-                        progress.dismiss();
-                    }
-                };
-            }
+            fetch();
         }
     }
 
@@ -203,10 +180,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
 //                startActivity(paymentIntent);
                 break;
+            case R.id.reload_button:
+                fetch();
+                break;
         }
     }
 
-    void setTotalOutstandingRent() {
+    private void fetch() {
+        if (restService.isInitialDataFetchComplete()) {
+            restService.reload();
+        }
+        ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("Loading");
+        progress.setMessage("Wait while loading...");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
+
+        restService.initialDataFetchCompletionCallBack = new NetworkDataModuleCallback() {
+            @Override
+            public void onSuccess(Object obj) {
+                progress.dismiss();
+                setPendingAmountEntries();
+                setTotalOutstandingRent();
+            }
+
+            @Override
+            public void onFailure() {
+                progress.dismiss();
+                Toast toast = Toast.makeText(MainActivity.this, "Call To Network Service Failed", Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
+            }
+
+            @Override
+            public void onResult() {
+                progress.dismiss();
+            }
+        };
+    }
+
+    private void setTotalOutstandingRent() {
         receivedRentValue.setText(restService.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.RENT));
         outstandingRentValue.setText(String.valueOf(restService.getTotalPendingAmount(DataModel.PendingType.RENT)));
