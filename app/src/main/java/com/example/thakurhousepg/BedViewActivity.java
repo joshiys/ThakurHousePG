@@ -120,9 +120,9 @@ public class BedViewActivity extends AppCompatActivity {
                     startActivityForResult(bookingIntent, INTENT_REQUEST_CODE_BOOKING);
                 } else if(bookingButton.getText().toString().equals("Update Booking")) {
                     dataModule.updateBooking(bedInfo.bookingId, rentAmount.getText().toString(), depositAmount.getText().toString(),
-                            new NetworkDataModuleCallback<DataModel.Booking>() {
+                            new NetworkDataModuleCallback<DataModel.DataModelClass>() {
                                 @Override
-                                public void onSuccess(DataModel.Booking obj) {
+                                public void onSuccess(DataModel.DataModelClass obj) {
                                 }
 
                                 @Override
@@ -137,9 +137,7 @@ public class BedViewActivity extends AppCompatActivity {
                     });
                 } else {
                     AlertDialog.Builder bookingActionBuilder = new AlertDialog.Builder(BedViewActivity.this);
-                    DialogInterface.OnClickListener itemsChoice = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                    DialogInterface.OnClickListener itemsChoice = (DialogInterface dialog, int which) -> {
                             switch (which) {
                                 case 0:
                                     closeBooking(bedInfo.bookingId, true);
@@ -156,7 +154,6 @@ public class BedViewActivity extends AppCompatActivity {
                                     startActivityForResult(receiptIntent, INTENT_REQUEST_CODE_RECEIPT);
                                     break;
                             }
-                        }
                     };
 
                     if(dataModule.getPendingAmountForBooking(bedInfo.bookingId) > 0) {
@@ -243,9 +240,9 @@ public class BedViewActivity extends AppCompatActivity {
 
     private void closeBooking(String id, boolean shouldCancel) {
         Toast.makeText(BedViewActivity.this, "Closing the Booking", Toast.LENGTH_SHORT).show();
-        dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), shouldCancel, new NetworkDataModuleCallback<DataModel.Booking>() {
+        dataModule.closeBooking(id, new SimpleDateFormat("yyyy-MM-dd").format(new Date()).toString(), shouldCancel, new NetworkDataModuleCallback<DataModel.DataModelClass>() {
             @Override
-            public void onSuccess(DataModel.Booking obj) {
+            public void onSuccess(DataModel.DataModelClass obj) {
                 BedsListContent.refresh();
                 finish();
             }

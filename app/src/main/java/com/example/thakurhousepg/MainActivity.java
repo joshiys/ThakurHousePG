@@ -25,18 +25,23 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-    SMSManagement smsHandle;
-    Button sendSMS, receivedRentValue, outstandingRentValue;
-    Button btn_receipt, btn_occupancy, btn_payment;
-    EditText roomNumber;
-    ImageButton reloadButton;
-    TextView headerView;
+    private SMSManagement smsHandle;
+    private Button sendSMS;
+    private Button receivedRentValue;
+    private Button outstandingRentValue;
+    private Button btn_receipt;
+    private Button btn_occupancy;
+    private Button btn_payment;
+    private EditText roomNumber;
+    private ImageButton reloadButton;
+    private TextView headerView;
 
+    private ProgressDialog progress;
     private static final String TAG = "MainActivity";
     private NetworkDataModule restService;
 
-    int PERMISSION_ALL = 1;
-    String[] PERMISSIONS = {
+    private final int PERMISSION_ALL = 1;
+    private final String[] PERMISSIONS = {
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
             android.Manifest.permission.SEND_SMS,
 //            Manifest.permission.INTERNET,
@@ -85,6 +90,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             sendSMS.setOnClickListener(this);
 
+            progress = new ProgressDialog(this);
+            progress.setTitle("Loading");
+            progress.setMessage("Wait while loading...");
+            progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+
             fetch();
         }
     }
@@ -102,15 +112,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         checkForPermissions();
-        if (restService.isInitialDataFetchComplete()) {
+        if (!progress.isShowing()) {
             setTotalOutstandingRent();
         }
     }
 
     @Override
     public void onClick(View view) {
-        String outstandingRent = "", outstandingDeposit = "", outstandingPenalty = "";
-
         switch(view.getId()){
             case R.id.sendSMSButton:
                 if(!roomNumber.getText().toString().isEmpty()) {
@@ -187,16 +195,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void fetch() {
-        if (restService.isInitialDataFetchComplete()) {
-            restService.reload();
-        }
-        ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Loading");
-        progress.setMessage("Wait while loading...");
-        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
-        restService.initialDataFetchCompletionCallBack = new NetworkDataModuleCallback() {
+        NetworkDataModuleCallback initialDataFetchCompletionCallBack = new NetworkDataModuleCallback() {
             @Override
             public void onSuccess(Object obj) {
                 progress.dismiss();
@@ -216,6 +217,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 progress.dismiss();
             }
         };
+
+        restService.loadData(initialDataFetchCompletionCallBack);
     }
 
     private void setTotalOutstandingRent() {
@@ -225,30 +228,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setPendingAmountEntries() {
-        Calendar rightNow = Calendar.getInstance();
 
+        Calendar rightNow = Calendar.getInstance();
+/*
         SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
         int monthUpdated = settings.getInt("pendingEntriesUpdatedForMonth", 0);
+*/
+        int monthUpdated = restService.getPendingEntriesUpdatedForMonth();
 
         if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
             Log.i(TAG, "Creating Pending Entries for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
+            if(!restService.getCurrentBookings().isEmpty()) {
+                restService.createMonthlyPendingEntries((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED),
+                        new NetworkDataModuleCallback<DataModel.Pending>() {
+                            @Override
+                            public void onSuccess(DataModel.Pending obj) {
+                                restService.setPendingEntriesUpdatedForMonth(rightNow.get(Calendar.MONTH) + 1);
+                            }
 
-            restService.createMonthlyPendingEntries((ActivityCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED), new NetworkDataModuleCallback<DataModel.Pending>() {
-                @Override
-                public void onSuccess(DataModel.Pending obj) {
-                    SharedPreferences.Editor settingsEditor = settings.edit();
-                    /* Calendar object in Java starts the month entries from 0, (as in 0 for Jauary to 11 for December)
-                        But SQlite starts them from 1, so make calculation in DataModule easier, add 1 here
-                    */
-                    settingsEditor.putInt("pendingEntriesUpdatedForMonth", (rightNow.get(Calendar.MONTH) + 1));
-                    settingsEditor.commit();
-                }
-
-                @Override
-                public void onFailure() {
-                    Toast.makeText(MainActivity.this, "Could not create Monthly Pending Entries", Toast.LENGTH_LONG).show();
-                }
-            });
+                            @Override
+                            public void onFailure() {
+                                Toast.makeText(MainActivity.this, "Could not create Monthly Pending Entries", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                );
+            } else {
+                restService.setPendingEntriesUpdatedForMonth(rightNow.get(Calendar.MONTH) + 1);
+            }
         }
     }
 

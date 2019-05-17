@@ -46,7 +46,10 @@ public class DataModel {
     }
 
     //MARK: ---------------------------------- Data Class Definitions ---------------------------------
-    public static class Bed {
+    public static class DataModelClass {
+    }
+
+    public static class Bed extends DataModelClass {
         @SerializedName("roomNumber")
         public String bedNumber;
         public String bookingId;
@@ -63,6 +66,11 @@ public class DataModel {
             this.depositAmount = depositAmount;
             this.isOccupied = isOccupied;
         }
+
+        public String getBedNumber() {
+            return bedNumber;
+        }
+
         @Override
         public String toString() {
             return bedNumber + " , " + bookingId + " , " + rentAmount + " , " + depositAmount + " , " + isOccupied;
@@ -70,7 +78,7 @@ public class DataModel {
         }
     }
 
-    public static class Booking {
+    public static class Booking extends DataModelClass {
         @SerializedName("bookingId")
         public final String id;
         @SerializedName("roomNumber")
@@ -92,9 +100,15 @@ public class DataModel {
             this.tenantId = tenantId;
             this.closingDate = closingDate;
         }
+
+        @Override
+        public String toString() {
+            return id + " , " + rentAmount + " , " + depositAmount + " , " + bookingDate + " , " + isWholeRoom + " , " + tenantId + " , " + closingDate;
+
+        }
     }
 
-    public static class Tenant implements java.io.Serializable {
+    public static class Tenant extends DataModelClass implements java.io.Serializable {
         @SerializedName("tenantId")
         public String id;
         public String name;
@@ -113,9 +127,15 @@ public class DataModel {
             this.address = address;
             this.parentId = parentId;
         }
+
+        @Override
+        public String toString() {
+            return id + " , " + name + " , " + mobile + " , " + email + " , " + address + " , " + isCurrent + " , " + parentId;
+
+        }
     }
 
-    public static class Receipt {
+    public static class Receipt extends DataModelClass {
         public final String id;
         public final String onlineAmount;
         public final String cashAmount;
@@ -139,11 +159,7 @@ public class DataModel {
         }
     }
 
-    public static class Payment {
-
-    }
-
-    public static class Pending {
+    public static class Pending extends DataModelClass {
         public String id;
         @SerializedName("pendingAmount")
         public int pendingAmt;
@@ -161,5 +177,9 @@ public class DataModel {
             this.type = type;
             this.pendingMonth = pendingMonth;
         }
+    }
+
+    public static class Payment extends DataModelClass {
+
     }
 }
