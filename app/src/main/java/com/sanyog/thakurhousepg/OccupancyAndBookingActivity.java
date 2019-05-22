@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +19,8 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+
 
 import java.util.ArrayList;
 import java.util.Calendar;

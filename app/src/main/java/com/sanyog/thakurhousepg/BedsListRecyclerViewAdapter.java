@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,8 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.example.thakurhousepg.BedsListFragment.OnBedsListInteractionListener;
-import com.example.thakurhousepg.BedsListContent.BedsListItem;
+import com.sanyog.thakurhousepg.BedsListFragment.OnBedsListInteractionListener;
+import com.sanyog.thakurhousepg.BedsListContent.BedsListItem;
+
 
 import java.util.List;
 

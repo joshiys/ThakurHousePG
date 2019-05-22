@@ -10,7 +10,7 @@
     android:paddingRight="30dp"
 
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context="com.sanyog.thakurhousepg.MainActivity">
 
     <Button
         android:id="@+id/main_monthButton"

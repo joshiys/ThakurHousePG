@@ -1,9 +1,8 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -20,6 +19,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+
 
 import java.util.Calendar;
 import java.util.Locale;

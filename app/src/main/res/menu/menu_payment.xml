@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.thakurhousepg.ReceiptActivity">
+    tools:context="com.sanyog.thakurhousepg.com.sanyog.thakurhousepg.ReceiptActivity">
     <item
         android:id="@+id/menu_actionShowOutstandings"
         android:orderInCategory="100"
