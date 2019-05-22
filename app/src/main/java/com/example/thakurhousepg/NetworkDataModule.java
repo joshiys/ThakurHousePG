@@ -569,7 +569,7 @@ public class NetworkDataModule {
     public String getTotalExpectedRent() {
         int totalRent = 0;
         for (DataModel.Booking b: bookingsList) {
-            if(b.closingDate == null || getMonth(b.closingDate) == Calendar.getInstance().get(Calendar.MONTH)) {
+            if(b.closingDate == null || getMonth(b.closingDate) == Calendar.getInstance().get(Calendar.MONTH) + 1) {
                 totalRent += Integer.parseInt(b.rentAmount);
             }
         }
