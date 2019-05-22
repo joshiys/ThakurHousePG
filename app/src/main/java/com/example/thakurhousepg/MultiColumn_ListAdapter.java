@@ -48,14 +48,7 @@ public class MultiColumn_ListAdapter extends ArrayAdapter<TableViewColumns> {
         TableViewColumns mTable = null;
         TableViewColumns outstandingTable = null;
 
-        /*if(masterTables != null) {
-            Log.d("TAGG", "mTable is NOT NULL: ");
-            mTable = masterTables.get(position);
-        } else {
-            Log.d("TAGG", "mTable is NULL: ");
-        }*/
         if(outstandingList != null) {
-            Log.d("TAGG", "tTable is NULL: ");
             outstandingTable = outstandingList.get(position);
         }
 
@@ -115,7 +108,6 @@ public class MultiColumn_ListAdapter extends ArrayAdapter<TableViewColumns> {
             if(rent != null) {
                 rent.setText(outstandingTable.getOutstandingRent());
             }
-            Log.d("TAGG", "Mobile: "+outstandingTable.getOutstandingRent());
             if(deposit != null) {
                 deposit.setText(outstandingTable.getOutstandingDeposit());
             }

@@ -12,4 +12,5 @@ public final class Constants {
 
     public static final int RECEIPT_ACTIVITY_NUM_SECTIONS = 3;
 
+    public static final String  THAKURHOUSEPG_BASE_URL = "http://192.168.0.100:8080/";
 }

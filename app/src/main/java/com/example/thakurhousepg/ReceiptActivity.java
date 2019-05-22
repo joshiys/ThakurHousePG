@@ -336,12 +336,13 @@ public class ReceiptActivity extends AppCompatActivity {
 
                         if (pendingEntry != null) {
                             dbHelper.createReceiptForPendingEntry(pendingEntry.id, onlineAmt.getText().toString(), cashAmt.getText().toString(),
-                                    (type == DataModel.ReceiptType.PENALTY && waiveOffCheckBox.isChecked()), new NetworkDataModuleCallback<DataModel.Receipt>() {
+                                    (type == DataModel.ReceiptType.PENALTY && waiveOffCheckBox.isChecked()), new NetworkDataModuleCallback<DataModel.DataModelClass>() {
                                         @Override
-                                        public void onSuccess(DataModel.Receipt obj) {
+                                        public void onSuccess(DataModel.DataModelClass obj) {
                                             Toast.makeText(getActivity(), "Receipt Generated.", Toast.LENGTH_SHORT).show();
                                             BedsListContent.refresh();
-                                            sendSMSAndFInish();                                        }
+                                            sendSMSAndFInish();
+                                        }
 
                                         @Override
                                         public void onFailure() {
