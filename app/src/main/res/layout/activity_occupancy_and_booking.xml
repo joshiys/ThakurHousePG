@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".OccupancyAndBookingActivity">
+    tools:context="com.sanyog.thakurhousepg.OccupancyAndBookingActivity">
 
     <android.support.design.widget.TabLayout
         android:id="@+id/floor_tabs_id"

@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
-import static com.example.thakurhousepg.Constants.*;
+import static com.sanyog.thakurhousepg.Constants.*;
 
 public class BookingScreenActivity extends AppCompatActivity {
 

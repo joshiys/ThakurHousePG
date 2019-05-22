@@ -1,17 +1,12 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;

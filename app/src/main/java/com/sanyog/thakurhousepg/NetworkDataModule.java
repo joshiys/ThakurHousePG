@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 
 import android.util.Log;
@@ -34,10 +34,10 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
-import static com.example.thakurhousepg.Constants.THAKURHOUSE_DATE_FORMAT;
-import static com.example.thakurhousepg.Constants.INITIAL_PING_DELAY;
-import static com.example.thakurhousepg.Constants.PING_PERIOD;
-import static com.example.thakurhousepg.Constants.THAKURHOUSEPG_BASE_URL;
+import static com.sanyog.thakurhousepg.Constants.THAKURHOUSE_DATE_FORMAT;
+import static com.sanyog.thakurhousepg.Constants.INITIAL_PING_DELAY;
+import static com.sanyog.thakurhousepg.Constants.PING_PERIOD;
+import static com.sanyog.thakurhousepg.Constants.THAKURHOUSEPG_BASE_URL;
 
 
 //region Service Interfaces
@@ -569,7 +569,7 @@ public class NetworkDataModule {
     public String getTotalExpectedRent() {
         int totalRent = 0;
         for (DataModel.Booking b: bookingsList) {
-            if(b.closingDate == null || getMonth(b.closingDate) == Calendar.getInstance().get(Calendar.MONTH) + 1) {
+            if(b.closingDate == null || getMonth(b.closingDate) == (Calendar.getInstance().get(Calendar.MONTH) + 1)) {
                 totalRent += Integer.parseInt(b.rentAmount);
             }
         }

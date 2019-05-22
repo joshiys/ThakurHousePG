@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import org.junit.Test;
 

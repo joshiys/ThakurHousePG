@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
 

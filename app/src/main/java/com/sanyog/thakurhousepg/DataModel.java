@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import com.google.gson.annotations.SerializedName;
 

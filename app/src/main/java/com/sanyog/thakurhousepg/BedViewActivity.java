@@ -1,9 +1,8 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,11 +15,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static com.example.thakurhousepg.Constants.*;
+import static com.sanyog.thakurhousepg.Constants.*;
 
 public class BedViewActivity extends AppCompatActivity {
 

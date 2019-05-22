@@ -1,4 +1,4 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 public final class Constants {
     public static final int INTENT_REQUEST_CODE_BOOKING = 0;
@@ -17,7 +17,9 @@ public final class Constants {
 
     public static final String THAKURHOUSE_DATE_FORMAT = "yyyy-MM-dd";
 
-    public static final String  THAKURHOUSEPG_BASE_URL = "http://192.168.1.12:8080/";
+//    public static final String  THAKURHOUSEPG_BASE_URL = "http://10.0.2.2:8080/";
+//    public static final String  THAKURHOUSEPG_BASE_URL = "http://192.168.1.5:8080/";
+    public static final String  THAKURHOUSEPG_BASE_URL = "http://223.229.149.129:8080/";
 
 
 }

@@ -1,13 +1,11 @@
-package com.example.thakurhousepg;
+package com.sanyog.thakurhousepg;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -33,12 +31,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+
 import java.util.ArrayList;
 
-import static com.example.thakurhousepg.Constants.RECEIPT_ACTIVITY_NUM_SECTIONS;
-import static com.example.thakurhousepg.Constants.RECEIPT_SECTION_DEPOSIT;
-import static com.example.thakurhousepg.Constants.RECEIPT_SECTION_PENALTY;
-import static com.example.thakurhousepg.Constants.RECEIPT_SECTION_RENT;
+import static com.sanyog.thakurhousepg.Constants.RECEIPT_ACTIVITY_NUM_SECTIONS;
+import static com.sanyog.thakurhousepg.Constants.RECEIPT_SECTION_DEPOSIT;
+import static com.sanyog.thakurhousepg.Constants.RECEIPT_SECTION_PENALTY;
+import static com.sanyog.thakurhousepg.Constants.RECEIPT_SECTION_RENT;
 
 public class ReceiptActivity extends AppCompatActivity {
 
