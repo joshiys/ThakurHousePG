@@ -26,11 +26,6 @@ public class ViewOutstandingActivity extends AppCompatActivity {
 
         dataModule = NetworkDataModule.getInstance();
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         showOutstandingIncoming();
     }
 

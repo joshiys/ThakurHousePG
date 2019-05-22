@@ -124,12 +124,10 @@ public class BookingScreenActivity extends AppCompatActivity {
                     }
 
                     dataModule.createNewBooking(bedNumber.getText().toString(), tenantId, rentAmount.getText().toString(), depositAmount.getText().toString(), bookingDate.getText().toString(),
-                            new NetworkDataModuleCallback<DataModel.DataModelClass>() {
+                            new NetworkDataModuleCallback<DataModel.Booking>() {
                         @Override
-                        public void onSuccess(DataModel.DataModelClass obj) {
-                            DataModel.Booking newBooking = (DataModel.Booking) obj;
-
-                            String newBookingId = newBooking.id;
+                        public void onSuccess(DataModel.Booking obj) {
+                            String newBookingId = obj.id;
                             Log.i(TAG, "result is " + newBookingId);
                             String pendingRent = reduceFirstRentCheckbox.isChecked() ? firstRent.getText().toString():rentAmount.getText().toString();
 
