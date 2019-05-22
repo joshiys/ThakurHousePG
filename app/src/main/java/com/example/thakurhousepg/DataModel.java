@@ -47,9 +47,12 @@ public class DataModel {
 
     //MARK: ---------------------------------- Data Class Definitions ---------------------------------
     public static class DataModelClass {
+        @SerializedName("sequenceNumber")
+        public Long sequenceNumber;
     }
 
     public static class Bed extends DataModelClass {
+        public String id;
         @SerializedName("roomNumber")
         public String bedNumber;
         public String bookingId;
@@ -59,7 +62,8 @@ public class DataModel {
         public String depositAmount;
         public Boolean isOccupied;
 
-        public Bed(String bedNumber, String bookingId, String rentAmount, String depositAmount, Boolean isOccupied) {
+        public Bed(String id, String bedNumber, String bookingId, String rentAmount, String depositAmount, Boolean isOccupied) {
+            this.id = id;
             this.bedNumber = bedNumber;
             this.bookingId = bookingId;
             this.rentAmount = rentAmount;
