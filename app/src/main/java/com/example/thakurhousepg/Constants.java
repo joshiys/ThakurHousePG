@@ -12,12 +12,5 @@ public final class Constants {
 
     public static final int RECEIPT_ACTIVITY_NUM_SECTIONS = 3;
 
-    public static final int PING_PERIOD = 10;
-    public static final int INITIAL_PING_DELAY = 10;
-
-    public static final String THAKURHOUSE_DATE_FORMAT = "yyyy-MM-dd";
-
-    public static final String  THAKURHOUSEPG_BASE_URL = "http://192.168.1.12:8080/";
-
-
+    public static final String  THAKURHOUSEPG_BASE_URL = "http://192.168.0.100:8080/";
 }
