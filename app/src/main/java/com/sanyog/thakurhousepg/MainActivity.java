@@ -1,7 +1,9 @@
 package com.sanyog.thakurhousepg;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -11,6 +13,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -21,9 +25,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Locale;
+
+import static com.sanyog.thakurhousepg.Constants.THAKURHOUSEPG_BASE_URL;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private SMSManagement smsHandle;
@@ -39,7 +45,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ProgressDialog progress;
     private static final String TAG = "MainActivity";
-    private NetworkDataModule restService;
+    private NetworkDataModule restService = null;
+
+    private boolean connectionStatus = false;
+    String baseURL = THAKURHOUSEPG_BASE_URL;
 
     private final int PERMISSION_ALL = 1;
     private final String[] PERMISSIONS = {
@@ -58,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         if(isNetworkAvailable()) {
-            restService = NetworkDataModule.getInstance();
+//            restService = NetworkDataModule.getInstance();
 
             btn_receipt = findViewById(R.id.receipt_button);
             btn_occupancy = findViewById(R.id.occupancy_button);
@@ -84,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             roomNumber.setSelection(roomNumber.getText().length());
 
             SMSManagement.setContext(this);
-            smsHandle = SMSManagement.getInstance();
+
 
             headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
             headerView.setOnClickListener(this);
@@ -96,8 +105,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             progress.setMessage("Wait while loading...");
             progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
-            fetch();
+            confirmServerAddress();
         }
+    }
+
+    private void confirmServerAddress() {
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+        EditText editText = new EditText(this);
+        editText.setText(baseURL);
+        editText.setSingleLine();
+        editText.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
+//        alertDialog.setMessage("Enter URL");
+        alertDialog.setTitle("Confirm Server URL");
+
+        alertDialog.setView(editText);
+
+        alertDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int whichButton) {
+                if(!editText.getText().toString().isEmpty()) {
+                    baseURL = editText.getText().toString();
+                }
+                restService = NetworkDataModule.getInstance(baseURL);
+                smsHandle = SMSManagement.getInstance();
+                fetch();
+            }
+        });
+
+        alertDialog.show();
     }
 
     private void checkForPermissions() {
@@ -113,7 +149,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         checkForPermissions();
-        if (!progress.isShowing()) {
+
+        if (restService != null && !progress.isShowing()) {
             setTotalOutstandingRent();
         }
     }
@@ -190,7 +227,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                startActivity(paymentIntent);
                 break;
             case R.id.reload_button:
-                fetch();
+                /*if(connectionStatus == false) {
+                 confirmServerAddress();
+                } else*/ {
+                    fetch();
+                }
                 break;
         }
     }
@@ -202,6 +243,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSuccess(Object obj) {
                 progress.dismiss();
+                connectionStatus = true;
                 setPendingAmountEntries();
                 setTotalOutstandingRent();
             }
@@ -209,6 +251,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onFailure() {
                 progress.dismiss();
+                connectionStatus = false;
                 Toast toast = Toast.makeText(MainActivity.this, "Call To Network Service Failed", Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
             }

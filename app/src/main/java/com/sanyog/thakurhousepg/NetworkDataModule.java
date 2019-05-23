@@ -150,13 +150,22 @@ public class NetworkDataModule {
 
     public static NetworkDataModule getInstance() {
         if (_instance == null) {
-            _instance = new NetworkDataModule();
+            _instance = new NetworkDataModule(THAKURHOUSEPG_BASE_URL);
         }
 
         return _instance;
     }
 
-    private NetworkDataModule() {
+    public static NetworkDataModule getInstance(String baseURL) {
+        if (_instance == null) {
+            _instance = new NetworkDataModule(baseURL);
+        }
+
+        return _instance;
+    }
+
+
+    private NetworkDataModule(String baseURL) {
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
         httpClient.addInterceptor(logging);
         Gson gson = new GsonBuilder()
@@ -164,7 +173,7 @@ public class NetworkDataModule {
                 .create();
 
         retrofit = new Retrofit.Builder()
-                .baseUrl(THAKURHOUSEPG_BASE_URL)
+                .baseUrl(baseURL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(httpClient.build())
                 .build();
