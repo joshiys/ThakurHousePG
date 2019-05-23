@@ -325,7 +325,7 @@ public class NetworkDataModule {
             public void onResponse(Call<List<DataModel.Receipt>> call, Response<List<DataModel.Receipt>> response) {
                 receiptsList.clear();
                 receiptsList.addAll(response.body());
-                receiptsList.sort((DataModel.Receipt o1, DataModel.Receipt o2) -> o2.id.compareTo(o1.id));
+                receiptsList.sort((DataModel.Receipt o1, DataModel.Receipt o2) -> o2.date.compareTo(o1.date));
                 if (callback != null)
                     callback.onSuccess(null);
             }
@@ -475,10 +475,7 @@ public class NetworkDataModule {
     }
 
     public ArrayList<DataModel.Pending> getAllPendingEntries() {
-        ArrayList<DataModel.Pending> pendingArrayList = new ArrayList<>();
-        pendingArrayList.addAll(pendingList);
-
-        return pendingArrayList;
+        return new ArrayList<>(pendingList);
     }
 
     public int getPendingAmountForBooking(String id) {

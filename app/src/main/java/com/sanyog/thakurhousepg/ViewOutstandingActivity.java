@@ -3,10 +3,11 @@ package com.sanyog.thakurhousepg;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
+import android.widget.Toast;
 
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class ViewOutstandingActivity extends AppCompatActivity {
     TableViewColumns outstandingTable;
     ListView listView;
     NetworkDataModule dataModule;
+    private static final String TAG = "ViewOutstandingActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +42,18 @@ public class ViewOutstandingActivity extends AppCompatActivity {
 
         outstandingTableList = new ArrayList<>();
         int i = 0;
-        outstandingTable = new TableViewColumns("Room Number", "Rent","Deposit","Penalty");
-        outstandingTableList.add(i, outstandingTable);
-        i++;
-
         ArrayList<DataModel.Pending> pendingList = dataModule.getAllPendingEntries();
 
         for(DataModel.Pending pendingentry : pendingList) {
             outstandingTable = TableViewColumns.fromPendingEntry(pendingentry);
             outstandingTableList.add(i++, outstandingTable);
         }
+
+        outstandingTableList.sort((TableViewColumns l1, TableViewColumns l2) -> l1.getRoomNumber().compareTo(l2.getRoomNumber()));
+
+        outstandingTable = new TableViewColumns("Room Number", "Rent","Deposit","Penalty");
+        outstandingTableList.add(0, outstandingTable);
+
 
         final MultiColumn_ListAdapter adapter = new MultiColumn_ListAdapter(this, 4,
                 R.layout.list_adapter_view, outstandingTableList);
@@ -62,8 +66,13 @@ public class ViewOutstandingActivity extends AppCompatActivity {
                 Intent receiptIntent = new Intent(ViewOutstandingActivity.this, ReceiptActivity.class);
                 DataModel.Pending pendingEntry = outstandingTableList.get((int)l).getPendingEntry();
 
+                if (pendingEntry == null) {
+                    Toast.makeText(ViewOutstandingActivity.this, "Error, null pending entry", Toast.LENGTH_LONG).show();
+
+                    return;
+                }
                 receiptIntent.putExtra("ROOM_NUMBER", outstandingTableList.get((int)l).getRoomNumber());
-                receiptIntent.putExtra("PENDING_ID", outstandingTableList.get((int)l).getPendingEntry().id);
+                receiptIntent.putExtra("PENDING_ID", pendingEntry.id);
 
                 switch (pendingEntry.type) {
                     case DEPOSIT:
