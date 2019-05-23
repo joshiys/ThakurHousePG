@@ -255,11 +255,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast toast = Toast.makeText(MainActivity.this, "Call To Network Service Failed", Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
             }
-
-            @Override
-            public void onResult() {
-                progress.dismiss();
-            }
         };
 
         restService.loadData(initialDataFetchCompletionCallBack);
@@ -272,12 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setPendingAmountEntries() {
-
         Calendar rightNow = Calendar.getInstance();
-/*
-        SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
-        int monthUpdated = settings.getInt("pendingEntriesUpdatedForMonth", 0);
-*/
         int monthUpdated = restService.getPendingEntriesUpdatedForMonth();
 
         if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {

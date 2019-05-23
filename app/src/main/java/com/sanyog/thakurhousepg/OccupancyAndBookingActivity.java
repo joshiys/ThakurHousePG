@@ -116,35 +116,28 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
             case R.id.menu_actionAddPenalty:
                 Calendar rightNow = Calendar.getInstance();
 
-                SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
-                int monthUpdated = settings.getInt("penaltyAddedForMonth", 0);
+//                SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
+//                int monthUpdated = settings.getInt("penaltyAddedForMonth", 0);
+                int monthUpdated = restService.getPenaltyAddedForMonth();
+
                 if(monthUpdated == 0 || monthUpdated != (rightNow.get(Calendar.MONTH) + 1)) {
                     Log.i(TAG, "Adding Penalties for the month of " + rightNow.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
-                    restService.addPenaltyToOutstandingPayments(new NetworkDataModuleCallback<DataModel.Pending>() {
-                        @Override
-                        public void onSuccess(DataModel.Pending obj) {
-                        }
+                    if(!restService.getCurrentBookings().isEmpty()) {
+                        restService.addPenaltyToOutstandingPayments(new NetworkDataModuleCallback<DataModel.Pending>() {
+                            @Override
+                            public void onSuccess(DataModel.Pending obj) {
+                                restService.setPenaltyAddedForMonth(rightNow.get(Calendar.MONTH) + 1);
 
-                        @Override
-                        public void onFailure() {
-                        }
+                                BedsListContent.refresh();
+                                BedsListFragment bedsFrag = (BedsListFragment) roomPagerAdapter.getItem(currentSelectedTab);
+                                bedsFrag.reloadData();
+                            }
 
-                        @Override
-                        public void onResult() {
-                            SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
-                            Calendar rightNow = Calendar.getInstance();
-                            SharedPreferences.Editor settingsEditor = settings.edit();
-                            settingsEditor.putInt("penaltyAddedForMonth", (rightNow.get(Calendar.MONTH) + 1));
-                            settingsEditor.commit();
-
-                            BedsListContent.refresh();
-                            BedsListFragment bedsFrag = (BedsListFragment) roomPagerAdapter.getItem(currentSelectedTab);
-                            bedsFrag.reloadData();
-                        }
-
-                    });
-
-
+                            @Override
+                            public void onFailure() {
+                            }
+                        });
+                    }
                 } else {
                     Toast.makeText(OccupancyAndBookingActivity.this, "Penalty has already been added for this Month.", Toast.LENGTH_SHORT).show();
                 }

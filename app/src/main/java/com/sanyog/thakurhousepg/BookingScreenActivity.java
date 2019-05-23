@@ -154,16 +154,12 @@ public class BookingScreenActivity extends AppCompatActivity {
                                 dataModule.updateTenant(id, "", "", "", "", "", true, tenantId, new NetworkDataModuleCallback<DataModel.Tenant>() {
                                     @Override
                                     public void onSuccess(DataModel.Tenant obj) {
-
+                                        BedsListContent.refresh();
                                     }
 
                                     @Override
                                     public void onFailure() {
 
-                                    }
-                                    @Override
-                                    public void onResult() {
-                                        BedsListContent.refresh();
                                     }
                                 });
                             }

@@ -123,16 +123,12 @@ public class BedViewActivity extends AppCompatActivity {
                             new NetworkDataModuleCallback<DataModel.DataModelClass>() {
                                 @Override
                                 public void onSuccess(DataModel.DataModelClass obj) {
+                                    BedsListContent.refresh();
+                                    finish();
                                 }
 
                                 @Override
                                 public void onFailure() {
-                                }
-
-                                @Override
-                                public void onResult() {
-                                    BedsListContent.refresh();
-                                    finish();
                                 }
                     });
                 } else {

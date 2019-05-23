@@ -21,6 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -101,14 +102,17 @@ interface ReceiptService {
 }
 
 interface SettingsService {
-    @GET("/Settings/pendingEntriesMonth")
-    Call<Integer> getPendingEntriesUpdatedForMonth();
+    @GET("/Settings/settingEntries")
+    Call<DataModel.Settings> getSettingEntriesUpdatedForMonth();
 
     @GET("/Settings/getNextSequence")
     Call<Long> getNextSequence();
 
     @POST("/Settings/pendingEntriesMonth/{month}")
     Call<Long> setPendingEntriesUpdatedForMonth(@Path("month") Integer month);
+
+    @POST("/Settings/penaltyAddedForMonth/{month}")
+    Call<Long> setPenaltyAddedForMonth(@Path("month") Integer month);
 }
 //endregion
 
@@ -144,6 +148,7 @@ public class NetworkDataModule {
 
     private final ScheduledExecutorService pinger = Executors.newScheduledThreadPool(1);
     private int pendingEntriesUpdatedForMonth;
+    private int penaltyEntriesAddedForMonth;
     private long sequenceNumber;
 
     //endregion
@@ -186,6 +191,7 @@ public class NetworkDataModule {
         settingsService = retrofit.create(SettingsService.class);
 
         pendingEntriesUpdatedForMonth = 0;
+        penaltyEntriesAddedForMonth = 0;
 
         pinger.scheduleAtFixedRate(() -> ping(), INITIAL_PING_DELAY, PING_PERIOD, TimeUnit.SECONDS);
     }
@@ -334,18 +340,20 @@ public class NetworkDataModule {
     }
 
     private void retrieveSettings(NetworkDataModuleCallback callback) {
-        Call<Integer> getSettings = settingsService.getPendingEntriesUpdatedForMonth();
+        Call<DataModel.Settings> getSettings = settingsService.getSettingEntriesUpdatedForMonth();
 
-        getSettings.enqueue(new Callback<Integer>() {
+        getSettings.enqueue(new Callback<DataModel.Settings>() {
             @Override
-            public void onResponse(Call<Integer> call, Response<Integer> response) {
-                pendingEntriesUpdatedForMonth = response.body();
+            public void onResponse(Call<DataModel.Settings> call, Response<DataModel.Settings> response) {
+                DataModel.Settings s = response.body();
+                pendingEntriesUpdatedForMonth = s.pendingEntriesUpdatedForMonth;
+                penaltyEntriesAddedForMonth = s.penaltyAddedForMonth;
                 if (callback != null)
                     callback.onSuccess(null);
             }
 
             @Override
-            public void onFailure(Call<Integer> call, Throwable t) {
+            public void onFailure(Call<DataModel.Settings> call, Throwable t) {
                 if (callback != null)
                     callback.onFailure();
             }
@@ -359,6 +367,10 @@ public class NetworkDataModule {
         return pendingEntriesUpdatedForMonth;
     }
 
+    public Integer getPenaltyAddedForMonth() {
+        return penaltyEntriesAddedForMonth;
+    }
+
     public void setPendingEntriesUpdatedForMonth(Integer month) {
         Call<Long> setSettings = settingsService.setPendingEntriesUpdatedForMonth(month);
         setSettings.enqueue(new Callback<Long>() {
@@ -366,6 +378,21 @@ public class NetworkDataModule {
             public void onResponse(Call<Long> call, Response<Long> response) {
                 sequenceNumber = response.body();
                 pendingEntriesUpdatedForMonth = month;
+            }
+
+            @Override
+            public void onFailure(Call<Long> call, Throwable t) {
+            }
+        });
+    }
+
+    public void setPenaltyAddedForMonth(Integer month) {
+        Call<Long> setSettings = settingsService.setPenaltyAddedForMonth(month);
+        setSettings.enqueue(new Callback<Long>() {
+            @Override
+            public void onResponse(Call<Long> call, Response<Long> response) {
+                sequenceNumber = response.body();
+                penaltyEntriesAddedForMonth = month;
             }
 
             @Override

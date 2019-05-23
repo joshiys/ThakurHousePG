@@ -183,7 +183,10 @@ public class DataModel {
         }
     }
 
-    public static class Payment extends DataModelClass {
-
+    public static class Settings extends DataModelClass {
+        @SerializedName("pendingEntriesUpdatedForMonth")
+        public Integer pendingEntriesUpdatedForMonth;
+        @SerializedName("penaltyAddedForMonth")
+        public Integer penaltyAddedForMonth;
     }
 }
