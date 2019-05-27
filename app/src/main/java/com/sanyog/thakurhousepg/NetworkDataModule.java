@@ -883,14 +883,14 @@ public class NetworkDataModule {
         updateTenant(tenant.id, tenant.name, tenant.mobile, "", tenant.email, tenant.address, tenant.isCurrent, tenant.parentId, callback);
     }
 
-    public void updateTenant(String id, String name, String mobile, String mobile2, String email,
+    public void updateTenant(@NotNull String id, @NotNull String name, @NotNull String mobile, String mobile2, String email,
                              String address, Boolean isCurrent, @NotNull String parentId,
                              final NetworkDataModuleCallback<? super DataModel.Tenant> callback) {
         DataModel.Tenant newTenant = getTenantInfo(id); //new DataModel.Tenant(id, name, mobile, email, address, isCurrent, parentId);
         if(!name.isEmpty()) newTenant.name = name;
-        if(!email.isEmpty()) newTenant.email = email;
         if(!mobile.isEmpty()) newTenant.mobile = mobile;
-        if(!address.isEmpty()) newTenant.address = address;
+        if(email!= null && !email.isEmpty()) newTenant.email = email;
+        if(address != null && !address.isEmpty()) newTenant.address = address;
         newTenant.isCurrent = isCurrent != null ? isCurrent : false;
         if(!parentId.isEmpty()) newTenant.parentId = parentId;
 
