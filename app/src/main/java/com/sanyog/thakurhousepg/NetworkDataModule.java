@@ -625,6 +625,17 @@ public class NetworkDataModule {
                                     callback.onSuccess(obj);
                                     callback.onResult();
                                 }
+                                DataModel.Tenant tenant = getTenantInfoForBooking(pendingEntry.bookingId);
+                                if(!tenant.mobile.isEmpty()) {
+                                    SMSManagement smsManagement = SMSManagement.getInstance();
+
+                                    smsManagement.sendSMS(tenant.mobile,
+                                            smsManagement.getSMSMessage(pendingEntry.bookingId,
+                                                    tenant,
+                                                    0,
+                                                    SMSManagement.SMS_TYPE.PENALTY_GENERATED)
+                                    );
+                                }
                             }
 
                             @Override
@@ -636,17 +647,7 @@ public class NetworkDataModule {
                                 }
                             }
                         });
-                DataModel.Tenant tenant = getTenantInfoForBooking(pendingEntry.bookingId);
-                if(!tenant.mobile.isEmpty()) {
-                    SMSManagement smsManagement = SMSManagement.getInstance();
 
-                    smsManagement.sendSMS(tenant.mobile,
-                            smsManagement.getSMSMessage(pendingEntry.bookingId,
-                                    tenant,
-                                    0,
-                                    SMSManagement.SMS_TYPE.PENALTY_GENERATED)
-                    );
-                }
             }
         }
     }
