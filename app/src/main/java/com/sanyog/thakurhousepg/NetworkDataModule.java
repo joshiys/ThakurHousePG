@@ -692,21 +692,33 @@ public class NetworkDataModule {
                     rentAmount -= Integer.parseInt(r.cashAmount) + Integer.parseInt(r.onlineAmount);
                 }
             }
-            createPendingEntryForBooking(booking.id, DataModel.PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1, callback);
 
-            if(smsPermission) {
-                DataModel.Tenant tenant = getTenantInfoForBooking(booking.id);
-                if (tenant != null && !tenant.mobile.isEmpty()) {
-                    SMSManagement smsManagement = SMSManagement.getInstance();
+            createPendingEntryForBooking(booking.id, DataModel.PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1, new NetworkDataModuleCallback<DataModel.Pending>() {
+                @Override
+                public void onSuccess(DataModel.Pending obj) {
+                    if(smsPermission) {
+                        DataModel.Tenant tenant = getTenantInfoForBooking(booking.id);
+                        if (tenant != null && !tenant.mobile.isEmpty()) {
+                            SMSManagement smsManagement = SMSManagement.getInstance();
 
-                    smsManagement.sendSMS(tenant.mobile,
-                            SMSManagement.getInstance().getSMSMessage(booking.id,
-                                    tenant,
-                                    0,
-                                    SMSManagement.SMS_TYPE.MONTHLY_RENT)
-                    );
+                            smsManagement.sendSMS(tenant.mobile,
+                                    SMSManagement.getInstance().getSMSMessage(booking.id,
+                                            tenant,
+                                            0,
+                                            SMSManagement.SMS_TYPE.MONTHLY_RENT)
+                            );
+                        }
+                    }
+
+                    if(callback != null) { callback.onSuccess(obj); }
                 }
-            }
+
+                @Override
+                public void onFailure() {
+                    if(callback != null) { callback.onFailure(); }
+                }
+            });
+
         }
     }
 
