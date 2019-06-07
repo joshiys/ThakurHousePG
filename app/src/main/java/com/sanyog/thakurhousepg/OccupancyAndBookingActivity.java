@@ -227,7 +227,6 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         if(bed != null && bed.bookingId != null) {
             Toast.makeText(OccupancyAndBookingActivity.this, "Launching Rent Payment", Toast.LENGTH_SHORT).show();
             Intent receiptIntent = new Intent(OccupancyAndBookingActivity.this, ReceiptActivity.class);
-            receiptIntent.putExtra("SECTION", "Rent");
             receiptIntent.putExtra("ROOM_NUMBER", item.bedNumber);
 
             //XXX : Assuming there will be maximum three entries
@@ -241,6 +240,11 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
                 }
             }
             //XXX : Booking should not be null because bed is already booked.
+            if (!deposit.isEmpty()) {
+                receiptIntent.putExtra("SECTION", "Deposit");
+            } else {
+                receiptIntent.putExtra("SECTION", "Rent");
+            }
             receiptIntent.putExtra("RENT_AMOUNT", rent);
             receiptIntent.putExtra("DEPOSIT_AMOUNT", deposit);
 

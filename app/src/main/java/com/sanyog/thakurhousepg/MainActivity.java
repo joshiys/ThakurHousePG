@@ -129,10 +129,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 restService = NetworkDataModule.getInstance(baseURL);
                 smsHandle = SMSManagement.getInstance();
+                reloadButton.setEnabled(false);
                 fetch();
             }
         });
 
+        alertDialog.setCancelable(false);
         alertDialog.show();
     }
 
@@ -231,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  confirmServerAddress();
                 } else*/ {
                     fetch();
+                    reloadButton.setEnabled(false);
                 }
                 break;
         }
@@ -246,12 +249,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 connectionStatus = true;
                 setPendingAmountEntries();
                 setTotalOutstandingRent();
+                reloadButton.setEnabled(true);
             }
 
             @Override
             public void onFailure() {
                 progress.dismiss();
                 connectionStatus = false;
+                reloadButton.setEnabled(true);
                 Toast toast = Toast.makeText(MainActivity.this, "Call To Network Service Failed", Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
             }

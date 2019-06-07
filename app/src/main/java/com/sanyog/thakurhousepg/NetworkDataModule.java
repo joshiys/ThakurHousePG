@@ -625,6 +625,17 @@ public class NetworkDataModule {
                                     callback.onSuccess(obj);
                                     callback.onResult();
                                 }
+                                DataModel.Tenant tenant = getTenantInfoForBooking(pendingEntry.bookingId);
+                                if(!tenant.mobile.isEmpty()) {
+                                    SMSManagement smsManagement = SMSManagement.getInstance();
+
+                                    smsManagement.sendSMS(tenant.mobile,
+                                            smsManagement.getSMSMessage(pendingEntry.bookingId,
+                                                    tenant,
+                                                    0,
+                                                    SMSManagement.SMS_TYPE.PENALTY_GENERATED)
+                                    );
+                                }
                             }
 
                             @Override
@@ -636,17 +647,7 @@ public class NetworkDataModule {
                                 }
                             }
                         });
-                DataModel.Tenant tenant = getTenantInfoForBooking(pendingEntry.bookingId);
-                if(!tenant.mobile.isEmpty()) {
-                    SMSManagement smsManagement = SMSManagement.getInstance();
 
-                    smsManagement.sendSMS(tenant.mobile,
-                            smsManagement.getSMSMessage(pendingEntry.bookingId,
-                                    tenant,
-                                    0,
-                                    SMSManagement.SMS_TYPE.PENALTY_GENERATED)
-                    );
-                }
             }
         }
     }
@@ -692,21 +693,33 @@ public class NetworkDataModule {
                     rentAmount -= Integer.parseInt(r.cashAmount) + Integer.parseInt(r.onlineAmount);
                 }
             }
-            createPendingEntryForBooking(booking.id, DataModel.PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1, callback);
 
-            if(smsPermission) {
-                DataModel.Tenant tenant = getTenantInfoForBooking(booking.id);
-                if (tenant != null && !tenant.mobile.isEmpty()) {
-                    SMSManagement smsManagement = SMSManagement.getInstance();
+            createPendingEntryForBooking(booking.id, DataModel.PendingType.RENT, String.valueOf(rentAmount), Calendar.getInstance().get(Calendar.MONTH) + 1, new NetworkDataModuleCallback<DataModel.Pending>() {
+                @Override
+                public void onSuccess(DataModel.Pending obj) {
+                    if(smsPermission) {
+                        DataModel.Tenant tenant = getTenantInfoForBooking(booking.id);
+                        if (tenant != null && !tenant.mobile.isEmpty()) {
+                            SMSManagement smsManagement = SMSManagement.getInstance();
 
-                    smsManagement.sendSMS(tenant.mobile,
-                            SMSManagement.getInstance().getSMSMessage(booking.id,
-                                    tenant,
-                                    0,
-                                    SMSManagement.SMS_TYPE.MONTHLY_RENT)
-                    );
+                            smsManagement.sendSMS(tenant.mobile,
+                                    SMSManagement.getInstance().getSMSMessage(booking.id,
+                                            tenant,
+                                            0,
+                                            SMSManagement.SMS_TYPE.MONTHLY_RENT)
+                            );
+                        }
+                    }
+
+                    if(callback != null) { callback.onSuccess(obj); }
                 }
-            }
+
+                @Override
+                public void onFailure() {
+                    if(callback != null) { callback.onFailure(); }
+                }
+            });
+
         }
     }
 
@@ -739,7 +752,7 @@ public class NetworkDataModule {
         } else {
             Call <DataModel.Pending> pendingCall;
             pending.pendingAmt = totalPendingAmount;
-            pendingCall = pendingService.updatePendingEntry(pending.bookingId, pending);
+            pendingCall = pendingService.updatePendingEntry(pending.id, pending);
             pendingCall.enqueue(new Callback<DataModel.Pending>() {
                 @Override
                 public void onResponse(Call<DataModel.Pending> call, Response<DataModel.Pending> response) {
@@ -971,8 +984,7 @@ public class NetworkDataModule {
             @Override
             public void onResponse(Call<DataModel.Booking> call, Response<DataModel.Booking> response) {
                 Log.i(TAG, "Update Booking Successful");
-                DataModel.Booking booking = (DataModel.Booking) response.body();
-                NetworkMergeCallback waitingCallback = new NetworkMergeCallback(0, callback, booking);
+                DataModel.Booking booking = response.body();
 
 
                 for (DataModel.Booking b : getCurrentBookings()) {
@@ -981,18 +993,24 @@ public class NetworkDataModule {
                     }
                 }
 
-                for(DataModel.Pending p: getPendingEntriesForBooking (booking.id)) {
-                    String amt = "";
-                    if (Integer.parseInt(booking.rentAmount) != p.pendingAmt && p.type == DataModel.PendingType.RENT) {
-                        amt = booking.rentAmount;
-                    }
-                    if (Integer.parseInt(booking.depositAmount) != p.pendingAmt && p.type == DataModel.PendingType.DEPOSIT) {
-                        amt = booking.depositAmount;
-                    }
+                ArrayList<DataModel.Pending> pendings = getPendingEntriesForBooking (booking.id);
+                if (pendings.isEmpty() && callback != null) {
+                    callback.onSuccess(booking);
+                } else {
+                    NetworkMergeCallback waitingCallback = new NetworkMergeCallback(0, callback, booking);
+                    for (DataModel.Pending p : pendings) {
+                        String amt = "";
+                        if (Integer.parseInt(booking.rentAmount) != p.pendingAmt && p.type == DataModel.PendingType.RENT) {
+                            amt = booking.rentAmount;
+                        }
+                        if (Integer.parseInt(booking.depositAmount) != p.pendingAmt && p.type == DataModel.PendingType.DEPOSIT) {
+                            amt = booking.depositAmount;
+                        }
 
-                    if (!amt.isEmpty()) {
-                        waitingCallback.expectedCallBackCount += 1;
-                        updatePendingEntryForBooking(booking.id, p.type, amt, waitingCallback);
+                        if (!amt.isEmpty()) {
+                            waitingCallback.expectedCallBackCount += 1;
+                            updatePendingEntryForBooking(booking.id, p.type, amt, waitingCallback);
+                        }
                     }
                 }
             }
@@ -1074,7 +1092,7 @@ public class NetworkDataModule {
                     public void onSuccess(DataModel.Receipt newReceipt) {
                         NetworkMergeCallback waitingCallback = new NetworkMergeCallback(1, callback, newReceipt);
 
-                        updatePendingEntry(pendingEntry.id, String.valueOf(pendingEntry.pendingAmt), waitingCallback);
+                        updatePendingEntry(pendingEntry.id, String.valueOf(Integer.parseInt(cashAmount) + Integer.parseInt(onlineAmount)), waitingCallback);
                     }
 
                     @Override
@@ -1089,7 +1107,7 @@ public class NetworkDataModule {
 
     public void createReceipt(DataModel.ReceiptType type, String bookingId, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModuleCallback<DataModel.Receipt> callback) {
         if (bookingId==null) throw new AssertionError("Object cannot be null");
-        DataModel.Receipt newReceipt = new DataModel.Receipt(null, bookingId, onlineAmount, cashAmount, penaltyWaiveOff, new SimpleDateFormat(THAKURHOUSE_DATE_FORMAT).format(new Date()).toString(), type);
+        DataModel.Receipt newReceipt = new DataModel.Receipt(null, bookingId, onlineAmount, cashAmount, penaltyWaiveOff, new SimpleDateFormat(THAKURHOUSE_DATE_FORMAT).format(new Date()), type);
         Call<DataModel.Receipt> createReceiptCall = receiptsService.createReceipt(newReceipt);
 
         createReceiptCall.enqueue(new Callback<DataModel.Receipt>() {
