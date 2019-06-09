@@ -79,21 +79,21 @@ public class MonthlyDataActivity extends AppCompatActivity {
 
 
 
-        expectedRent.setText("Rs." + dataModule.getTotalExpectedRent());
+        expectedRent.setText(getString(R.string.Ruppees) + dataModule.getTotalExpectedRent());
 
-        rentCash.setText("Rs." + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        rentCash.setText(getString(R.string.Ruppees) + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.RENT));
-        depositCash.setText("Rs." + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        depositCash.setText(getString(R.string.Ruppees) + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.DEPOSIT));
 
-        rentReceipts.setText("Rs." + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        rentReceipts.setText(getString(R.string.Ruppees) + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.RENT));
-        totalOutstanding.setText("Rs." + String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.RENT)));
+        totalOutstanding.setText(getString(R.string.Ruppees) + String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.RENT)));
 
-        depositReceipts.setText("Rs." + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        depositReceipts.setText(getString(R.string.Ruppees) + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.DEPOSIT));
 
-        totalDepositOutstanding.setText("Rs." + String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.DEPOSIT)));
+        totalDepositOutstanding.setText(getString(R.string.Ruppees)+ String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.DEPOSIT)));
     }
 
     @Override

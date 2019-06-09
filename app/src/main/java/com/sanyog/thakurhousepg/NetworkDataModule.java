@@ -99,6 +99,9 @@ interface ReceiptService {
 
     @PUT("/receipts")
     Call<DataModel.Receipt> createReceipt(@Body DataModel.Receipt receipt);
+
+    @DELETE("/receipts/{id}")
+    Call<Long> deleteReceipt(@Path("id") String id);
 }
 
 interface SettingsService {
@@ -326,6 +329,7 @@ public class NetworkDataModule {
                 receiptsList.clear();
                 receiptsList.addAll(response.body());
                 receiptsList.sort((DataModel.Receipt o1, DataModel.Receipt o2) -> o2.date.compareTo(o1.date));
+                receiptsList.sort((DataModel.Receipt o1, DataModel.Receipt o2) -> o1.id.compareTo(o2.id));
                 if (callback != null)
                     callback.onSuccess(null);
             }
@@ -363,15 +367,15 @@ public class NetworkDataModule {
     //endregion
 
 
-    public Integer getPendingEntriesUpdatedForMonth() {
+    Integer getPendingEntriesUpdatedForMonth() {
         return pendingEntriesUpdatedForMonth;
     }
 
-    public Integer getPenaltyAddedForMonth() {
+    Integer getPenaltyAddedForMonth() {
         return penaltyEntriesAddedForMonth;
     }
 
-    public void setPendingEntriesUpdatedForMonth(Integer month) {
+    void setPendingEntriesUpdatedForMonth(Integer month) {
         Call<Long> setSettings = settingsService.setPendingEntriesUpdatedForMonth(month);
         setSettings.enqueue(new Callback<Long>() {
             @Override
@@ -386,7 +390,7 @@ public class NetworkDataModule {
         });
     }
 
-    public void setPenaltyAddedForMonth(Integer month) {
+    void setPenaltyAddedForMonth(Integer month) {
         Call<Long> setSettings = settingsService.setPenaltyAddedForMonth(month);
         setSettings.enqueue(new Callback<Long>() {
             @Override
@@ -401,11 +405,11 @@ public class NetworkDataModule {
         });
     }
 
-    public ArrayList<DataModel.Bed> getRoomsList() {
+    ArrayList<DataModel.Bed> getRoomsList() {
         return roomsList;
     }
 
-    public ArrayList<DataModel.Tenant> getAllTenants(boolean onlyCurrent) {
+    ArrayList<DataModel.Tenant> getAllTenants(boolean onlyCurrent) {
         ArrayList<DataModel.Tenant> list = new ArrayList<DataModel.Tenant>();
         if (onlyCurrent) {
             for (DataModel.Tenant t : tenantsList) {
@@ -418,7 +422,7 @@ public class NetworkDataModule {
         return list;
     }
 
-    public ArrayList<DataModel.Booking> getCurrentBookings() {
+    ArrayList<DataModel.Booking> getCurrentBookings() {
         ArrayList<DataModel.Booking> currentBookings = new ArrayList<>();
         for (DataModel.Booking b: bookingsList) {
             if(b.closingDate == null)
@@ -435,7 +439,7 @@ public class NetworkDataModule {
         return bookingList;
     }
 
-    public DataModel.Booking getBookingInfo(String id) {
+    DataModel.Booking getBookingInfo(String id) {
         DataModel.Booking booking = null;
         for (DataModel.Booking b : bookingsList) {
             if (b.id.equals(id)) { //&& (b.closingDate == null || b.closingDate.isEmpty())
@@ -447,7 +451,7 @@ public class NetworkDataModule {
         return booking;
     }
 
-    public DataModel.Booking getBookingInfoForTenant(String id) {
+    DataModel.Booking getBookingInfoForTenant(String id) {
         DataModel.Booking booking = null;
         for (DataModel.Booking b : bookingsList) {
             if (b.tenantId.equals(id)) {
@@ -459,7 +463,7 @@ public class NetworkDataModule {
         return booking;
     }
 
-    public DataModel.Tenant getTenantInfoForBooking(String id) {
+    DataModel.Tenant getTenantInfoForBooking(String id) {
         DataModel.Booking b = getBookingInfo(id);
         DataModel.Tenant tenant = null;
         if (b != null) {
@@ -474,11 +478,11 @@ public class NetworkDataModule {
         return tenant;
     }
 
-    public ArrayList<DataModel.Pending> getAllPendingEntries() {
+    ArrayList<DataModel.Pending> getAllPendingEntries() {
         return new ArrayList<>(pendingList);
     }
 
-    public int getPendingAmountForBooking(String id) {
+    int getPendingAmountForBooking(String id) {
         int totalPendingAmount = 0;
         ArrayList<DataModel.Pending> pendings = getPendingEntriesForBooking(id);
         for (DataModel.Pending pendingEntry : pendings) {
@@ -488,7 +492,7 @@ public class NetworkDataModule {
         return totalPendingAmount;
     }
 
-    public ArrayList<DataModel.Pending> getPendingEntriesForBooking(String id) {
+    ArrayList<DataModel.Pending> getPendingEntriesForBooking(String id) {
         ArrayList<DataModel.Pending> pendingEntries = new ArrayList<DataModel.Pending>();
         for (DataModel.Pending pendingEntry : pendingList) {
             if (pendingEntry.bookingId.equals(id))
@@ -498,7 +502,7 @@ public class NetworkDataModule {
         return pendingEntries;
     }
 
-    public DataModel.Pending getPendingEntryByID(String id) {
+    DataModel.Pending getPendingEntryByID(String id) {
         DataModel.Pending pending = null;
         for (DataModel.Pending pendingEntry : pendingList) {
             if (pendingEntry.id.equals(id))
@@ -508,7 +512,7 @@ public class NetworkDataModule {
         return pending;
     }
 
-    public ArrayList<DataModel.Tenant> getDependents(String id) {
+    ArrayList<DataModel.Tenant> getDependents(String id) {
         ArrayList<DataModel.Tenant> dependentList = new ArrayList<DataModel.Tenant>();
         for (DataModel.Tenant t : tenantsList) {
             if (t.parentId.equals(id)) {
@@ -519,7 +523,7 @@ public class NetworkDataModule {
         return dependentList;
     }
 
-    public DataModel.Bed getBedInfo(String forBedNumber) {
+    DataModel.Bed getBedInfo(String forBedNumber) {
         DataModel.Bed bed = null;
         for (DataModel.Bed b : roomsList) {
             if (b.bedNumber.equals(forBedNumber)) {
@@ -531,7 +535,7 @@ public class NetworkDataModule {
         return bed;
     }
 
-    public DataModel.Tenant getTenantInfo(String id) {
+    DataModel.Tenant getTenantInfo(String id) {
         DataModel.Tenant tenant = null;
         for (DataModel.Tenant t : tenantsList) {
             if (t.id.equals(id)) {
@@ -543,7 +547,7 @@ public class NetworkDataModule {
         return tenant;
     }
 
-    public int getTotalPendingAmount(DataModel.PendingType type) {
+    int getTotalPendingAmount(DataModel.PendingType type) {
         int pendingAmount = 0;
         for (DataModel.Pending pendingEntry : pendingList) {
             if(pendingEntry.type == type) {
@@ -554,7 +558,18 @@ public class NetworkDataModule {
         return pendingAmount;
     }
 
-    public ArrayList<DataModel.Receipt> getReceiptsForTenant(String id) {
+    private DataModel.Receipt getReceipt(String id) {
+        DataModel.Receipt receipt = null;
+        for(DataModel.Receipt r: receiptsList) {
+            if (r.id.equals(id)) {
+                receipt = r;
+                break;
+            }
+        }
+        return receipt;
+    }
+
+    ArrayList<DataModel.Receipt> getReceiptsForTenant(String id) {
         ArrayList<DataModel.Receipt> receiptEntries = new ArrayList<DataModel.Receipt>();
         DataModel.Booking booking = getBookingInfoForTenant(id);
         for(DataModel.Receipt receipt: receiptsList) {
@@ -580,7 +595,7 @@ public class NetworkDataModule {
     public String getTotalCashReceipts(int month, DataModel.ReceiptType receiptType) {
         Integer receivedAmount = 0;
         for(DataModel.Receipt receipt: receiptsList) {
-            if (getMonth(receipt.date) == month && receipt.type == receiptType) {
+            if (getMonth(receipt.date) == month && receipt.type == receiptType && !receipt.isWaivedOff) {
                 receivedAmount += Integer.parseInt(receipt.cashAmount);
             }
         }
@@ -591,7 +606,7 @@ public class NetworkDataModule {
     public String  getTotalReceivedAmountForMonth(int month, DataModel.ReceiptType type) {
         Integer receivedAmount = 0;
         for(DataModel.Receipt receipt: receiptsList) {
-            if (getMonth(receipt.date) == month && receipt.type == type) {
+            if (getMonth(receipt.date) == month && receipt.type == type && !receipt.isWaivedOff) {
                 receivedAmount += Integer.parseInt(receipt.cashAmount) + Integer.parseInt(receipt.onlineAmount);
             }
         }
@@ -652,7 +667,7 @@ public class NetworkDataModule {
         }
     }
 
-    public void createPendingEntryForBooking(String bookingId, DataModel.PendingType type, String amount, int month, final NetworkDataModuleCallback<DataModel.Pending> callback) {
+    public void createPendingEntryForBooking(String bookingId, DataModel.PendingType type, String amount, int month, final NetworkDataModuleCallback<? super DataModel.Pending> callback) {
 
         DataModel.Pending pending = new DataModel.Pending(null, Integer.parseInt(amount), bookingId, null, type, month);
         Call<DataModel.Pending> createPendingEntryCall = pendingService.createPendingEntry (pending);
@@ -1083,10 +1098,10 @@ public class NetworkDataModule {
         });
     }
 
-    public void createReceiptForPendingEntry(String id, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModuleCallback<? super DataModel.DataModelClass> callback) {
+    public void createReceiptForPendingEntry(String id, String onlineAmount, String cashAmount, boolean waiveOff, NetworkDataModuleCallback<? super DataModel.DataModelClass> callback) {
         DataModel.Pending pendingEntry = getPendingEntryByID(id);
 
-        createReceipt(DataModel.ReceiptType.values()[pendingEntry.type.getIntValue()], pendingEntry.bookingId, onlineAmount, cashAmount, penaltyWaiveOff,
+        createReceipt(DataModel.ReceiptType.values()[pendingEntry.type.getIntValue()], pendingEntry.bookingId, onlineAmount, cashAmount, waiveOff,
                 new NetworkDataModuleCallback<DataModel.Receipt>() {
                     @Override
                     public void onSuccess(DataModel.Receipt newReceipt) {
@@ -1105,9 +1120,9 @@ public class NetworkDataModule {
         });
     }
 
-    public void createReceipt(DataModel.ReceiptType type, String bookingId, String onlineAmount, String cashAmount, boolean penaltyWaiveOff, NetworkDataModuleCallback<DataModel.Receipt> callback) {
+    public void createReceipt(DataModel.ReceiptType type, String bookingId, String onlineAmount, String cashAmount, boolean waiveOff, NetworkDataModuleCallback<DataModel.Receipt> callback) {
         if (bookingId==null) throw new AssertionError("Object cannot be null");
-        DataModel.Receipt newReceipt = new DataModel.Receipt(null, bookingId, onlineAmount, cashAmount, penaltyWaiveOff, new SimpleDateFormat(THAKURHOUSE_DATE_FORMAT).format(new Date()), type);
+        DataModel.Receipt newReceipt = new DataModel.Receipt(null, bookingId, onlineAmount, cashAmount, waiveOff, new SimpleDateFormat(THAKURHOUSE_DATE_FORMAT).format(new Date()), type);
         Call<DataModel.Receipt> createReceiptCall = receiptsService.createReceipt(newReceipt);
 
         createReceiptCall.enqueue(new Callback<DataModel.Receipt>() {
@@ -1131,6 +1146,51 @@ public class NetworkDataModule {
                 }
             }
         });
+    }
+
+    public boolean revertReceipt(String id, NetworkMergeCallback callback) {
+        if (id==null) throw new AssertionError("Object cannot be null");
+        boolean opSuccess = true;
+        final DataModel.Receipt receipt = getReceipt(id);
+
+        if (receipt != null) {
+            Call<Long> deleteReceiptCall = receiptsService.deleteReceipt(id);
+            deleteReceiptCall.enqueue(new Callback<Long>() {
+                @Override
+                public void onResponse(Call<Long> call, Response<Long> response) {
+                    Log.i(TAG, "Receipt Deleted Successfully");
+                    receiptsList.remove(receipt);
+                    sequenceNumber = response.body();
+
+
+                    NetworkMergeCallback waitingCallback = new NetworkMergeCallback(2, callback, null);
+                    ArrayList<DataModel.Pending> pendings = getPendingEntriesForBooking(receipt.bookingId);
+                    int month = getMonth(receipt.date);
+                    String amount = String.valueOf(Integer.parseInt(receipt.cashAmount) + Integer.parseInt(receipt.onlineAmount));
+
+                    if (pendings.isEmpty()) {
+                        createPendingEntryForBooking(receipt.bookingId, DataModel.PendingType.values()[receipt.type.getIntValue()], amount, month, waitingCallback);
+                    } else {
+                        for (DataModel.Pending p:pendings) {
+                            if(receipt.type.getIntValue() == p.type.getIntValue() && p.pendingMonth == month) {
+                                //Sending a negative amount would add it to the existing pending amount
+                                updatePendingEntry(p.id, "-"+amount, waitingCallback);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Long> call, Throwable t) {
+
+                }
+            });
+        } else {
+            opSuccess = false;
+        }
+
+        return opSuccess;
     }
 
     public void splitRoom(String roomNumber, int numRooms, String rent, String deposit) {

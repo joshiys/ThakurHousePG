@@ -146,18 +146,18 @@ public class DataModel {
         @SerializedName("receiptDate")
         public final String date;
         @SerializedName("penaltyWaiveOff")
-        public final boolean ispPenaltyWaiveOff;
+        public final boolean isWaivedOff;
         @SerializedName("receiptType")
         public final ReceiptType type;
         public final String bookingId;
 
 
-        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, boolean ispPenaltyWaiveOff, String date, ReceiptType type) {
+        public Receipt(String id, String bookingId, String onlineAmount, String cashAmount, boolean isWaivedOff, String date, ReceiptType type) {
             this.id = id;
             this.bookingId = bookingId;
             this.onlineAmount = onlineAmount;
             this.cashAmount = cashAmount;
-            this.ispPenaltyWaiveOff = ispPenaltyWaiveOff;
+            this.isWaivedOff = isWaivedOff;
             this.date = date;
             this.type = type;
         }
