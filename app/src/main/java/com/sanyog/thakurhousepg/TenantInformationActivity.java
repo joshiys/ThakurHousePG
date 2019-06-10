@@ -155,7 +155,12 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
         return true;
     }
 
-    public void onListFragmentInteraction(DataModel.Receipt item) {
+    public void onListItemTouch(DataModel.Receipt item) {
+
+    }
+
+    @Override
+    public void onListItemSwipeRight(DataModel.Receipt item) {
 
     }
 }

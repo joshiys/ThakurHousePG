@@ -1167,17 +1167,18 @@ public class NetworkDataModule {
                     ArrayList<DataModel.Pending> pendings = getPendingEntriesForBooking(receipt.bookingId);
                     int month = getMonth(receipt.date);
                     String amount = String.valueOf(Integer.parseInt(receipt.cashAmount) + Integer.parseInt(receipt.onlineAmount));
-
-                    if (pendings.isEmpty()) {
-                        createPendingEntryForBooking(receipt.bookingId, DataModel.PendingType.values()[receipt.type.getIntValue()], amount, month, waitingCallback);
-                    } else {
-                        for (DataModel.Pending p:pendings) {
-                            if(receipt.type.getIntValue() == p.type.getIntValue() && p.pendingMonth == month) {
-                                //Sending a negative amount would add it to the existing pending amount
-                                updatePendingEntry(p.id, "-"+amount, waitingCallback);
-                                break;
-                            }
+                    boolean pendingUpdated = false;
+                    for (DataModel.Pending p:pendings) {
+                        if(receipt.type.getIntValue() == p.type.getIntValue() && p.pendingMonth == month) {
+                            //Sending a negative amount would add it to the existing pending amount
+                            updatePendingEntry(p.id, "-"+amount, waitingCallback);
+                            pendingUpdated = true;
+                            break;
                         }
+                    }
+
+                    if (!pendingUpdated) {
+                        createPendingEntryForBooking(receipt.bookingId, DataModel.PendingType.values()[receipt.type.getIntValue()], amount, month, waitingCallback);
                     }
                 }
 

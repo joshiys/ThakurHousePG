@@ -1,5 +1,7 @@
 package com.sanyog.thakurhousepg;
 
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,22 +11,25 @@ import android.widget.TextView;
 import com.sanyog.thakurhousepg.ReceiptsListFragment.OnListFragmentInteractionListener;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public ArrayList<DataModel.Receipt> mValues;
+    ArrayList<DataModel.Receipt> mValues;
     private final OnListFragmentInteractionListener mListener;
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
 
-    public ReceiptsListViewAdapter(ArrayList<DataModel.Receipt> items, OnListFragmentInteractionListener listener) {
+    ReceiptsListViewAdapter(ArrayList<DataModel.Receipt> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
 
+    @NotNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.header_receipts_list, parent, false);
@@ -37,7 +42,7 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder vHolder, int position) {
+    public void onBindViewHolder(@NotNull final RecyclerView.ViewHolder vHolder, int position) {
 
         if (vHolder instanceof ItemViewHolder) {
             final ItemViewHolder holder = (ItemViewHolder) vHolder;
@@ -51,6 +56,11 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             holder.receiptDate.setText(holder.mItem.date);
             holder.receiptType.setText(holder.mItem.type.toString());
 
+            if(holder.mItem.isWaivedOff) {
+                holder.receiptType.setTextColor(Color.RED);
+                holder.receiptType.setPaintFlags(holder.receiptType.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            }
+
             //TODO: Modify the mItem to point to a local struct that will contain, bed+receipt info
             holder.roomNumber.setText(NetworkDataModule.getInstance().getBookingInfo(holder.mItem.bookingId).bedNumber);
 
@@ -58,7 +68,7 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
                 @Override
                 public void onClick(View v) {
                     if (null != mListener) {
-                        mListener.onListFragmentInteraction(holder.mItem);
+                        mListener.onListItemTouch(holder.mItem);
                     }
                 }
             });
@@ -99,6 +109,7 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             roomNumber = view.findViewById(R.id.receipt_list_room_number);
         }
 
+        @NotNull
         @Override
         public String toString() {
             return super.toString() + " '" + cashRentAmount.getText() + "'";
@@ -123,6 +134,7 @@ public class ReceiptsListViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             roomNumberLabel = view.findViewById(R.id.receipt_header_room_number);
         }
 
+        @NotNull
         @Override
         public String toString() {
             return super.toString() + " '" + onlineRentAmountLabel.getText() + " , " + cashRentAmountLabel.getText() +

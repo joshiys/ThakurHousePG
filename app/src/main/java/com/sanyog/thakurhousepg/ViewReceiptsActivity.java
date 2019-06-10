@@ -17,11 +17,8 @@ import java.util.Calendar;
 public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsListFragment.OnListFragmentInteractionListener {
 
     NetworkDataModule datamodule;
-    TableLayout tableLayout;
 
-    TextView roomNoTextView, rIdTextView, onlineAmountTextView, cashAmountTextView, typeForTextView;
-
-    Spinner monthSpiner, roomSpinner, modeSpiner, typeSpiner;
+    Spinner monthSpiner, modeSpiner, typeSpiner;
 
     int currentRowNumber = 1;
     ReceiptsListFragment fragment = null;
@@ -73,7 +70,7 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
         modeSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                ((TextView) modeSpiner.getSelectedView()).setBackgroundColor(Color.LTGRAY);
+                (modeSpiner.getSelectedView()).setBackgroundColor(Color.LTGRAY);
 //                currentRowNumber = 1;
                 if(fragment != null) {
                     fragment.refreshForMode(i);
@@ -92,7 +89,7 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
         typeSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                ((TextView) typeSpiner.getSelectedView()).setBackgroundColor(Color.LTGRAY);
+                (typeSpiner.getSelectedView()).setBackgroundColor(Color.LTGRAY);
 //                currentRowNumber = 1;
                 if(fragment != null) {
                     fragment.refreshForType(i);
@@ -124,7 +121,11 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
         return true;
     }
 
-    public void onListFragmentInteraction(DataModel.Receipt item) {
-
+    public void onListItemTouch(DataModel.Receipt item) {
     }
+
+    public void onListItemSwipeRight(DataModel.Receipt item) {
+        datamodule.revertReceipt(item.id, null);
+    }
+
 }
