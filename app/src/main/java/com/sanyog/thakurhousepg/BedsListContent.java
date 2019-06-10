@@ -47,9 +47,16 @@ public class BedsListContent {
                         tenant = restService.getTenantInfoForBooking(bed.bookingId);
                         pendingAmount = String.valueOf(restService.getPendingAmountForBooking(booking.id));
                     }
+                    String tenantName = "";
+                    if (tenant != null) {
+                        tenantName = tenant.name;
+                        if(restService.getDependents(tenant.id).size() > 0) {
+                            tenantName += " +";
+                        }
+                    }
     
                     if (OccupancyAndBookingActivity.isRoomForSelectedTab(Integer.valueOf(bed.bedNumber.split("\\.")[0]), i)) {
-                        items.add(new BedsListItem(bed.bedNumber, (tenant != null) ? tenant.name : "", (booking != null) ? pendingAmount : bed.rentAmount));
+                        items.add(new BedsListItem(bed.bedNumber, tenantName, (booking != null) ? pendingAmount : bed.rentAmount));
                     }
                 }
             }

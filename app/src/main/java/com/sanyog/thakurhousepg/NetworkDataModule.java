@@ -572,9 +572,12 @@ public class NetworkDataModule {
     ArrayList<DataModel.Receipt> getReceiptsForTenant(String id) {
         ArrayList<DataModel.Receipt> receiptEntries = new ArrayList<DataModel.Receipt>();
         DataModel.Booking booking = getBookingInfoForTenant(id);
-        for(DataModel.Receipt receipt: receiptsList) {
-            if(receipt.bookingId.equals(booking.id)) {
-                receiptEntries.add(receipt);
+
+        if (booking != null) {
+            for (DataModel.Receipt receipt : receiptsList) {
+                if (receipt.bookingId.equals(booking.id)) {
+                    receiptEntries.add(receipt);
+                }
             }
         }
 
