@@ -67,8 +67,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         if(isNetworkAvailable()) {
-//            restService = NetworkDataModule.getInstance();
-
             btn_receipt = findViewById(R.id.receipt_button);
             btn_occupancy = findViewById(R.id.occupancy_button);
             btn_payment = findViewById(R.id.payments_button);
@@ -117,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editText.setText(baseURL);
         editText.setSingleLine();
         editText.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
-//        alertDialog.setMessage("Enter URL");
         alertDialog.setTitle("Confirm Server URL");
 
         alertDialog.setView(editText);
@@ -249,6 +246,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 connectionStatus = true;
                 setPendingAmountEntries();
                 setTotalOutstandingRent();
+                btn_occupancy.setText(getResources().getString(R.string.button_text_occupancy, restService.getOccupiedBedCount(), restService.getTotalBedCount()));
+                headerView.setText(getResources().getString(R.string.button_main_header,  headerView.getText(), restService.getCurrentTenantCount()));
                 reloadButton.setEnabled(true);
             }
 

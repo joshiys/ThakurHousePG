@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 
+import java.util.Objects;
+
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
 
 public class TenantInformationActivity extends AppCompatActivity implements ReceiptsListFragment.OnListFragmentInteractionListener {
@@ -20,7 +22,6 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
     private EditText tenantEmail;
     private EditText tenantMobile;
     private EditText tenantAddress;
-    private Button saveButton;
 
     public DataModel.Tenant tenantInfoForModification = null;
     private String tenantId = null;
@@ -35,7 +36,7 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tenant_information);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         restService = NetworkDataModule.getInstance();
         final Bundle bundle = getIntent().getExtras();
@@ -86,59 +87,54 @@ public class TenantInformationActivity extends AppCompatActivity implements Rece
 
         this.getWindow().setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        saveButton = findViewById(R.id.add_tenant_save);
-        saveButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            public void onFocusChange (View v, boolean hasFocus) {
-                if(hasFocus) {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                }
+        Button saveButton = findViewById(R.id.add_tenant_save);
+        saveButton.setOnFocusChangeListener((v, hasFocus) -> {
+            if(hasFocus) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
             }
         });
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(addTenantMode) {
-                    //Just to make sure call goes successfully to the server
-                    //Todo: Implement Callback mechanism
-                    restService.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(),
-                            tenantEmail.getText().toString(), tenantAddress.getText().toString(), "0", false,
-                            new NetworkDataModuleCallback<DataModel.Tenant>() {
-                                @Override
-                                public void onSuccess(DataModel.Tenant t) {
-                                    tenantId = t.id;
-                                    returnIntent.putExtra("TENANT_ID", tenantId);
-                                    setResult(Activity.RESULT_OK, returnIntent);
-                                    finish();
-                                }
+        saveButton.setOnClickListener(v -> {
+            if(addTenantMode) {
+                //Just to make sure call goes successfully to the server
+                //Todo: Implement Callback mechanism
+                restService.addNewTenant(tenantName.getText().toString(), tenantMobile.getText().toString(),
+                        tenantEmail.getText().toString(), tenantAddress.getText().toString(), "0", false,
+                        new NetworkDataModuleCallback<DataModel.Tenant>() {
+                            @Override
+                            public void onSuccess(DataModel.Tenant t) {
+                                tenantId = t.id;
+                                returnIntent.putExtra("TENANT_ID", tenantId);
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                finish();
+                            }
 
-                                @Override
-                                public void onFailure() {
-                                    Toast.makeText(TenantInformationActivity.this, "Can not create new Tenant", Toast.LENGTH_SHORT);
-                                }
-                            });
-                } else {
-                    boolean status = false;
-                    if(tenantInfoForModification != null) {
-                        restService.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
-                        "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), tenantInfoForModification.isCurrent, tenantInfoForModification.parentId,
-                            new NetworkDataModuleCallback<DataModel.Tenant>() {
-                                @Override
-                                public void onSuccess(DataModel.Tenant t) {
-                                    tenantId = tenantInfoForModification.id;
-                                    Toast.makeText(TenantInformationActivity.this, "Tenant Record Updated Successfully", Toast.LENGTH_SHORT).show();
-                                    finish();
-                                }
-
-                                @Override
-                                public void onFailure() {
-                                    Toast.makeText(TenantInformationActivity.this, "Tenant Record Update Failed", Toast.LENGTH_SHORT).show();
-                                }
+                            @Override
+                            public void onFailure() {
+                                Toast.makeText(TenantInformationActivity.this, "Can not create new Tenant", Toast.LENGTH_SHORT)
+                                .show();
+                            }
                         });
-                    }
-                }
+            } else {
+                if(tenantInfoForModification != null) {
+                    restService.updateTenant(tenantInfoForModification.id, tenantName.getText().toString(), tenantMobile.getText().toString(),
+                    "", tenantEmail.getText().toString(), tenantAddress.getText().toString(), tenantInfoForModification.isCurrent, tenantInfoForModification.parentId,
+                        new NetworkDataModuleCallback<DataModel.Tenant>() {
+                            @Override
+                            public void onSuccess(DataModel.Tenant t) {
+                                tenantId = tenantInfoForModification.id;
+                                Toast.makeText(TenantInformationActivity.this, "Tenant Record Updated Successfully", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
 
+                            @Override
+                            public void onFailure() {
+                                Toast.makeText(TenantInformationActivity.this, "Tenant Record Update Failed", Toast.LENGTH_SHORT).show();
+                            }
+                    });
+                }
             }
+
         });
     }
 

@@ -422,6 +422,23 @@ public class NetworkDataModule {
         return list;
     }
 
+    Integer getCurrentTenantCount() {
+        return getAllTenants(true).size();
+    }
+
+    Integer getTotalBedCount() {
+        return roomsList.size();
+    }
+
+    Integer getOccupiedBedCount() {
+        Integer occupiedRooms = roomsList.size();
+        for(DataModel.Bed room: getRoomsList()) {
+            if(!room.isOccupied) occupiedRooms --;
+        }
+
+        return occupiedRooms;
+    }
+
     ArrayList<DataModel.Booking> getCurrentBookings() {
         ArrayList<DataModel.Booking> currentBookings = new ArrayList<>();
         for (DataModel.Booking b: bookingsList) {

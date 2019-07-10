@@ -1,17 +1,18 @@
 package com.sanyog.thakurhousepg;
 
-import android.util.ArraySet;
 import android.util.Log;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Helper class for providing sample content for user interfaces created by
  * Android template wizards.
  * <p>
- * TODO: Replace all uses of this class before publishing your app.
  */
 public class BedsListContent {
     private static final String TAG = "BedsListContent";
@@ -19,19 +20,16 @@ public class BedsListContent {
     /**
      * An array of Beds.
      */
-    public static HashMap<Integer, List<BedsListItem>> itemMap = new HashMap<>();
-//    public static List<BedsListItem> items = new ArrayList<BedsListItem>();
-    private static ArraySet<String> rooms = new ArraySet<String>();
-    private static NetworkDataModule restService;
+    static HashMap<Integer, List<BedsListItem>> itemMap = new HashMap<>();
 
-    public static void create() {
-        restService = NetworkDataModule.getInstance();
+    private static void create() {
+        NetworkDataModule restService = NetworkDataModule.getInstance();
 
         for (int i = 0; i < 7; i++) {
-            List<BedsListItem> items = itemMap.get(Integer.valueOf(i));
+            List<BedsListItem> items = itemMap.get(i);
             if(items == null){
-                items = new ArrayList<BedsListItem>();
-                itemMap.put(Integer.valueOf(i), items);
+                items = new ArrayList<>();
+                itemMap.put(i, items);
             }
             if (items.isEmpty()) {
                 Log.i(TAG, "Creating Beds list");
@@ -64,9 +62,9 @@ public class BedsListContent {
     }
 
 
-    public static void refresh() {
+    static void refresh() {
         for (int i = 0; i < itemMap.size(); i++) {
-            itemMap.get(Integer.valueOf(i)).clear();
+            Objects.requireNonNull(itemMap.get(i)).clear();
         }
         create();
     }
@@ -74,9 +72,10 @@ public class BedsListContent {
     /* SAHIRE Optimise this function if used*/
     public static void update(String bedNumber, String tenantName, String rent){
         for (int i = 0; i < itemMap.size(); i++) {
-            List<BedsListItem> items = itemMap.get(Integer.valueOf(i));
+            List<BedsListItem> items = itemMap.get(i);
+            assert items != null;
             for (BedsListItem item : items) {
-                if (item.bedNumber == bedNumber) {
+                if (item.bedNumber.equals(bedNumber)) {
                     item.tenantName = tenantName;
                     item.rentPayble = rent;
                 }
@@ -89,17 +88,18 @@ public class BedsListContent {
      */
     public static class BedsListItem {
         public String bedNumber;
-        public String tenantName;
-        public String rentPayble;
-        public boolean isPending;
+        String tenantName;
+        String rentPayble;
+        boolean isPending;
 
-        public BedsListItem(String bedNumber, String tenantName, String rentPayble) {
+        BedsListItem(String bedNumber, String tenantName, String rentPayble) {
             this.bedNumber = bedNumber;
             this.tenantName = tenantName;
             this.rentPayble = rentPayble;
             this.isPending = false;
         }
 
+        @NotNull
         @Override
         public String toString() {
             return bedNumber + " " + tenantName + " " + rentPayble;

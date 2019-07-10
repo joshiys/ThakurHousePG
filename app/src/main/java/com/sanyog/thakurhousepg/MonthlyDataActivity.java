@@ -79,21 +79,21 @@ public class MonthlyDataActivity extends AppCompatActivity {
 
 
 
-        expectedRent.setText(getString(R.string.Ruppees) + dataModule.getTotalExpectedRent());
+        expectedRent.setText(getString(R.string.rupees) + dataModule.getTotalExpectedRent());
 
-        rentCash.setText(getString(R.string.Ruppees) + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        rentCash.setText(getString(R.string.rupees) + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.RENT));
-        depositCash.setText(getString(R.string.Ruppees) + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        depositCash.setText(getString(R.string.rupees) + dataModule.getTotalCashReceipts(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.DEPOSIT));
 
-        rentReceipts.setText(getString(R.string.Ruppees) + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        rentReceipts.setText(getString(R.string.rupees) + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.RENT));
-        totalOutstanding.setText(getString(R.string.Ruppees) + String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.RENT)));
+        totalOutstanding.setText(getString(R.string.rupees) + String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.RENT)));
 
-        depositReceipts.setText(getString(R.string.Ruppees) + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
+        depositReceipts.setText(getString(R.string.rupees) + dataModule.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
                 DataModel.ReceiptType.DEPOSIT));
 
-        totalDepositOutstanding.setText(getString(R.string.Ruppees)+ String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.DEPOSIT)));
+        totalDepositOutstanding.setText(getString(R.string.rupees)+ String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.DEPOSIT)));
     }
 
     @Override
