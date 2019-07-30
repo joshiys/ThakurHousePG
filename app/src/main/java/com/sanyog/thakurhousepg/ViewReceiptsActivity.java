@@ -103,8 +103,6 @@ public class ViewReceiptsActivity extends AppCompatActivity implements ReceiptsL
 
 
         if (savedInstanceState == null) {
-            DataModel.Tenant tenantInfoForModification = null;
-
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             fragment = new ReceiptsListFragment();
             Bundle fragmentBundle = new Bundle();
