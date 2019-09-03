@@ -210,9 +210,11 @@ public class BedViewActivity extends AppCompatActivity {
             for (DataModule.Tenant t : dependentsList) {
                 if(!selectedTenants.contains(t.id)) {
                     dataModule.updateTenant(t.id, "", "", "", "", "", false, "0");
-                } else {
-                    dataModule.updateTenant(t.id, "", "", "", "", "", true, tenant.id);
+                    selectedTenants.remove(t.id);
                 }
+            }
+            for (String tid : selectedTenants) {
+                dataModule.updateTenant(tid, "", "", "", "", "", true, tenant.id);
             }
         }
         depositAmount.removeTextChangedListener(amountWatcher);
