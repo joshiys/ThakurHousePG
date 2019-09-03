@@ -3,9 +3,11 @@ package com.sanyog.thakurhousepg;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
+//import android.support.design.widget.Snackbar;
+//import android.support.v7.app.AlertDialog;
+//import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,8 +15,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,7 +32,7 @@ import static com.sanyog.thakurhousepg.Constants.*;
 
 public class BedViewActivity extends AppCompatActivity {
 
-    private EditText bedNumber;
+    private TextView bedNumberLabel;
     private EditText tenantName;
     private EditText rentAmount;
     private EditText depositAmount;
@@ -36,6 +44,7 @@ public class BedViewActivity extends AppCompatActivity {
     private ArrayList<DataModel.Tenant> dependentsList = new ArrayList<DataModel.Tenant>();
     private static final String TAG = "BedViewActivity";
     private DataModel.Tenant tenant;
+    private String bedNumber;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +53,7 @@ public class BedViewActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Bed View");
 
-        bedNumber = findViewById(R.id.bedview_bed_number);
+        bedNumberLabel = findViewById(R.id.bedview_bed_number);
         bookButton = findViewById(R.id.bedview_button_book);
         modifyButton = findViewById(R.id.bedview_button_modify);
         tenantName = findViewById(R.id.bedview_tenant_name);
@@ -55,8 +64,8 @@ public class BedViewActivity extends AppCompatActivity {
         dataModule = NetworkDataModule.getInstance();
 
         Bundle bundle = getIntent().getExtras();
-        bedNumber.setText(bundle.getString("BED_NUMBER"));
-        bedNumber.setEnabled(false);
+        bedNumber = bundle.getString("BED_NUMBER");
+        bedNumberLabel.setText(bedNumber);
         tenantName.setEnabled(false);
         bookingDate.setEnabled(false);
     }
@@ -64,11 +73,11 @@ public class BedViewActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        final DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
-        if(bedInfo.isOccupied == true) {
+        final DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber);
+        if(bedInfo.isOccupied) {
             viewBookingMode = true;
             bookButton.setText("Close Booking");
-            bedNumber.setBackgroundColor(Color.BLACK);
+//            bedNumber.setBackgroundColor(Color.BLACK);
 
             DataModel.Booking booking = dataModule.getBookingInfo(bedInfo.bookingId);
             Log.i(TAG, "Found Booking with Id " + bedInfo.bookingId);
@@ -80,14 +89,14 @@ public class BedViewActivity extends AppCompatActivity {
             // Add Dependents Names
             dependentsList = dataModule.getDependents(tenant.id);
 
-            String tempNameHolder = tenant.name;
+            StringBuilder tempNameHolder = new StringBuilder(tenant.name);
             for (DataModel.Tenant dependent: dependentsList) {
                 Log.i(TAG, "Found Dependent with Id " + dependent.id + " Name: " + dependent.name);
-                tempNameHolder += " , " + dependent.name;
+                tempNameHolder.append(" , ").append(dependent.name);
                 modifyButton.setVisibility(View.VISIBLE);
             }
             modifyButton.setVisibility(View.VISIBLE);
-            tenantName.setText(tempNameHolder);
+            tenantName.setText(tempNameHolder.toString());
 
             rentAmount.setText(booking.rentAmount);
             depositAmount.setText(booking.depositAmount);
@@ -101,7 +110,7 @@ public class BedViewActivity extends AppCompatActivity {
         } else {
             tenantName.setVisibility(View.INVISIBLE);
             bookingDate.setVisibility(View.GONE);
-            bedNumber.setBackgroundColor(Color.GREEN);
+//            bedNumber.setBackgroundColor(Color.GREEN);
 
             rentAmount.setText(bedInfo.rentAmount);
             depositAmount.setText(bedInfo.depositAmount);
@@ -114,7 +123,7 @@ public class BedViewActivity extends AppCompatActivity {
                 if(bookingButton.getText().toString().equals("Book")) {
                     Toast.makeText(BedViewActivity.this, "Create new Booking", Toast.LENGTH_SHORT).show();
                     Intent bookingIntent = new Intent(BedViewActivity.this, BookingScreenActivity.class);
-                    bookingIntent.putExtra("BED_NUMBER", bedNumber.getText().toString());
+                    bookingIntent.putExtra("BED_NUMBER", bedNumber);
                     bookingIntent.putExtra("RENT", rentAmount.getText().toString());
                     bookingIntent.putExtra("DEPOSIT", depositAmount.getText().toString());
                     startActivityForResult(bookingIntent, INTENT_REQUEST_CODE_BOOKING);
@@ -144,7 +153,7 @@ public class BedViewActivity extends AppCompatActivity {
                                 case 2:
                                     Intent receiptIntent = new Intent(BedViewActivity.this, ReceiptActivity.class);
                                     receiptIntent.putExtra("SECTION", "Deposit");
-                                    receiptIntent.putExtra("ROOM_NUMBER", bedNumber.getText().toString());
+                                    receiptIntent.putExtra("ROOM_NUMBER", bedNumber);
                                     receiptIntent.putExtra("RECEIPT_MODE", "DEPOSIT_CLOSE_BOOKING");
 
                                     startActivityForResult(receiptIntent, INTENT_REQUEST_CODE_RECEIPT);
@@ -189,7 +198,7 @@ public class BedViewActivity extends AppCompatActivity {
         }
 
         if(requestCode == INTENT_REQUEST_CODE_RECEIPT && resultCode == RESULT_OK) {
-            DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
+            DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber);
             closeBooking(bedInfo.bookingId, false);
         } else if(requestCode == INTENT_REQUEST_CODE_SELECT_TENANT && resultCode == RESULT_OK) {
             modifyButton.setVisibility(View.INVISIBLE);
@@ -251,10 +260,10 @@ public class BedViewActivity extends AppCompatActivity {
     }
 
     private void sendBookingSMS() {
-        final DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber.getText().toString());
+        final DataModel.Bed bedInfo = dataModule.getBedInfo(bedNumber);
         DataModel.Tenant tenant = dataModule.getTenantInfoForBooking(bedInfo.bookingId);
         if(!tenant.mobile.isEmpty()) {
-            Snackbar.make(this.findViewById(R.id.sendSMSButton), "Sending BOOKING SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+            Snackbar.make(bookButton, "Sending BOOKING SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
 
             SMSManagement smsManagement = SMSManagement.getInstance();
@@ -266,7 +275,7 @@ public class BedViewActivity extends AppCompatActivity {
                             SMSManagement.SMS_TYPE.BOOKING)
             );
         } else {
-            Snackbar.make(this.findViewById(R.id.sendSMSButton), "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
+            Snackbar.make(bookButton, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         }
     }

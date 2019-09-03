@@ -6,17 +6,10 @@
     android:layout_height="match_parent"
     tools:context="com.sanyog.thakurhousepg.BedViewActivity">
 
-    <EditText
+    <TextView
         android:id="@+id/bedview_bed_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:background="@android:color/background_dark"
-        android:editable="false"
-        android:ems="10"
-        android:inputType="numberDecimal"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="24sp"
@@ -24,38 +17,48 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/bedview_rent"
-        android:layout_width="wrap_content"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/bedview_rent_layout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Rent"
+        android:layout_marginBottom="@dimen/view_spacing_small"
+        android:layout_marginLeft="@dimen/view_spacing_medium"
+        android:layout_marginRight="@dimen/view_spacing_medium"
+        android:layout_marginTop="@dimen/view_spacing_large"
+        style="@style/Widget.ThakurHousePG.TextInputLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider2" />
+        app:layout_constraintTop_toBottomOf="@+id/divider2" >
 
-    <EditText
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/bedview_rent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/TextInputEditText.ThakurHousePG.OutlinedBox"
+            android:inputType="textPersonName"
+            android:hint="Rent"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/bedview_deposit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:ems="10"
+        style="@style/TextInputEditText.ThakurHousePG.OutlinedBox"
         android:inputType="textPersonName"
-        android:text="Deposit"
+        android:hint="Deposit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bedview_rent" />
+        app:layout_constraintTop_toBottomOf="@+id/bedview_rent_layout" />
 
-    <EditText
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/bedview_tenant_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:ems="10"
+        style="@style/TextInputEditText.ThakurHousePG.OutlinedBox"
         android:inputType="textPersonName"
         android:singleLine="false"
         android:text="Tenant"

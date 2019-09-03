@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="fill_horizontal"
+    android:layout_gravity="center_horizontal"
     android:orientation="horizontal">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/bed_number"
+        style="@style/ButtonStyle.Borderless.ColoredText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_height="100dp"
+        android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.ThakurHousePG.BedsListButton" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/tenant_name"
+        style="@style/ButtonStyle.Borderless.ColoredText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_height="100dp"
+        android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.ThakurHousePG.BedsListButton" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/pending_amount"
+        style="@style/ButtonStyle.Borderless.ColoredText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_height="100dp"
+        android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.ThakurHousePG.BedsListButton" />
 
 </LinearLayout>

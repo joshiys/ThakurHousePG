@@ -8,7 +8,7 @@
     <string name="rent_amount">NEFT/UPI</string>
     <string name="KEY_ROOM_NUMBER">KEY_ROOM_NUMBER</string>
     <string name="KEY_OUTSTANDING">KEY_OUTSTANDING</string>
-    <string name="title_activity_payment">Payment</string>
+    <string name="title_activity_receipt">Receipt</string>
     <string name="tab_text_1">Rent</string>
     <string name="tab_text_2">Deposit</string>
     <string name="tab_text_3">Penalty</string>

@@ -8,10 +8,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.design.widget.Snackbar;
+//import android.support.v4.app.ActivityCompat;
+//import android.support.v4.content.ContextCompat;
+//import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -25,6 +25,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
+
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Locale;
@@ -33,14 +42,11 @@ import static com.sanyog.thakurhousepg.Constants.THAKURHOUSEPG_BASE_URL;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private SMSManagement smsHandle;
-    private Button sendSMS;
-    private Button receivedRentValue;
-    private Button outstandingRentValue;
-    private Button btn_receipt;
-    private Button btn_occupancy;
-    private Button btn_payment;
-    private EditText roomNumber;
-    private ImageButton reloadButton;
+    private TextView receivedRentValue;
+    private TextView outstandingRentValue;
+    private MaterialButton reloadButton;
+    private MaterialCardView outstandingRentCard;
+    private MaterialCardView receivedRentCard;
     private TextView headerView;
 
     private ProgressDialog progress;
@@ -69,28 +75,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(isNetworkAvailable()) {
 //            restService = NetworkDataModule.getInstance();
 
-            btn_receipt = findViewById(R.id.receipt_button);
-            btn_occupancy = findViewById(R.id.occupancy_button);
-            btn_payment = findViewById(R.id.payments_button);
+//            MaterialButton btn_receipt = findViewById(R.id.receipt_button);
+//            MaterialButton btn_occupancy = findViewById(R.id.occupancy_button);
+//            MaterialButton btn_payment = findViewById(R.id.payments_button);
 
-            roomNumber = findViewById(R.id.roomNumberText);
-            sendSMS = findViewById(R.id.sendSMSButton);
+            MaterialCardView receiptCard = findViewById(R.id.receiptCard);
+            MaterialCardView occupancyCard = findViewById(R.id.occupantsCard);
+            MaterialCardView paymentsCard = findViewById(R.id.paymentsCard);
 
             receivedRentValue = findViewById(R.id.receivedRent);
             outstandingRentValue = findViewById(R.id.outstandingRent);
+            outstandingRentCard = findViewById(R.id.outstandingRentCard);
+            receivedRentCard = findViewById(R.id.receivedRentCard);
             reloadButton = findViewById(R.id.reload_button);
 
             headerView = findViewById(R.id.main_monthButton);
 
-            btn_receipt.setOnClickListener(this);
-            btn_occupancy.setOnClickListener(this);
-            btn_payment.setOnClickListener(this);
+            receiptCard.setOnClickListener(this);
+            occupancyCard.setOnClickListener(this);
+            paymentsCard.setOnClickListener(this);
 
-            receivedRentValue.setOnClickListener(this);
-            outstandingRentValue.setOnClickListener(this);
+            outstandingRentCard.setOnClickListener(this);
+            receivedRentCard.setOnClickListener(this);
             reloadButton.setOnClickListener(this);
-
-            roomNumber.setSelection(roomNumber.getText().length());
 
             SMSManagement.setContext(this);
 
@@ -98,20 +105,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
             headerView.setOnClickListener(this);
 
-            sendSMS.setOnClickListener(this);
-
             progress = new ProgressDialog(this);
             progress.setTitle("Loading");
             progress.setMessage("Wait while loading...");
             progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
-            confirmServerAddress();
+//            confirmServerAddress();
+            restService = NetworkDataModule.getInstance(baseURL);
+            smsHandle = SMSManagement.getInstance();
+            fetch();
         }
     }
 
     private void confirmServerAddress() {
 
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        MaterialAlertDialogBuilder alertDialog = new MaterialAlertDialogBuilder(this);
 
         EditText editText = new EditText(this);
         editText.setText(baseURL);
@@ -160,49 +168,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch(view.getId()){
-            case R.id.sendSMSButton:
-                if(!roomNumber.getText().toString().isEmpty()) {
-                    DataModel.Bed bedInfo = restService.getBedInfo(roomNumber.getText().toString());
-                    if (bedInfo.bookingId == null) {
-                        Snackbar.make(view, "Room has not been Booked yet.", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                        break;
-                    }
-                    DataModel.Tenant tenant = restService.getTenantInfoForBooking(bedInfo.bookingId);
-                    if(!tenant.mobile.isEmpty()) {
-                        Snackbar.make(view, "Sending DEFAULT SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                        SMSManagement smsManagement = SMSManagement.getInstance();
-
-                        smsManagement.sendSMS(tenant.mobile,
-                                smsManagement.getSMSMessage(bedInfo.bookingId,
-                                        tenant,
-                                        0,
-                                        SMSManagement.SMS_TYPE.DEFAULT)
-                        );
-                    } else {
-                        Snackbar.make(view, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    }
-                }
-                break;
-            case R.id.outstandingRent:
+            case R.id.outstandingRentCard:
                 Intent pendingIntent = new Intent(MainActivity.this, ViewOutstandingActivity.class);
                 startActivity(pendingIntent);
                 break;
+
             case R.id.main_monthButton:
                 Intent monthIntent = new Intent(MainActivity.this, MonthlyDataActivity.class);
                 startActivity(monthIntent);
-
                 break;
-            case R.id.receivedRent:
+
+            case R.id.receivedRentCard:
                 Intent receivedIntent = new Intent(MainActivity.this, ViewReceiptsActivity.class);
                 receivedIntent.putExtra("MODE", 0);//ALL
                 receivedIntent.putExtra("TYPE", 0);//ALL
                 startActivity(receivedIntent);
                 break;
-            case R.id.receipt_button:
 
+            case R.id.receiptCard:
                 Toast.makeText(MainActivity.this, "Launching Receipts", Toast.LENGTH_SHORT).show();
 
                 Intent receiptIntent = new Intent(MainActivity.this, ReceiptActivity.class);
@@ -212,14 +195,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 startActivity(receiptIntent);
                 break;
-            case R.id.occupancy_button:
+
+            case R.id.occupantsCard:
                 Toast.makeText(MainActivity.this, "Launching Occupancy & Booking", Toast.LENGTH_SHORT).show();
                 Intent occupancyIntent = new Intent(MainActivity.this, OccupancyAndBookingActivity.class);
 //                adminIntent.putExtra(getString(R.string.KEY_ROOM_NUMBER), roomNumber.getText().toString());
                 startActivity(occupancyIntent);
                 break;
 
-            case R.id.payments_button:
+            case R.id.paymentsCard:
                 Toast.makeText(MainActivity.this, "This functionality is not implemented yet", Toast.LENGTH_SHORT).show();
 //                Toast.makeText(MainActivity.this, "Launching Payments", Toast.LENGTH_SHORT).show();
 //
@@ -228,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                paymentIntent.putExtra(getString(R.string.KEY_OUTSTANDING), outstandingPenalty);
 //                startActivity(paymentIntent);
                 break;
+
             case R.id.reload_button:
                 /*if(connectionStatus == false) {
                  confirmServerAddress();

@@ -5,4 +5,23 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="screen_spacing_horizontal">16dp</dimen>
+    <dimen name="screen_spacing_vertical">16dp</dimen>
+    <dimen name="content_spacing_horizontal">12dp</dimen>
+    <dimen name="content_spacing_vertical">12dp</dimen>
+    <dimen name="view_spacing_extra_small">4dp</dimen>
+    <dimen name="view_spacing_small">8dp</dimen>
+    <dimen name="view_spacing_medium">16dp</dimen>
+    <dimen name="view_spacing_large">24dp</dimen>
+    <dimen name="view_spacing_very_large">32dp</dimen>
+    <dimen name="view_spacing_none">0dp</dimen>
+
+    <!-- Cards -->
+    <dimen name="card_corner_radius">3dp</dimen>
+    <dimen name="card_elevation">2dp</dimen>
+
+    <!-- Selectable Items -->
+    <dimen name="selectable_rounded_rect_corner_radius">3dp</dimen>
+
 </resources>

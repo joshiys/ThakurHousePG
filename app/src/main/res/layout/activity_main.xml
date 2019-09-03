@@ -12,138 +12,206 @@
     android:orientation="vertical"
     tools:context="com.sanyog.thakurhousepg.MainActivity">
 
-    <Button
-        android:id="@+id/main_monthButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/design_default_color_primary"
-        android:text="Month"
-        android:textAlignment="center"
-        android:textColor="@android:color/white"
-        android:textSize="30sp"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/receivedRent"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Received"
-            android:textColor="@android:color/holo_green_dark" />
-
-        <Button
-            android:id="@+id/outstandingRent"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Pending"
-            android:textColor="@android:color/holo_red_dark" />
-
-        <!--<Button-->
-            <!--android:id="@+id/totalRent"-->
-            <!--style="@style/Widget.AppCompat.Button.Borderless"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:text="Total" />-->
-    </LinearLayout>
-
-
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
-        android:layout_marginTop="20dp"
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/receipt_button"
+            android:id="@+id/main_monthButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/holo_blue_light"
-            android:text="Receipt" />
+            android:layout_marginBottom="0dp"
+            android:layout_marginVertical="0dp"
+            android:layout_gravity="fill"
+            android:text="Month"
+            android:background="@color/design_default_color_primary"
+            android:textAlignment="center"
+            android:textSize="30sp"
+            android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/occupancy_button"
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/receivedRentCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@android:color/holo_blue_light"
-            android:text="Occupancy" />
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            style="@style/CardStyle.Home">
 
-        <Button
-            android:id="@+id/payments_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@android:color/holo_blue_light"
-            android:text="Payment" />
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:background="@android:color/holo_blue_light"
-            android:orientation="vertical">
-
-            <EditText
-                android:id="@+id/roomNumberText"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-                android:layout_marginLeft="5dp"
-                android:background="@android:color/holo_blue_light"
-                android:hint="Enter Room Number"
-                android:inputType="numberDecimal"
+                <TextView
+                    android:id="@+id/receivedRentLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Received amount"
+                    android:textAppearance="@style/TextAppearance.ThakurHousePG.MaterialCardTitle" />
 
-                android:maxLines="1"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-                android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/receivedRent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Text"
+                    android:textAlignment="viewEnd"
+                    android:textAppearance="@style/TextAppearance.ThakurHousePG.MaterialCardBody" />
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/sendSMSButton"
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/outstandingRentCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            style="@style/CardStyle.Home">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="1"
-                android:text="SEND SMS"
+                android:orientation="horizontal">
 
+                <TextView
+                    android:id="@+id/outstandingRentLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Outstanding amount"
+                    android:textAppearance="@style/TextAppearance.ThakurHousePG.MaterialCardTitle"/>
 
-                android:textStyle="bold"
-                android:tooltipText="Send SMS to all rooms with Due peyment." />
+                <TextView
+                    android:id="@+id/outstandingRent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Text"
+                    android:textAlignment="viewEnd"
+                    android:textAppearance="@style/TextAppearance.ThakurHousePG.MaterialCardBody"
+                    android:textColor="@android:color/holo_red_dark" />
 
+            </LinearLayout>
 
-        </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 
-    <ImageButton
+
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:columnCount="2"
+        android:rowCount="2">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/receiptCard"
+            android:layout_column="0"
+            android:layout_row="0"
+            android:layout_gravity="fill_horizontal|fill_vertical"
+            android:layout_columnWeight="1"
+            android:clickable="true"
+            android:focusable="true"
+            style="@style/CardStyle.Home.Square">
+
+            <TextView
+                android:id="@+id/receiptText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Receipt"
+                android:textAlignment="center"
+                android:drawableTop="@mipmap/receipt_blue_48"
+                android:textAppearance="@style/TextAppearance.ThakurHousePG.MaterialCardTitle" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/occupantsCard"
+            android:layout_column="1"
+            android:layout_row="0"
+            android:layout_gravity="fill_horizontal|fill_vertical"
+            android:layout_columnWeight="1"
+            android:clickable="true"
+            style="@style/CardStyle.Home.Square"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/occupantText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Occupancy"
+                android:textAlignment="center"
+                android:drawableTop="@mipmap/occupants"
+                android:textAppearance="@style/TextAppearance.ThakurHousePG.MaterialCardTitle" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/paymentsCard"
+            android:layout_column="0"
+            android:layout_row="1"
+            android:layout_gravity="fill_horizontal|fill_vertical"
+            android:layout_columnWeight="1"
+            android:clickable="true"
+            style="@style/CardStyle.Home.Square"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/paymentText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Payment"
+                android:textAlignment="center"
+                android:drawableTop="@mipmap/occupants"
+                android:textAppearance="@style/TextAppearance.ThakurHousePG.MaterialCardTitle"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/accountsCard"
+            android:layout_column="1"
+            android:layout_row="1"
+            android:layout_gravity="fill_horizontal|fill_vertical"
+            android:layout_columnWeight="1"
+            android:clickable="true"
+            style="@style/CardStyle.Home.Square"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/accountText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Accounts"
+                android:textAlignment="center"
+                android:drawableTop="@mipmap/receipt_blue_48"
+                android:textAppearance="@style/TextAppearance.ThakurHousePG.MaterialCardTitle"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </GridLayout>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/reload_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center_horizontal|center_vertical"
         android:layout_marginTop="32dp"
-        android:backgroundTint="#FF33B5E5"
-        android:tint="#9C27B0"
-        app:srcCompat="@android:drawable/ic_menu_rotate" />
+        app:icon="@mipmap/reload_24"
+        app:iconGravity="textStart"
+        android:contentDescription="Reload All data"
+        style="@style/ButtonStyle.Colored"/>
+    <!--android:backgroundTint="#FF33B5E5"-->
+    <!--android:tint="#9C27B0"-->
 
-
-    <!--<TextView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Hello World!"-->
-        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--app:layout_constraintLeft_toLeftOf="parent"-->
-        <!--app:layout_constraintRight_toRightOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent" />-->
 
 </LinearLayout>

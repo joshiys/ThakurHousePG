@@ -1,14 +1,19 @@
 package com.sanyog.thakurhousepg;
 
-import android.support.v7.widget.RecyclerView;
+//import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
 import com.sanyog.thakurhousepg.BedsListFragment.OnBedsListInteractionListener;
 import com.sanyog.thakurhousepg.BedsListContent.BedsListItem;
 
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -22,20 +27,21 @@ public class BedsListRecyclerViewAdapter extends RecyclerView.Adapter<BedsListRe
     private List<BedsListItem> mValues;
     private final BedsListFragment.OnBedsListInteractionListener mListener;
 
-    public BedsListRecyclerViewAdapter(List<BedsListItem> items, OnBedsListInteractionListener listener) {
+    BedsListRecyclerViewAdapter(List<BedsListItem> items, OnBedsListInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
 
+    @NotNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NotNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_bed_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NotNull final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mBedNumber.setText(mValues.get(position).bedNumber);
         holder.mTenantName.setText(mValues.get(position).tenantName);
@@ -68,20 +74,21 @@ public class BedsListRecyclerViewAdapter extends RecyclerView.Adapter<BedsListRe
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final Button mBedNumber;
-        public final Button mTenantName;
-        public final Button mRentView;
-        public BedsListItem mItem;
+        final View mView;
+        final MaterialButton mBedNumber;
+        final MaterialButton mTenantName;
+        final MaterialButton mRentView;
+        BedsListItem mItem;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
-            mBedNumber = (Button) view.findViewById(R.id.bed_number);
-            mTenantName = (Button) view.findViewById(R.id.tenant_name);
-            mRentView = (Button) view.findViewById(R.id.pending_amount);
+            mBedNumber = view.findViewById(R.id.bed_number);
+            mTenantName = view.findViewById(R.id.tenant_name);
+            mRentView = view.findViewById(R.id.pending_amount);
         }
 
+        @NotNull
         @Override
         public String toString() {
             return super.toString() + " '" + mTenantName.getText() + "'";

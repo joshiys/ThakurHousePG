@@ -1,21 +1,210 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <!--<style name="AppTheme" parent="android:Theme.DeviceDefault">-->
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
+    <style name="BaseTheme" parent="Base.Theme.MaterialComponents.Light.DarkActionBar">
+        <!-- Attributes for all APIs -->
+        <item name="android:windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
+        <item name="dialogTheme">@style/AppTheme.Dialog</item>
+        <item name="alertDialogTheme">@style/AppTheme.Dialog.Alert</item>
+        <item name="colorControlHighlight">@color/selector_black_pressed</item>
     </style>
 
+    <!-- Default App Theme -->
+    <style name="AppTheme" parent="BaseTheme">
+        <!-- API specific attributes 14+ -->
+        <item name="selectableRectDrawable">@drawable/state_list_selectable_rect_black</item>
+        <item name="selectableRectDrawableInverse">@drawable/state_list_selectable_rect_white</item>
+        <item name="selectableRectDrawableColored">@drawable/state_list_selectable_rect_black</item>
+        <item name="selectableRoundedRectDrawable">@drawable/state_list_selectable_rounded_rect_black</item>
+        <item name="selectableRoundedRectDrawableInverse">@drawable/state_list_selectable_rounded_rect_white</item>
+        <item name="selectableRoundedRectDrawableColored">@drawable/state_list_selectable_rounded_rect_black</item>
+    </style>
+
+    <style name="BaseTheme.Blue" parent="AppTheme">
+        <!-- Attributes for all APIs -->
+        <item name="colorPrimary">@color/material_blue_500</item>
+        <item name="colorPrimaryDark">@color/material_blue_600</item>
+        <item name="colorAccent">@color/material_blue_a700</item>
+        <item name="dialogTheme">@style/AppTheme.Dialog.Blue</item>
+        <item name="alertDialogTheme">@style/AppTheme.Dialog.Alert.Blue</item>
+    </style>
+
+    <style name="AppTheme.Dialog" parent="Base.Theme.MaterialComponents.Light.Dialog">
+    </style>
+
+    <style name="AppTheme.Dialog.Alert" parent="Base.Theme.MaterialComponents.Light.Dialog.Alert">
+    </style>
+
+    <!-- Blue App Theme -->
+    <style name="AppTheme.Blue" parent="BaseTheme.Blue">
+        <item name="selectableRectDrawableColored">@drawable/state_list_selectable_rect_blue</item>
+        <item name="selectableRoundedRectDrawableColored">@drawable/state_list_selectable_rounded_rect_blue</item>
+    </style>
+
+    <style name="AppTheme.Dialog.Blue">
+        <item name="colorPrimary">@color/material_blue_500</item>
+        <item name="colorPrimaryDark">@color/material_blue_700</item>
+        <item name="colorAccent">@color/material_blue_a700</item>
+    </style>
+
+    <style name="AppTheme.Dialog.Alert.Blue">
+        <item name="colorPrimary">@color/material_blue_500</item>
+        <item name="colorPrimaryDark">@color/material_blue_700</item>
+        <item name="colorAccent">@color/material_blue_a700</item>
+        <item name="MaterialCardBackground">@color/material_blue_100</item>
+    </style>
+
+    <!-- Teal App Theme -->
+    <style name="BaseTheme.Teal" parent="AppTheme">
+        <!-- Attributes for all APIs -->
+        <item name="colorPrimary">@color/material_teal_500</item>
+        <item name="colorPrimaryDark">@color/material_teal_700</item>
+        <item name="colorAccent">@color/material_teal_a700</item>
+        <!-- Uncomment to completely color control elements
+        <item name="colorControlNormal">@color/material_teal_500</item>
+        <item name="colorControlActivated">@color/material_teal_500</item>
+        <item name="colorControlHighlight">@color/selector_teal_pressed</item>
+        -->
+        <item name="dialogTheme">@style/AppTheme.Dialog.Teal</item>
+        <item name="alertDialogTheme">@style/AppTheme.Dialog.Alert.Teal</item>
+    </style>
+
+    <style name="AppTheme.Teal" parent="BaseTheme.Teal">
+        <!-- API specific attributes 14+ -->
+        <item name="selectableRectDrawableColored">@drawable/state_list_selectable_rect_teal</item>
+        <item name="selectableRoundedRectDrawableColored">@drawable/state_list_selectable_rounded_rect_teal</item>
+    </style>
+
+    <style name="AppTheme.Dialog.Teal">
+        <item name="colorPrimary">@color/material_teal_500</item>
+        <item name="colorPrimaryDark">@color/material_teal_700</item>
+        <item name="colorAccent">@color/material_teal_a700</item>
+    </style>
+
+    <style name="AppTheme.Dialog.Alert.Teal">
+        <item name="colorPrimary">@color/material_teal_500</item>
+        <item name="colorPrimaryDark">@color/material_teal_700</item>
+        <item name="colorAccent">@color/material_teal_a700</item>
+    </style>
+
+
+
+    <!-- Button Styles -->
+    <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
+    </style>
+
+    <style name="ButtonStyle.NoRaise">
+        <!-- Pre API 21 has no raise effect by default -->
+    </style>
+
+    <style name="ButtonStyle.Colored" parent="Widget.MaterialComponents.Button.OutlinedButton">
+    </style>
+
+    <style name="ButtonStyle.Borderless" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+    </style>
+
+    <style name="ButtonStyle.Borderless.ColoredText" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:background">@color/material_blue_100</item>
+    </style>
+
+    <!-- Text Styles -->
+    <style name="TextAppearance.ThakurHousePG" parent="TextAppearance.MaterialComponents.Button">
+    </style>
+
+    <style name="TextAppearance.ThakurHousePG.BedsListButton" parent="TextAppearance.MaterialComponents.Button">
+        <item name="fontFamily">@font/roboto_medium</item>
+        <item name="android:fontFamily">@font/roboto_medium</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+
+    <style name="TextAppearance.ThakurHousePG.MaterialCardTitle" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="fontFamily">@font/roboto_black</item>
+        <item name="android:fontFamily">@font/roboto_black</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="TextAppearance.ThakurHousePG.MaterialCardBody" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">@font/roboto_bold</item>
+        <item name="android:fontFamily">@font/roboto_bold</item>
+        <item name="android:textColor">@android:color/holo_green_dark</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.ThakurHousePG.AppTitle" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <!-- Edit Text Styles -->
+    <style name="TextInputEditText.ThakurHousePG" parent="Base.Widget.MaterialComponents.TextInputEditText">
+    </style>
+
+    <style name="TextInputEditText.ThakurHousePG.OutlinedBox" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+    </style>
+
+    <style name="Widget.ThakurHousePG.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="hintTextAppearance">@style/TextAppearance.ThakurHousePG.TextInputLayout.HintText</item>
+    </style>
+
+    <style name="TextAppearance.ThakurHousePG.TextInputLayout.HintText" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <!-- Spinner Styles -->
+    <style name="SpinnerStyle" parent="Widget.AppCompat.Spinner">
+    </style>
+
+    <style name="SpinnerStyle.Underlined" parent="Widget.AppCompat.Spinner.Underlined">
+    </style>
+
+    <!-- Slider Styles -->
+    <style name="SeekbarStyle" parent="Widget.AppCompat.SeekBar">
+    </style>
+
+    <!-- Image Styles -->
+    <style name="ImageStyle">
+    </style>
+
+    <style name="ImageStyle.Colored">
+        <item name="android:tint">?colorAccent</item>
+    </style>
+
+    <!-- Card Styles -->
+    <style name="CardStyle" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="android:theme">@style/AppTheme.Blue</item>
+        <item name="cardBackgroundColor">@color/material_blue_100</item>
+    </style>
+
+    <style name="CardStyle.Home" parent="CardStyle">
+        <item name="contentPaddingBottom">@dimen/content_spacing_vertical</item>
+        <item name="contentPaddingLeft">@dimen/content_spacing_horizontal</item>
+        <item name="contentPaddingRight">@dimen/content_spacing_horizontal</item>
+        <item name="contentPaddingTop">@dimen/content_spacing_vertical</item>
+        <item name="android:layout_marginBottom">@dimen/view_spacing_extra_small</item>
+        <item name="android:layout_marginLeft">@dimen/view_spacing_none</item>
+        <item name="android:layout_marginRight">@dimen/view_spacing_none</item>
+        <item name="android:layout_marginTop">@dimen/view_spacing_extra_small</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="CardStyle.Home.Square" parent="CardStyle.Home">
+        <item name="android:layout_marginLeft">@dimen/view_spacing_medium</item>
+        <item name="android:layout_marginRight">@dimen/view_spacing_medium</item>
+    </style>
+
+    <!-- Previous -->
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

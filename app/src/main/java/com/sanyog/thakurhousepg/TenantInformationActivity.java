@@ -3,8 +3,8 @@ package com.sanyog.thakurhousepg;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v4.app.FragmentTransaction;
+//import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -12,6 +12,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
 

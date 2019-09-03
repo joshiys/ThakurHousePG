@@ -3,16 +3,16 @@ package com.sanyog.thakurhousepg;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
+//import android.support.design.widget.TabLayout;
+//import android.support.design.widget.FloatingActionButton;
+//import android.support.design.widget.Snackbar;
+//import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.widget.Toolbar;
+//
+//import android.support.v4.app.Fragment;
+//import android.support.v4.app.FragmentManager;
+//import android.support.v4.app.FragmentPagerAdapter;
+//import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -32,6 +32,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 
@@ -43,12 +53,12 @@ import static com.sanyog.thakurhousepg.Constants.RECEIPT_SECTION_RENT;
 public class ReceiptActivity extends AppCompatActivity {
 
     /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * The {@link androidx.viewpager.widget.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
      * {@link FragmentPagerAdapter} derivative, which will keep every
      * loaded fragment in memory. If this becomes too memory intensive, it
      * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     * {@link androidx.fragment.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -64,11 +74,11 @@ public class ReceiptActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receipt);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        setTitle("Receipt");
+//        setTitle("Receipt");
 
         Bundle bundle = getIntent().getExtras();
 
@@ -83,7 +93,7 @@ public class ReceiptActivity extends AppCompatActivity {
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
-        tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
+        tabLayout.setTabTextColors(Color.BLACK, getColor(R.color.colorPrimaryDark));
         String selectedSection = bundle.getString("SECTION");
 
         if("Rent".equals(selectedSection)) {
@@ -131,7 +141,6 @@ public class ReceiptActivity extends AppCompatActivity {
         private NetworkDataModule dbHelper;
 
         private CheckBox onlineCheckBox, cashCheckBox, advanceCheckBox, waiveOffCheckBox;
-        private FloatingActionButton fab;
 
         private String dueAmount = "0";
         private DataModel.Pending pendingEntry = null;
@@ -172,7 +181,6 @@ public class ReceiptActivity extends AppCompatActivity {
 
             onlineCheckBox = rootView.findViewById(R.id.onlineCheckBox);
             cashCheckBox = rootView.findViewById(R.id.cashCheckBox);
-            fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
 
             onlineAmt.setEnabled(false);
             cashAmt.setEnabled(false);
@@ -249,35 +257,6 @@ public class ReceiptActivity extends AppCompatActivity {
                     } else{
                         totalAmount.setText("0");
                         totalAmount.setSelection(totalAmount.getText().length());
-                    }
-                }
-            });
-
-
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    DataModel.Bed bedInfo = dbHelper.getBedInfo(roomNumber.getText().toString());
-                    if (bedInfo.bookingId == null) {
-                        Snackbar.make(view, "Room has not been Booked yet.", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    } else {
-                        DataModel.Tenant tenant = dbHelper.getTenantInfoForBooking(bedInfo.bookingId);
-                        if (!tenant.mobile.isEmpty()) {
-                            Snackbar.make(view, "Sending REMINDER SMS to the Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                            SMSManagement smsManagement = SMSManagement.getInstance();
-
-                            smsManagement.sendSMS(tenant.mobile,
-                                    smsManagement.getSMSMessage(bedInfo.bookingId,
-                                            tenant,
-                                            0,
-                                            SMSManagement.SMS_TYPE.DUE_REMINDER)
-                            );
-                        } else {
-                            Snackbar.make(view, "Mobile number is not updated for Tenant: " + tenant.name, Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
                     }
                 }
             });

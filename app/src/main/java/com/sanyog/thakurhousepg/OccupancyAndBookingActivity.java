@@ -5,13 +5,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.design.widget.TabLayout;
+//import android.support.v4.app.Fragment;
+//import android.support.v4.app.FragmentManager;
+//import android.support.v4.app.FragmentPagerAdapter;
+//import android.support.v4.view.ViewPager;
+//import android.support.v7.app.AlertDialog;
+//import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -21,6 +21,14 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,7 +57,7 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         restService = NetworkDataModule.getInstance();
 
         tabLayout = (TabLayout) findViewById(R.id.floor_tabs_id);
-        tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
+//        tabLayout.setTabTextColors(Color.WHITE, Color.CYAN);
 
         roomPagerAdapter = new RoomsPagerAdapter(getSupportFragmentManager());
         // Set up the ViewPager with the sections adapter.
@@ -71,21 +79,13 @@ public class OccupancyAndBookingActivity extends AppCompatActivity implements Be
         BedsListFragment bedsFrag = (BedsListFragment) roomPagerAdapter.getItem(currentSelectedTab);
         bedsFrag.reloadData();
 
-        tabLayout.addOnTabSelectedListener(new TabLayout.BaseOnTabSelectedListener() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                currentSelectedTab = tab.getPosition();
-            }
+            public void onTabSelected(TabLayout.Tab tab) { currentSelectedTab = tab.getPosition(); }
 
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-//                Log.e("TAGG", "OccupancyAnd... onTabUnSelected");
-            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) { }
 
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-//                Log.e("TAGG", "OccupancyAnd... onTabReselected");
-            }
+            @Override public void onTabReselected(TabLayout.Tab tab) { }
         });
     }
 

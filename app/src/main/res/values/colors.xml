@@ -7,4 +7,46 @@
     <color name="colorForButtonPanel">#FF5722</color>
     <color name="colorForAdminButtonPanel">#8BC34A</color>
     <color name="pushedEffect">#4A4E45</color>
+
+    <color name="material_blue_050">#E3F2FD</color>
+    <color name="material_blue_100">#BBDEFB</color>
+    <color name="material_blue_200">#90CAF9</color>
+    <color name="material_blue_300">#64B5F6</color>
+    <color name="material_blue_400">#42A5F5</color>
+    <color name="material_blue_500">#2196F3</color>
+    <color name="material_blue_600">#1E88E5</color>
+    <color name="material_blue_700">#1976D2</color>
+    <color name="material_blue_800">#1565C0</color>
+    <color name="material_blue_900">#0D47A1</color>
+    <color name="material_blue_a100">#82B1FF</color>
+    <color name="material_blue_a200">#448AFF</color>
+    <color name="material_blue_a400">#2979FF</color>
+    <color name="material_blue_a700">#2962FF</color>
+
+    <color name="material_teal_050">#E0F2F1</color>
+    <color name="material_teal_100">#B2DFDB</color>
+    <color name="material_teal_200">#80CBC4</color>
+    <color name="material_teal_300">#4DB6AC</color>
+    <color name="material_teal_400">#26A69A</color>
+    <color name="material_teal_500">#009688</color>
+    <color name="material_teal_600">#00897B</color>
+    <color name="material_teal_700">#00796B</color>
+    <color name="material_teal_800">#00695C</color>
+    <color name="material_teal_900">#004D40</color>
+    <color name="material_teal_a100">#A7FFEB</color>
+    <color name="material_teal_a200">#64FFDA</color>
+    <color name="material_teal_a400">#1DE9B6</color>
+    <color name="material_teal_a700">#00BFA5</color>
+
+    <!-- Selectors -->
+    <color name="selector_normal">@android:color/transparent</color>
+    <color name="selector_teal_focused">#2200BFA5</color>
+    <color name="selector_teal_pressed">#4400BFA5</color>
+    <color name="selector_blue_focused">#222962FF</color>
+    <color name="selector_blue_pressed">#442962FF</color>
+    <color name="selector_black_focused">#12000000</color>
+    <color name="selector_black_pressed">#1F000000</color>
+    <color name="selector_white_focused">#22FFFFFF</color>
+    <color name="selector_white_pressed">#33FFFFFF</color>
+
 </resources>

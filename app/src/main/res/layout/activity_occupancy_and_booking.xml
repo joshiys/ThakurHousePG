@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.sanyog.thakurhousepg.OccupancyAndBookingActivity">
 
-    <android.support.design.widget.TabLayout
+    <com.google.android.material.tabs.TabLayout
         android:id="@+id/floor_tabs_id"
         style="@style/Widget.Design.AppBarLayout"
         android:layout_width="match_parent"
@@ -17,51 +17,51 @@
         app:tabTextColor="@android:color/white"
         tools:layout_editor_absoluteX="0dp">
 
-        <android.support.design.widget.TabItem
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/ground_floor_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ground" />
 
-        <android.support.design.widget.TabItem
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/first_floor_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1st" />
 
-        <android.support.design.widget.TabItem
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/second_floor_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="2nd" />
 
-        <android.support.design.widget.TabItem
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/third_floor_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="3rd" />
 
-        <android.support.design.widget.TabItem
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/fourth_floor_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="4th" />
 
-        <android.support.design.widget.TabItem
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/fifth_floor_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="5th" />
 
-        <android.support.design.widget.TabItem
+        <com.google.android.material.tabs.TabItem
             android:id="@+id/sixth_floor_tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/str_sixth_floor" />
 
-    </android.support.design.widget.TabLayout>
+    </com.google.android.material.tabs.TabLayout>
 
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         android:id="@+id/RoomsPagerContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
