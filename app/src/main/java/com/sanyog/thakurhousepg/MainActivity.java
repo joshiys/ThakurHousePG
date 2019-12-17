@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -111,6 +112,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
+        SharedPreferences settings = getSharedPreferences("Settings", Context.MODE_PRIVATE);
+        String lastURL = settings.getString("lastServerURL", "");
+        if(!lastURL.isEmpty()){
+            baseURL = lastURL;
+        }
+
         EditText editText = new EditText(this);
         editText.setText(baseURL);
         editText.setSingleLine();
@@ -127,6 +134,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 restService = NetworkDataModule.getInstance(baseURL);
                 smsHandle = SMSManagement.getInstance();
                 reloadButton.setEnabled(false);
+                SharedPreferences.Editor settingsEditor = settings.edit();
+                settingsEditor.putString("lastServerURL", baseURL);
+                settingsEditor.commit();
                 fetch();
             }
         });
@@ -229,10 +239,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 /*if(connectionStatus == false) {
                  confirmServerAddress();
                 } else*/ {
-                    fetch();
-                    reloadButton.setEnabled(false);
-                }
-                break;
+                fetch();
+                reloadButton.setEnabled(false);
+            }
+            break;
         }
     }
 
@@ -247,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 setPendingAmountEntries();
                 setTotalOutstandingRent();
                 btn_occupancy.setText(getResources().getString(R.string.button_text_occupancy, restService.getOccupiedBedCount(), restService.getTotalBedCount()));
+                headerView.setText(Calendar.getInstance().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US));
                 headerView.setText(getResources().getString(R.string.button_main_header,  headerView.getText(), restService.getCurrentTenantCount()));
                 reloadButton.setEnabled(true);
             }

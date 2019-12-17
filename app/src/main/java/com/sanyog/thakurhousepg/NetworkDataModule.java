@@ -637,7 +637,8 @@ public class NetworkDataModule {
     public String getTotalExpectedRent() {
         int totalRent = 0;
         for (DataModel.Booking b: bookingsList) {
-            if(b.closingDate == null || getMonth(b.closingDate) == (Calendar.getInstance().get(Calendar.MONTH) + 1)) {
+//            if(b.closingDate == null || getMonth(b.closingDate) == (Calendar.getInstance().get(Calendar.MONTH) + 1)) {
+            if(b.closingDate == null) { // || getMonth(b.closingDate) == (Calendar.getInstance().get(Calendar.MONTH) + 1)) {
                 totalRent += Integer.parseInt(b.rentAmount);
             }
         }
@@ -724,7 +725,7 @@ public class NetworkDataModule {
             for (DataModel.Receipt r: receiptsList) {
                 // Also check if last month there has been an advance Receipt for this Booking
                 if(r.id.equals(booking.id) && r.type == DataModel.ReceiptType.ADVANCE &&
-                    getMonth(r.date) + 1 == Calendar.getInstance().get(Calendar.MONTH) + 2 ) {
+                        getMonth(r.date) + 1 == Calendar.getInstance().get(Calendar.MONTH) + 2 ) {
                     rentAmount -= Integer.parseInt(r.cashAmount) + Integer.parseInt(r.onlineAmount);
                 }
             }
@@ -1009,7 +1010,7 @@ public class NetworkDataModule {
     }
 
     public void updateBooking(String id, String newRent, String newDeposit,
-                                 final NetworkDataModuleCallback<? super DataModel.DataModelClass> callback) {
+                              final NetworkDataModuleCallback<? super DataModel.DataModelClass> callback) {
         DataModel.Booking booking = getBookingInfo(id);
         booking.rentAmount = newRent;
         booking.depositAmount = newDeposit;
@@ -1063,7 +1064,7 @@ public class NetworkDataModule {
 
 
     public void closeBooking(String id, String closeingDate, boolean cancelBooking,
-                                final NetworkDataModuleCallback<? super DataModel.DataModelClass> callback) {
+                             final NetworkDataModuleCallback<? super DataModel.DataModelClass> callback) {
         DataModel.Booking booking = getBookingInfo(id);
         booking.closingDate = closeingDate;
 
@@ -1137,7 +1138,7 @@ public class NetworkDataModule {
                             callback.onResult();
                         }
                     }
-        });
+                });
     }
 
     public void createReceipt(DataModel.ReceiptType type, String bookingId, String onlineAmount, String cashAmount, boolean waiveOff, NetworkDataModuleCallback<DataModel.Receipt> callback) {
