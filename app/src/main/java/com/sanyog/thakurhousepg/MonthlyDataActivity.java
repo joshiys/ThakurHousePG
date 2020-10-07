@@ -107,13 +107,20 @@ public class MonthlyDataActivity extends AppCompatActivity {
     private void ShowMonthlyData(Integer forMonth) {
         expectedRent.setText(getString(R.string.rupees) + dataModule.getTotalExpectedRent());
 
-        rentCash.setText(getString(R.string.rupees) + dataModule.getTotalCashReceipts(forMonth + 1, DataModel.ReceiptType.RENT));
-        depositCash.setText(getString(R.string.rupees) + dataModule.getTotalCashReceipts(forMonth + 1, DataModel.ReceiptType.DEPOSIT));
+        rentCash.setText(getString(R.string.rupees) + dataModule.getTotalCashReceipts(forMonth + 1,
+                Calendar.getInstance().get(Calendar.YEAR),
+                DataModel.ReceiptType.RENT));
+        depositCash.setText(getString(R.string.rupees) + dataModule.getTotalCashReceipts(forMonth + 1,
+                Calendar.getInstance().get(Calendar.YEAR),
+                DataModel.ReceiptType.DEPOSIT));
 
-        rentReceipts.setText(getString(R.string.rupees) + dataModule.getTotalReceivedAmountForMonth(forMonth + 1, DataModel.ReceiptType.RENT));
+        rentReceipts.setText(getString(R.string.rupees) + dataModule.getTotalReceivedAmountForMonth(forMonth + 1,
+                Calendar.getInstance().get(Calendar.YEAR),
+                DataModel.ReceiptType.RENT));
         totalOutstanding.setText(getString(R.string.rupees) + String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.RENT)));
 
         depositReceipts.setText(getString(R.string.rupees) + dataModule.getTotalReceivedAmountForMonth(forMonth + 1,
+                Calendar.getInstance().get(Calendar.YEAR),
                 DataModel.ReceiptType.DEPOSIT));
 
         totalDepositOutstanding.setText(getString(R.string.rupees)+ String.valueOf(dataModule.getTotalPendingAmount(DataModel.PendingType.DEPOSIT)));

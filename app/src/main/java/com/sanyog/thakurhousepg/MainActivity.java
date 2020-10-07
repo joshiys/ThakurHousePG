@@ -277,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setTotalOutstandingRent() {
         receivedRentValue.setText(restService.getTotalReceivedAmountForMonth(Calendar.getInstance().get(Calendar.MONTH) + 1,
+                Calendar.getInstance().get(Calendar.YEAR),
                 DataModel.ReceiptType.RENT));
         outstandingRentValue.setText(String.valueOf(restService.getTotalPendingAmount(DataModel.PendingType.RENT)));
     }

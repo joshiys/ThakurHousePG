@@ -604,7 +604,7 @@ public class NetworkDataModule {
     public ArrayList<DataModel.Receipt> getAllReceipts(int month) {
         ArrayList<DataModel.Receipt> receiptEntries = new ArrayList<DataModel.Receipt>();
         for(DataModel.Receipt receipt: receiptsList) {
-            if (getMonth(receipt.date) == month) {
+            if (getMonth(receipt.date) == month && getYear(receipt.date) == Calendar.getInstance().get(Calendar.YEAR)) {
                 receiptEntries.add(receipt);
             }
         }
@@ -612,10 +612,11 @@ public class NetworkDataModule {
         return receiptEntries;
     }
 
-    public String getTotalCashReceipts(int month, DataModel.ReceiptType receiptType) {
+    public String getTotalCashReceipts(int month, int year, DataModel.ReceiptType receiptType) {
         Integer receivedAmount = 0;
         for(DataModel.Receipt receipt: receiptsList) {
-            if (getMonth(receipt.date) == month && receipt.type == receiptType && !receipt.isWaivedOff) {
+            if (getMonth(receipt.date) == month && getYear(receipt.date) == year
+                    && receipt.type == receiptType && !receipt.isWaivedOff) {
                 receivedAmount += Integer.parseInt(receipt.cashAmount);
             }
         }
@@ -623,10 +624,11 @@ public class NetworkDataModule {
         return receivedAmount.toString();
     }
 
-    public String  getTotalReceivedAmountForMonth(int month, DataModel.ReceiptType type) {
+    public String  getTotalReceivedAmountForMonth(int month, int year, DataModel.ReceiptType type) {
         Integer receivedAmount = 0;
         for(DataModel.Receipt receipt: receiptsList) {
-            if (getMonth(receipt.date) == month && receipt.type == type && !receipt.isWaivedOff) {
+            if (getMonth(receipt.date) == month && getYear(receipt.date) == year
+                    && receipt.type == type && !receipt.isWaivedOff) {
                 receivedAmount += Integer.parseInt(receipt.cashAmount) + Integer.parseInt(receipt.onlineAmount);
             }
         }
@@ -1229,6 +1231,15 @@ public class NetworkDataModule {
 
         Log.i(TAG, "getMonth : " + c.get(Calendar.MONTH));
         return c.get(Calendar.MONTH) + 1;
+    }
+
+    private int getYear(String fromDate) {
+        Calendar c = Calendar.getInstance();
+        try { c.setTime(new SimpleDateFormat(THAKURHOUSE_DATE_FORMAT).parse(fromDate)); }
+        catch (ParseException e) { e.printStackTrace(); }
+
+        Log.i(TAG, "getMonth : " + c.get(Calendar.MONTH));
+        return c.get(Calendar.YEAR);
     }
 
     private class NetworkMergeCallback implements NetworkDataModuleCallback<DataModel.DataModelClass> {
